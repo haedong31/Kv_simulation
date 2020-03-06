@@ -1,12 +1,28 @@
+# folders
+/JMCC_fig4/
+/literature/
+/MCMC_demo/
+/Rasmusson_figs/
+/code/MGAT1_Data/
+/code/MGAT1_Data_tidy/
+/code/Rasmusson_old/
+/code/RasmussonModel/
+
+# files
+*.pptx
+*.jpg
+*.zip
+*.csv
+
 # History files
-.Rhistory
-.Rapp.history
+/code/.Rhistory
+/code/.Rapp.history
 
 # Session Data files
-.RData
+/code/.RData
 
 # User-specific files
-.Ruserdata
+/code/.Ruserdata
 
 # Example code in package build process
 *-Ex.R
@@ -18,7 +34,7 @@
 /*.Rcheck/
 
 # RStudio files
-.Rproj.user/
+/code/.Rproj.user/
 
 # produced vignettes
 vignettes/*.html
