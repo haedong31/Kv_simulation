@@ -1,7 +1,7 @@
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = Rasmusson()
+function [t, STATES, ALGEBRAIC, CONSTANTS] = Rasmusson(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel();
+   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
 end
 
 function [algebraicVariableCount] = getAlgebraicVariableCount() 
@@ -11,7 +11,7 @@ function [algebraicVariableCount] = getAlgebraicVariableCount()
     algebraicVariableCount =72;
 end
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel()
+function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % Create ALGEBRAIC of correct size
     global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
     
@@ -19,17 +19,17 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel()
     [INIT_STATES, CONSTANTS] = initConsts;
 
     % Set timespan to solve over 
-    tspan = [0, 100];
+    tspan = [0, P2_t];
 
     % Set numerical accuracy options for ODE solver
     options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
 
     % Solve model with ODE solver
-    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS), tspan, INIT_STATES, options);
+    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2), tspan, INIT_STATES, options);
 
     % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS);
-    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t);
+    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
+    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
 end
 
 function [STATES, CONSTANTS] = initConsts()
@@ -172,7 +172,7 @@ function [STATES, CONSTANTS] = initConsts()
     if (isempty(STATES)), warning('Initial values for states not set'); end
 end
 
-function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS)
+function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2)
     global algebraicVariableCount;
     statesSize = size(STATES);
     statesColumnCount = statesSize(2);
@@ -186,7 +186,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS)
     end
     
     % externally applied voltage (voltage clamp)
-    ALGEBRAIC(:,72) = arrayfun(@volt_clamp, t);
+    ALGEBRAIC(:,72) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
     
     % A94; iKss if CONSTANTS(:,72)=0  or A110; sigma if CONSTANTS(:,72)=A110
     RATES(:,37) = CONSTANTS(:,72); 
@@ -415,8 +415,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS)
    RATES = RATES';
 end
 
-% Calculate algebraic variables
-function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t)
+function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2)
     ALGEBRAIC(:,2) = 1.00000 - (STATES(:,11)+STATES(:,9)+STATES(:,10));
     ALGEBRAIC(:,5) =  0.180640.*exp( 0.0357700.*(STATES(:,1)+30.0000));
     ALGEBRAIC(:,15) =  0.395600.*exp(  - 0.0623700.*(STATES(:,1)+30.0000));
@@ -488,7 +487,7 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t)
     ALGEBRAIC(:,1) = piecewise({t>=CONSTANTS(:,13)&t<=CONSTANTS(:,14)&(t - CONSTANTS(:,13)) -  floor((t - CONSTANTS(:,13))./CONSTANTS(:,15)).*CONSTANTS(:,15)<=CONSTANTS(:,16), CONSTANTS(:,17) }, 0.00000);
     ALGEBRAIC(:,70) = 0.200000./(1.00000+exp( - (STATES(:,1) - 46.7000)./7.80000));
     ALGEBRAIC(:,71) =  (( CONSTANTS(:,69).*ALGEBRAIC(:,70).*STATES(:,2))./(STATES(:,2)+CONSTANTS(:,71))).*(STATES(:,1) - CONSTANTS(:,70));
-    ALGEBRAIC(:,72) = arrayfun(@volt_clamp, t);
+    ALGEBRAIC(:,72) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
 end
 
 % Compute result of a piecewise function (for stimulation current)
@@ -510,257 +509,12 @@ function x = piecewise(cases, default)
     end
 end
 
-function volt = volt_clamp(t)
-    if t < 10
-        volt = -140;
-    elseif (t >=10) && (t <= 80) 
-        volt = -60;
+function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t, P2)
+    if t < holding_t
+        VC = holding_p;
+    elseif (t >= holding_t) && (t <= P1_t) 
+        VC = P1;
     else
-        volt = -20;
+        VC = P2;
     end
-end
-
-% Pad out or shorten strings to a set length
-function strout = strpad(strin)
-    req_length = 160;
-    insize = size(strin,2);
-    if insize > req_length
-        strout = strin(1:req_length);
-    else
-        strout = [strin, blanks(req_length - insize)];
-    end
-end
-
-function [LEGEND_STATES, LEGEND_ALGEBRAIC, LEGEND_t, LEGEND_CONSTANTS] = createLegends()
-    LEGEND_STATES = ''; LEGEND_ALGEBRAIC = ''; LEGEND_t = ''; LEGEND_CONSTANTS = '';
-    LEGEND_t = strpad('time in component environment (millisecond)');
-    LEGEND_STATES(:,1) = strpad('V in component membrane (millivolt)');
-    LEGEND_CONSTANTS(:,1) = strpad('Cm in component membrane (microF_per_cm2)');
-    LEGEND_CONSTANTS(:,2) = strpad('Vmyo in component membrane (microlitre)');
-    LEGEND_CONSTANTS(:,3) = strpad('VJSR in component membrane (microlitre)');
-    LEGEND_CONSTANTS(:,4) = strpad('VNSR in component membrane (microlitre)');
-    LEGEND_CONSTANTS(:,5) = strpad('Vss in component membrane (microlitre)');
-    LEGEND_CONSTANTS(:,6) = strpad('Acap in component membrane (cm2)');
-    LEGEND_CONSTANTS(:,7) = strpad('Ko in component membrane (micromolar)');
-    LEGEND_CONSTANTS(:,8) = strpad('Nao in component membrane (micromolar)');
-    LEGEND_CONSTANTS(:,9) = strpad('Cao in component membrane (micromolar)');
-    LEGEND_CONSTANTS(:,10) = strpad('R in component membrane (joule_per_mole_kelvin)');
-    LEGEND_CONSTANTS(:,11) = strpad('T in component membrane (kelvin)');
-    LEGEND_CONSTANTS(:,12) = strpad('F in component membrane (coulomb_per_millimole)');
-    LEGEND_ALGEBRAIC(:,1) = strpad('i_stim in component membrane (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,47) = strpad('i_CaL in component L_type_calcium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,49) = strpad('i_pCa in component calcium_pump_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,51) = strpad('i_NaCa in component sodium_calcium_exchange_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,55) = strpad('i_Cab in component calcium_background_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,58) = strpad('i_Na in component fast_sodium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,59) = strpad('i_Nab in component sodium_background_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,69) = strpad('i_NaK in component sodium_potassium_pump_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,61) = strpad('i_Kto_f in component fast_transient_outward_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,62) = strpad('i_Kto_s in component slow_transient_outward_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,63) = strpad('i_K1 in component time_independent_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,64) = strpad('i_Ks in component slow_delayed_rectifier_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,65) = strpad('i_Kur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,66) = strpad('i_Kss in component non_inactivating_steady_state_potassium_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,71) = strpad('i_ClCa in component calcium_activated_chloride_current (picoA_per_picoF)');
-    LEGEND_ALGEBRAIC(:,67) = strpad('i_Kr in component rapid_delayed_rectifier_potassium_current (picoA_per_picoF)');
-    LEGEND_CONSTANTS(:,13) = strpad('stim_start in component membrane (millisecond)');
-    LEGEND_CONSTANTS(:,14) = strpad('stim_end in component membrane (millisecond)');
-    LEGEND_CONSTANTS(:,15) = strpad('stim_period in component membrane (millisecond)');
-    LEGEND_CONSTANTS(:,16) = strpad('stim_duration in component membrane (millisecond)');
-    LEGEND_CONSTANTS(:,17) = strpad('stim_amplitude in component membrane (picoA_per_picoF)');
-    LEGEND_STATES(:,2) = strpad('Cai in component calcium_concentration (micromolar)');
-    LEGEND_STATES(:,3) = strpad('Cass in component calcium_concentration (micromolar)');
-    LEGEND_STATES(:,4) = strpad('CaJSR in component calcium_concentration (micromolar)');
-    LEGEND_STATES(:,5) = strpad('CaNSR in component calcium_concentration (micromolar)');
-    LEGEND_ALGEBRAIC(:,12) = strpad('Bi in component calcium_concentration (dimensionless)');
-    LEGEND_ALGEBRAIC(:,25) = strpad('Bss in component calcium_concentration (dimensionless)');
-    LEGEND_ALGEBRAIC(:,30) = strpad('BJSR in component calcium_concentration (dimensionless)');
-    LEGEND_CONSTANTS(:,18) = strpad('CMDN_tot in component calcium_concentration (micromolar)');
-    LEGEND_CONSTANTS(:,19) = strpad('CSQN_tot in component calcium_concentration (micromolar)');
-    LEGEND_CONSTANTS(:,20) = strpad('Km_CMDN in component calcium_concentration (micromolar)');
-    LEGEND_CONSTANTS(:,21) = strpad('Km_CSQN in component calcium_concentration (micromolar)');
-    LEGEND_ALGEBRAIC(:,41) = strpad('J_leak in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_ALGEBRAIC(:,34) = strpad('J_rel in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_ALGEBRAIC(:,43) = strpad('J_up in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_ALGEBRAIC(:,37) = strpad('J_tr in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_ALGEBRAIC(:,45) = strpad('J_trpn in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_ALGEBRAIC(:,39) = strpad('J_xfer in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_CONSTANTS(:,22) = strpad('k_plus_htrpn in component calcium_fluxes (per_micromolar_millisecond)');
-    LEGEND_CONSTANTS(:,23) = strpad('k_minus_htrpn in component calcium_fluxes (per_millisecond)');
-    LEGEND_CONSTANTS(:,24) = strpad('k_plus_ltrpn in component calcium_fluxes (per_micromolar_millisecond)');
-    LEGEND_CONSTANTS(:,25) = strpad('k_minus_ltrpn in component calcium_fluxes (per_millisecond)');
-    LEGEND_STATES(:,6) = strpad('P_RyR in component calcium_fluxes (dimensionless)');
-    LEGEND_CONSTANTS(:,26) = strpad('v1 in component calcium_fluxes (per_millisecond)');
-    LEGEND_CONSTANTS(:,27) = strpad('tau_tr in component calcium_fluxes (millisecond)');
-    LEGEND_CONSTANTS(:,28) = strpad('v2 in component calcium_fluxes (per_millisecond)');
-    LEGEND_CONSTANTS(:,29) = strpad('tau_xfer in component calcium_fluxes (millisecond)');
-    LEGEND_CONSTANTS(:,30) = strpad('v3 in component calcium_fluxes (micromolar_per_millisecond)');
-    LEGEND_CONSTANTS(:,31) = strpad('Km_up in component calcium_fluxes (micromolar)');
-    LEGEND_CONSTANTS(:,32) = strpad('LTRPN_tot in component calcium_buffering (micromolar)');
-    LEGEND_CONSTANTS(:,33) = strpad('HTRPN_tot in component calcium_buffering (micromolar)');
-    LEGEND_STATES(:,7) = strpad('LTRPN_Ca in component calcium_buffering (micromolar)');
-    LEGEND_STATES(:,8) = strpad('HTRPN_Ca in component calcium_buffering (micromolar)');
-    LEGEND_CONSTANTS(:,34) = strpad('i_CaL_max in component L_type_calcium_current (picoA_per_picoF)');
-    LEGEND_STATES(:,9) = strpad('P_O1 in component ryanodine_receptors (dimensionless)');
-    LEGEND_STATES(:,10) = strpad('P_O2 in component ryanodine_receptors (dimensionless)');
-    LEGEND_ALGEBRAIC(:,2) = strpad('P_C1 in component ryanodine_receptors (dimensionless)');
-    LEGEND_STATES(:,11) = strpad('P_C2 in component ryanodine_receptors (dimensionless)');
-    LEGEND_CONSTANTS(:,35) = strpad('k_plus_a in component ryanodine_receptors (micromolar4_per_millisecond)');
-    LEGEND_CONSTANTS(:,36) = strpad('k_minus_a in component ryanodine_receptors (per_millisecond)');
-    LEGEND_CONSTANTS(:,37) = strpad('k_plus_b in component ryanodine_receptors (micromolar3_per_millisecond)');
-    LEGEND_CONSTANTS(:,38) = strpad('k_minus_b in component ryanodine_receptors (per_millisecond)');
-    LEGEND_CONSTANTS(:,39) = strpad('k_plus_c in component ryanodine_receptors (per_millisecond)');
-    LEGEND_CONSTANTS(:,40) = strpad('k_minus_c in component ryanodine_receptors (per_millisecond)');
-    LEGEND_CONSTANTS(:,41) = strpad('m in component ryanodine_receptors (dimensionless)');
-    LEGEND_CONSTANTS(:,42) = strpad('n in component ryanodine_receptors (dimensionless)');
-    LEGEND_CONSTANTS(:,43) = strpad('E_CaL in component L_type_calcium_current (millivolt)');
-    LEGEND_CONSTANTS(:,44) = strpad('g_CaL in component L_type_calcium_current (milliS_per_microF)');
-    LEGEND_STATES(:,12) = strpad('O in component L_type_calcium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,3) = strpad('C1 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,13) = strpad('C2 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,14) = strpad('C3 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,15) = strpad('C4 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,16) = strpad('I1 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,17) = strpad('I2 in component L_type_calcium_current (dimensionless)');
-    LEGEND_STATES(:,18) = strpad('I3 in component L_type_calcium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,13) = strpad('alpha in component L_type_calcium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,26) = strpad('beta in component L_type_calcium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,31) = strpad('gamma in component L_type_calcium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,35) = strpad('Kpcf in component L_type_calcium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,45) = strpad('Kpcb in component L_type_calcium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,46) = strpad('Kpc_max in component L_type_calcium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,47) = strpad('Kpc_half in component L_type_calcium_current (micromolar)');
-    LEGEND_CONSTANTS(:,48) = strpad('i_pCa_max in component calcium_pump_current (picoA_per_picoF)');
-    LEGEND_CONSTANTS(:,49) = strpad('Km_pCa in component calcium_pump_current (micromolar)');
-    LEGEND_CONSTANTS(:,50) = strpad('k_NaCa in component sodium_calcium_exchange_current (picoA_per_picoF)');
-    LEGEND_CONSTANTS(:,51) = strpad('K_mNa in component sodium_calcium_exchange_current (micromolar)');
-    LEGEND_CONSTANTS(:,52) = strpad('K_mCa in component sodium_calcium_exchange_current (micromolar)');
-    LEGEND_CONSTANTS(:,53) = strpad('k_sat in component sodium_calcium_exchange_current (dimensionless)');
-    LEGEND_CONSTANTS(:,54) = strpad('eta in component sodium_calcium_exchange_current (dimensionless)');
-    LEGEND_STATES(:,19) = strpad('Nai in component sodium_concentration (micromolar)');
-    LEGEND_CONSTANTS(:,55) = strpad('g_Cab in component calcium_background_current (milliS_per_microF)');
-    LEGEND_ALGEBRAIC(:,53) = strpad('E_CaN in component calcium_background_current (millivolt)');
-    LEGEND_ALGEBRAIC(:,57) = strpad('E_Na in component fast_sodium_current (millivolt)');
-    LEGEND_CONSTANTS(:,56) = strpad('g_Na in component fast_sodium_current (milliS_per_microF)');
-    LEGEND_STATES(:,20) = strpad('O_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,21) = strpad('C_Na1 in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,22) = strpad('C_Na2 in component fast_sodium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,4) = strpad('C_Na3 in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,23) = strpad('I1_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,24) = strpad('I2_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,25) = strpad('IF_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,26) = strpad('IC_Na2 in component fast_sodium_current (dimensionless)');
-    LEGEND_STATES(:,27) = strpad('IC_Na3 in component fast_sodium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,14) = strpad('alpha_Na11 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,36) = strpad('beta_Na11 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,27) = strpad('alpha_Na12 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,38) = strpad('beta_Na12 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,32) = strpad('alpha_Na13 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,40) = strpad('beta_Na13 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,42) = strpad('alpha_Na3 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,44) = strpad('beta_Na3 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,46) = strpad('alpha_Na2 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,48) = strpad('beta_Na2 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,50) = strpad('alpha_Na4 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,52) = strpad('beta_Na4 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,54) = strpad('alpha_Na5 in component fast_sodium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,56) = strpad('beta_Na5 in component fast_sodium_current (per_millisecond)');
-    LEGEND_STATES(:,28) = strpad('Ki in component potassium_concentration (micromolar)');
-    LEGEND_CONSTANTS(:,57) = strpad('g_Nab in component sodium_background_current (milliS_per_microF)');
-    LEGEND_ALGEBRAIC(:,60) = strpad('E_K in component fast_transient_outward_potassium_current (millivolt)');
-    LEGEND_CONSTANTS(:,58) = strpad('g_Kto_f in component fast_transient_outward_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,29) = strpad('ato_f in component fast_transient_outward_potassium_current (dimensionless)');
-    LEGEND_STATES(:,30) = strpad('ito_f in component fast_transient_outward_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,5) = strpad('alpha_a in component fast_transient_outward_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,15) = strpad('beta_a in component fast_transient_outward_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,6) = strpad('alpha_i in component fast_transient_outward_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,16) = strpad('beta_i in component fast_transient_outward_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,7) = strpad('ass in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,8) = strpad('iss in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_CONSTANTS(:,59) = strpad('g_Kto_s in component slow_transient_outward_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,31) = strpad('ato_s in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_STATES(:,32) = strpad('ito_s in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,17) = strpad('tau_ta_s in component slow_transient_outward_potassium_current (millisecond)');
-    LEGEND_ALGEBRAIC(:,18) = strpad('tau_ti_s in component slow_transient_outward_potassium_current (millisecond)');
-    LEGEND_CONSTANTS(:,60) = strpad('g_Ks in component slow_delayed_rectifier_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,33) = strpad('nKs in component slow_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,9) = strpad('alpha_n in component slow_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,19) = strpad('beta_n in component slow_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,61) = strpad('g_Kur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,34) = strpad('aur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_STATES(:,35) = strpad('iur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,20) = strpad('tau_aur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (millisecond)');
-    LEGEND_ALGEBRAIC(:,21) = strpad('tau_iur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (millisecond)');
-    LEGEND_CONSTANTS(:,62) = strpad('g_Kss in component non_inactivating_steady_state_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,36) = strpad('aKss in component non_inactivating_steady_state_potassium_current (dimensionless)');
-    LEGEND_STATES(:,37) = strpad('iKss in component non_inactivating_steady_state_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,22) = strpad('tau_Kss in component non_inactivating_steady_state_potassium_current (millisecond)');
-    LEGEND_CONSTANTS(:,63) = strpad('g_Kr in component rapid_delayed_rectifier_potassium_current (milliS_per_microF)');
-    LEGEND_STATES(:,38) = strpad('O_K in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_STATES(:,39) = strpad('C_K1 in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_STATES(:,40) = strpad('C_K2 in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,10) = strpad('C_K0 in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_STATES(:,41) = strpad('I_K in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_ALGEBRAIC(:,23) = strpad('alpha_a0 in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,28) = strpad('beta_a0 in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,64) = strpad('kb in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,65) = strpad('kf in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,11) = strpad('alpha_a1 in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,24) = strpad('beta_a1 in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,29) = strpad('alpha_i in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_ALGEBRAIC(:,33) = strpad('beta_i in component rapid_delayed_rectifier_potassium_current (per_millisecond)');
-    LEGEND_CONSTANTS(:,66) = strpad('i_NaK_max in component sodium_potassium_pump_current (picoA_per_picoF)');
-    LEGEND_CONSTANTS(:,67) = strpad('Km_Nai in component sodium_potassium_pump_current (micromolar)');
-    LEGEND_CONSTANTS(:,68) = strpad('Km_Ko in component sodium_potassium_pump_current (micromolar)');
-    LEGEND_ALGEBRAIC(:,68) = strpad('f_NaK in component sodium_potassium_pump_current (dimensionless)');
-    LEGEND_CONSTANTS(:,72) = strpad('sigma in component sodium_potassium_pump_current (dimensionless)');
-    LEGEND_CONSTANTS(:,69) = strpad('g_ClCa in component calcium_activated_chloride_current (milliS_per_microF)');
-    LEGEND_ALGEBRAIC(:,70) = strpad('O_ClCa in component calcium_activated_chloride_current (dimensionless)');
-    LEGEND_CONSTANTS(:,70) = strpad('E_Cl in component calcium_activated_chloride_current (millivolt)');
-    LEGEND_CONSTANTS(:,71) = strpad('Km_Cl in component calcium_activated_chloride_current (micromolar)');
-    LEGEND_RATES(:,1) = strpad('d/dt V in component membrane (millivolt)');
-    LEGEND_RATES(:,2) = strpad('d/dt Cai in component calcium_concentration (micromolar)');
-    LEGEND_RATES(:,3) = strpad('d/dt Cass in component calcium_concentration (micromolar)');
-    LEGEND_RATES(:,4) = strpad('d/dt CaJSR in component calcium_concentration (micromolar)');
-    LEGEND_RATES(:,5) = strpad('d/dt CaNSR in component calcium_concentration (micromolar)');
-    LEGEND_RATES(:,6) = strpad('d/dt P_RyR in component calcium_fluxes (dimensionless)');
-    LEGEND_RATES(:,7) = strpad('d/dt LTRPN_Ca in component calcium_buffering (micromolar)');
-    LEGEND_RATES(:,8) = strpad('d/dt HTRPN_Ca in component calcium_buffering (micromolar)');
-    LEGEND_RATES(:,9) = strpad('d/dt P_O1 in component ryanodine_receptors (dimensionless)');
-    LEGEND_RATES(:,10) = strpad('d/dt P_O2 in component ryanodine_receptors (dimensionless)');
-    LEGEND_RATES(:,11) = strpad('d/dt P_C2 in component ryanodine_receptors (dimensionless)');
-    LEGEND_RATES(:,12) = strpad('d/dt O in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,13) = strpad('d/dt C2 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,14) = strpad('d/dt C3 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,15) = strpad('d/dt C4 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,16) = strpad('d/dt I1 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,17) = strpad('d/dt I2 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,18) = strpad('d/dt I3 in component L_type_calcium_current (dimensionless)');
-    LEGEND_RATES(:,19) = strpad('d/dt Nai in component sodium_concentration (micromolar)');
-    LEGEND_RATES(:,22) = strpad('d/dt C_Na2 in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,21) = strpad('d/dt C_Na1 in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,20) = strpad('d/dt O_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,25) = strpad('d/dt IF_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,23) = strpad('d/dt I1_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,24) = strpad('d/dt I2_Na in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,26) = strpad('d/dt IC_Na2 in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,27) = strpad('d/dt IC_Na3 in component fast_sodium_current (dimensionless)');
-    LEGEND_RATES(:,28) = strpad('d/dt Ki in component potassium_concentration (micromolar)');
-    LEGEND_RATES(:,29) = strpad('d/dt ato_f in component fast_transient_outward_potassium_current (dimensionless)');
-    LEGEND_RATES(:,30) = strpad('d/dt ito_f in component fast_transient_outward_potassium_current (dimensionless)');
-    LEGEND_RATES(:,31) = strpad('d/dt ato_s in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_RATES(:,32) = strpad('d/dt ito_s in component slow_transient_outward_potassium_current (dimensionless)');
-    LEGEND_RATES(:,33) = strpad('d/dt nKs in component slow_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,34) = strpad('d/dt aur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,35) = strpad('d/dt iur in component ultra_rapidly_activating_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,36) = strpad('d/dt aKss in component non_inactivating_steady_state_potassium_current (dimensionless)');
-    LEGEND_RATES(:,37) = strpad('d/dt iKss in component non_inactivating_steady_state_potassium_current (dimensionless)');
-    LEGEND_RATES(:,40) = strpad('d/dt C_K2 in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,39) = strpad('d/dt C_K1 in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,38) = strpad('d/dt O_K in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_RATES(:,41) = strpad('d/dt I_K in component rapid_delayed_rectifier_potassium_current (dimensionless)');
-    LEGEND_STATES  = LEGEND_STATES';
-    LEGEND_ALGEBRAIC = LEGEND_ALGEBRAIC';
-    LEGEND_RATES = LEGEND_RATES';
-    LEGEND_CONSTANTS = LEGEND_CONSTANTS';
 end
