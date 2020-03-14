@@ -2,21 +2,18 @@ library(tidyverse)
 library(readxl)
 
 
-## Fig. 6 ----
+## Fig. 6 -----
 Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
                     range = cell_limits(c(1, 1), c(85, 11)))
 Ca_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
                     range = cell_limits(c(1, 13), c(55, 23)))
 
-# Fig. 6 C-2
-# fig6_c20
-
 # Fig. 6 C-3
-
 fig6_c3_WT <- Ca_WT %>% 
   select(`TimeToPeak (ms)`, 8:11) %>%
   summarise_all(mean) %>% 
   mutate(group = 'WT')
+fig6_c3_WT$`Tau (s)` <- fig6_c3_WT$`Tau (s)`
 fig6_c3_KO <- Ca_KO %>% 
   select(`TimeToPeak (ms)`, 8:11) %>% 
   summarise_all(mean) %>% 
@@ -25,7 +22,79 @@ fig6_c3 <- bind_rows(fig6_c3_WT, fig6_c3_KO)
 fig6_c3 %>% 
   pivot_longer(colnames(fig6_c3)[1:5], names_to = 'measures') %>% 
   ggplot(aes(x = measures, y = value, fill = group)) +
-  geom_bar(stat = 'identity', position = position_dodge())
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  xlab('Measures') +
+  ylab('Time')
+
+
+## Fig. 4 -----
+Na_dv_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
+                       range = cell_limits(c(1, 1), c(24, 20)))
+Na_dv_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
+                       range = cell_limits(c(1, 24), c(17, 43)))
+Na_ssi_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina SSI MGAT1KO Final.xlsx',
+                        range = cell_limits(c(1, 1), c(26, 21)))
+Na_ssi_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina SSI MGAT1KO Final.xlsx',
+                        range = cell_limits(c(1, 25), c(17, 45)))
+
+# data pre-processing; density-voltage WT
+Na_dv_WT_2 <- Na_dv_WT %>% 
+  pivot_longer(colnames(Na_dv_WT)[7:20], names_to = 'V', values_to = 'G')
+Na_dv_WT_2$V <- Na_dv_WT_2$V %>% as.numeric()
+# G_max <- max(Na_dv_WT_2$G)
+# Na_dv_WT_2 <- Na_dv_WT_2 %>% 
+#   mutate(ss_act = G / G_max)
+Na_dv_WT_3 <- Na_dv_WT_2 %>% 
+  group_by(V) %>% 
+  summarise(mean_G = mean(G))
+
+# data pre-processing; density-voltage KO
+Na_dv_KO_2 <- Na_dv_KO %>% 
+  pivot_longer(colnames(Na_dv_KO)[7:20], names_to = 'V', values_to = 'G')
+Na_dv_KO_2$V <- Na_dv_KO_2$V %>% as.numeric()
+# G_max <- max(Na_dv_KO_2$G)
+# Na_dv_KO_2 <- Na_dv_WT_2 %>% 
+#   mutate(ss_act = G / G_max)
+Na_dv_KO_3 <- Na_dv_KO_2 %>% 
+  group_by(V) %>% 
+  summarise(mean_G = mean(G))
+
+# data pre-processing; SSI WT
+Na_ssi_WT_2 <- Na_ssi_WT %>% 
+  pivot_longer(colnames(Na_ssi_WT)[6:21], names_to = 'V', values_to = 'I')
+Na_ssi_WT_2$V <- Na_ssi_WT_2$V %>% as.numeric()
+# I_max <- max(Na_ssi_WT_2$I)
+# Na_ssi_WT_2 <- Na_ssi_WT_2 %>% 
+#   mutate(ss_inact = I / I_max)
+Na_ssi_WT_3 <- Na_ssi_WT_2 %>% 
+  group_by(V) %>% 
+  summarise(mean_I = mean(I))
+
+# data pre-processing; SSI KO
+Na_ssi_KO_2 <- Na_ssi_KO %>% 
+  pivot_longer(colnames(Na_ssi_KO)[6:21], names_to = 'V', values_to = 'I')
+Na_ssi_KO_2$V <- Na_ssi_KO_2$V %>% as.numeric()
+# I_max <- max(Na_ssi_KO_2$I)
+# Na_ssi_KO_2 <- Na_ssi_KO_2 %>% 
+#   mutate(ss_inact = I / I_max)
+Na_ssi_KO_3 <- Na_ssi_KO_2 %>% 
+  group_by(V) %>% 
+  summarise(mean_I = mean(I))
+Na_act_inact_WT <- full_join(Na_dv_WT_3, Na_ssi_WT_3, 'V')
+Na_act_inact_KO <- full_join(Na_dv_KO_3, Na_ssi_KO_3, 'V')
+
+p <- Na_act_inact_WT %>% 
+  ggplot(aes(x = V, y = mean_G, color = 'WT')) +
+  geom_point() +
+  geom_line()
+p + geom_point(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
+  geom_line(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
+  geom_point(data = Na_act_inact_KO, aes(x = V, y = mean_G, color = 'KO')) +
+  geom_line(data = Na_act_inact_KO, aes(x = V, y = mean_G, color = 'KO')) +
+  geom_point(data = Na_act_inact_KO, aes(x = V, y = mean_I, color = 'KO')) +
+  geom_line(data = Na_act_inact_KO, aes(x = V, y = mean_I, color = 'KO')) +
+  ylab('I/Imax, G/Gmax') +
+  xlab('Voltage (MV)') 
 
 
 ## current-densities (normalized) ----
