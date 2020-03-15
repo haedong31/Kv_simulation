@@ -11,6 +11,7 @@
 # files
 *.pptx
 *.jpg
+*.png
 *.zip
 *.csv
 
@@ -31,7 +32,7 @@
 /*.tar.gz
 
 # Output files from R CMD check
-/*.Rcheck/
+/code/*.Rcheck/
 
 # RStudio files
 /code/.Rproj.user/

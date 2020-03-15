@@ -2,29 +2,45 @@ library(tidyverse)
 library(readxl)
 
 
-## Fig. 6 -----
-Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
-                    range = cell_limits(c(1, 1), c(85, 11)))
-Ca_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
-                    range = cell_limits(c(1, 13), c(55, 23)))
+## Fig. 3 -----
+# Repolarizing K+ currents at a test potential 50 mV for 25 sec
+fig3_wt <- read_excel('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-WT.xlsx')
+fig3_ko <- read_excel('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-KO.xlsx')
 
-# Fig. 6 C-3
-fig6_c3_WT <- Ca_WT %>% 
-  select(`TimeToPeak (ms)`, 8:11) %>%
-  summarise_all(mean) %>% 
+fig3_wt_agg <- fig3_wt %>% 
+  select(-Weeks, -VAR2, -Seal, -Resis) %>% 
+  summarise_all(~mean(., na.rm = TRUE)) %>% 
   mutate(group = 'WT')
-fig6_c3_WT$`Tau (s)` <- fig6_c3_WT$`Tau (s)`
-fig6_c3_KO <- Ca_KO %>% 
-  select(`TimeToPeak (ms)`, 8:11) %>% 
-  summarise_all(mean) %>% 
+
+fig3_ko_agg <- fig3_ko %>% 
+  select(-Weeks, -`Date Cell FF`, -`Seal FF`, -`Resis FF`) %>% 
+  summarise_all(~mean(., na.rm = TRUE)) %>% 
   mutate(group = 'KO')
-fig6_c3 <- bind_rows(fig6_c3_WT, fig6_c3_KO)
-fig6_c3 %>% 
-  pivot_longer(colnames(fig6_c3)[1:5], names_to = 'measures') %>% 
-  ggplot(aes(x = measures, y = value, fill = group)) +
+
+colnames(fig3_ko_agg) <- colnames(fig3_wt_agg)
+fig3 <- bind_rows(fig3_ko_agg, fig3_wt_agg)
+fig3 <- fig3 %>% 
+  select(-C)
+
+# Fig. 3-B
+fig3 %>% 
+  select(2:6, group) %>% 
+  pivot_longer(colnames(fig3)[2:6], names_to = 'measure') %>% 
+  ggplot(aes(x = measure, y = value, fill = group)) +
   geom_bar(stat = 'identity', position = position_dodge()) +
-  xlab('Measures') +
-  ylab('Time')
+  scale_y_continuous(breaks = seq(0, 60, 20)) +
+  xlab('')
+  ylab('Density (pA/pF)')
+
+# Fig. 3-C
+fig3 %>% 
+  select(Cap, group) %>% 
+  pivot_longer(Cap, names_to = 'measure') %>% 
+  ggplot(aes(x = measure, y = value, fill = group)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  xlab('Capacitance') +
+  ylab('pF') +
+  scale_y_continuous(n.breaks = 6)
 
 
 ## Fig. 4 -----
@@ -95,6 +111,38 @@ p + geom_point(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
   geom_line(data = Na_act_inact_KO, aes(x = V, y = mean_I, color = 'KO')) +
   ylab('I/Imax, G/Gmax') +
   xlab('Voltage (MV)') 
+
+
+## Fig. 6 -----
+Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
+                    range = cell_limits(c(1, 1), c(85, 11)))
+Ca_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
+                    range = cell_limits(c(1, 13), c(55, 23)))
+
+# Fig. 6 C-3
+fig6_c3_WT <- Ca_WT %>% 
+  select(`TimeToPeak (ms)`, 8:11) %>%
+  summarise_all(mean) %>% 
+  mutate(group = 'WT')
+fig6_c3_WT$`Tau (s)` <- fig6_c3_WT$`Tau (s)` * 1000  # s to ms
+fig6_c3_WT <- fig6_c3_WT %>% 
+  rename(`Tau (ms)` = `Tau (s)`)
+
+fig6_c3_KO <- Ca_KO %>% 
+  select(`TimeToPeak (ms)`, 8:11) %>% 
+  summarise_all(mean) %>% 
+  mutate(group = 'KO')
+fig6_c3_KO$`Tau (s)` <- fig6_c3_KO$`Tau (s)` * 1000  # s to ms
+fig6_c3_KO <- fig6_c3_KO %>% 
+  rename(`Tau (ms)` = `Tau (s)`)
+
+fig6_c3 <- bind_rows(fig6_c3_WT, fig6_c3_KO)
+fig6_c3 %>% 
+  pivot_longer(colnames(fig6_c3)[1:5], names_to = 'measures') %>% 
+  ggplot(aes(x = measures, y = value, fill = group)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  xlab('Measures') +
+  ylab('Time')
 
 
 ## current-densities (normalized) ----
