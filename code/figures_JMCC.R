@@ -2,7 +2,7 @@ library(tidyverse)
 library(readxl)
 
 
-## Fig. 3 -----
+## Fig 3 -----
 # Repolarizing K+ currents at a test potential 50 mV for 25 sec
 fig3_wt <- read_excel('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-WT.xlsx')
 fig3_ko <- read_excel('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-KO.xlsx')
@@ -20,9 +20,10 @@ fig3_ko_agg <- fig3_ko %>%
 colnames(fig3_ko_agg) <- colnames(fig3_wt_agg)
 fig3 <- bind_rows(fig3_ko_agg, fig3_wt_agg)
 fig3 <- fig3 %>% 
-  select(-C)
+  select(-Cap)
 
-# Fig. 3-B
+# Fig 3-B
+# currents
 fig3 %>% 
   select(2:6, group) %>% 
   pivot_longer(colnames(fig3)[2:6], names_to = 'measure') %>% 
@@ -31,8 +32,17 @@ fig3 %>%
   scale_y_continuous(breaks = seq(0, 60, 20)) +
   xlab('')
   ylab('Density (pA/pF)')
+# taus
+fig3 %>% 
+  select(8:9, group) %>% 
+  pivot_longer(colnames(fig3)[8:9], names_to = 'measure') %>% 
+  ggplot(aes(x = measure, y = value, fill = group)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  scale_y_continuous(breaks = c(0, 100, 1000, 1250, 1500, 1750, 2000)) +
+  xlab('') +
+  ylab('Tau Inactivation (ms)')
 
-# Fig. 3-C
+# Fig 3-C
 fig3 %>% 
   select(Cap, group) %>% 
   pivot_longer(Cap, names_to = 'measure') %>% 
@@ -43,7 +53,43 @@ fig3 %>%
   scale_y_continuous(n.breaks = 6)
 
 
-## Fig. 4 -----
+## Fig 4 -----
+# Fig 4-B & Fig 4-C
+fig4_bc <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/FF IV 01-11-2018 - 3-22-19 - final.xlsx',
+                      range = cell_limits(c(1, 51), c(21, 59)))
+
+# data pre-processing
+fig4_bc_wt <- fig4_bc %>% 
+  select(1:5) %>% 
+  mutate(group = 'WT')
+colnames(fig4_bc_wt) <- c('mV', 'norm_mean', 'mean', 'norm_SEM', 'SEM', 'group')
+fig4_bc_ko <- fig4_bc %>% 
+  select(c(1, 6:9)) %>% 
+  mutate(group = 'KO')
+colnames(fig4_bc_ko) <- c('mV', 'norm_mean', 'mean', 'norm_SEM', 'SEM', 'group')
+fig4_bc <- bind_rows(fig4_bc_wt, fig4_bc_ko)
+
+# Fig 4-B
+fig4_bc %>% 
+  select(mV, group, norm_mean) %>% 
+  filter(mV <= 0) %>% 
+  ggplot(aes(x = mV, y = norm_mean, color = group)) +
+  geom_point() +
+  geom_line() +
+  xlab('Voltage (mV)') +
+  ylab('Density (pA/pF)')
+
+# Fig 4-C
+fig4_bc %>% 
+  select(mV, group, mean) %>% 
+  filter(mV <= 0) %>% 
+  ggplot(aes(x = mV, y = mean, color = group)) +
+  geom_point() +
+  geom_line() +
+  xlab('Voltage (mV)') +
+  ylab('Amplitude (pA)')
+  
+# Fig 4-D
 Na_dv_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
                        range = cell_limits(c(1, 1), c(24, 20)))
 Na_dv_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
@@ -113,13 +159,13 @@ p + geom_point(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
   xlab('Voltage (MV)') 
 
 
-## Fig. 6 -----
+## Fig 6 -----
 Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
                     range = cell_limits(c(1, 1), c(85, 11)))
 Ca_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
                     range = cell_limits(c(1, 13), c(55, 23)))
 
-# Fig. 6 C-3
+# Fig 6 C-3
 fig6_c3_WT <- Ca_WT %>% 
   select(`TimeToPeak (ms)`, 8:11) %>%
   summarise_all(mean) %>% 
