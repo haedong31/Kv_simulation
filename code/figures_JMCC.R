@@ -54,7 +54,6 @@ fig3 %>%
 
 
 ## Fig 4 -----
-# Fig 4-B & Fig 4-C
 fig4_bc <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/FF IV 01-11-2018 - 3-22-19 - final.xlsx',
                       range = cell_limits(c(1, 51), c(21, 59)))
 
@@ -71,7 +70,6 @@ fig4_bc <- bind_rows(fig4_bc_wt, fig4_bc_ko)
 
 # Fig 4-B
 fig4_bc %>% 
-  select(mV, group, norm_mean) %>% 
   filter(mV <= 0) %>% 
   ggplot(aes(x = mV, y = norm_mean, color = group)) +
   geom_point() +
@@ -81,82 +79,79 @@ fig4_bc %>%
 
 # Fig 4-C
 fig4_bc %>% 
-  select(mV, group, mean) %>% 
   filter(mV <= 0) %>% 
   ggplot(aes(x = mV, y = mean, color = group)) +
   geom_point() +
   geom_line() +
   xlab('Voltage (mV)') +
   ylab('Amplitude (pA)')
-  
-# Fig 4-D
-Na_dv_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
-                       range = cell_limits(c(1, 1), c(24, 20)))
-Na_dv_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
-                       range = cell_limits(c(1, 24), c(17, 43)))
-Na_ssi_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina SSI MGAT1KO Final.xlsx',
-                        range = cell_limits(c(1, 1), c(26, 21)))
-Na_ssi_KO <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina SSI MGAT1KO Final.xlsx',
-                        range = cell_limits(c(1, 25), c(17, 45)))
 
-# data pre-processing; density-voltage WT
-Na_dv_WT_2 <- Na_dv_WT %>% 
-  pivot_longer(colnames(Na_dv_WT)[7:20], names_to = 'V', values_to = 'G')
-Na_dv_WT_2$V <- Na_dv_WT_2$V %>% as.numeric()
-# G_max <- max(Na_dv_WT_2$G)
-# Na_dv_WT_2 <- Na_dv_WT_2 %>% 
-#   mutate(ss_act = G / G_max)
-Na_dv_WT_3 <- Na_dv_WT_2 %>% 
-  group_by(V) %>% 
-  summarise(mean_G = mean(G))
-
-# data pre-processing; density-voltage KO
-Na_dv_KO_2 <- Na_dv_KO %>% 
-  pivot_longer(colnames(Na_dv_KO)[7:20], names_to = 'V', values_to = 'G')
-Na_dv_KO_2$V <- Na_dv_KO_2$V %>% as.numeric()
-# G_max <- max(Na_dv_KO_2$G)
-# Na_dv_KO_2 <- Na_dv_WT_2 %>% 
-#   mutate(ss_act = G / G_max)
-Na_dv_KO_3 <- Na_dv_KO_2 %>% 
-  group_by(V) %>% 
-  summarise(mean_G = mean(G))
-
-# data pre-processing; SSI WT
-Na_ssi_WT_2 <- Na_ssi_WT %>% 
-  pivot_longer(colnames(Na_ssi_WT)[6:21], names_to = 'V', values_to = 'I')
-Na_ssi_WT_2$V <- Na_ssi_WT_2$V %>% as.numeric()
-# I_max <- max(Na_ssi_WT_2$I)
-# Na_ssi_WT_2 <- Na_ssi_WT_2 %>% 
-#   mutate(ss_inact = I / I_max)
-Na_ssi_WT_3 <- Na_ssi_WT_2 %>% 
-  group_by(V) %>% 
-  summarise(mean_I = mean(I))
-
-# data pre-processing; SSI KO
-Na_ssi_KO_2 <- Na_ssi_KO %>% 
-  pivot_longer(colnames(Na_ssi_KO)[6:21], names_to = 'V', values_to = 'I')
-Na_ssi_KO_2$V <- Na_ssi_KO_2$V %>% as.numeric()
-# I_max <- max(Na_ssi_KO_2$I)
-# Na_ssi_KO_2 <- Na_ssi_KO_2 %>% 
-#   mutate(ss_inact = I / I_max)
-Na_ssi_KO_3 <- Na_ssi_KO_2 %>% 
-  group_by(V) %>% 
-  summarise(mean_I = mean(I))
-Na_act_inact_WT <- full_join(Na_dv_WT_3, Na_ssi_WT_3, 'V')
-Na_act_inact_KO <- full_join(Na_dv_KO_3, Na_ssi_KO_3, 'V')
-
-p <- Na_act_inact_WT %>% 
-  ggplot(aes(x = V, y = mean_G, color = 'WT')) +
+# SEM?
+fig4_bc %>% 
+  ggplot(aes(x = mV, y = norm_SEM, color = group)) +
   geom_point() +
   geom_line()
-p + geom_point(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
-  geom_line(data = Na_act_inact_WT, aes(x = V, y = mean_I, color = 'WT')) +
-  geom_point(data = Na_act_inact_KO, aes(x = V, y = mean_G, color = 'KO')) +
-  geom_line(data = Na_act_inact_KO, aes(x = V, y = mean_G, color = 'KO')) +
-  geom_point(data = Na_act_inact_KO, aes(x = V, y = mean_I, color = 'KO')) +
-  geom_line(data = Na_act_inact_KO, aes(x = V, y = mean_I, color = 'KO')) +
-  ylab('I/Imax, G/Gmax') +
-  xlab('Voltage (MV)') 
+fig4_bc %>% 
+  ggplot(aes(x = mV, y = SEM, color = group)) +
+  geom_point() +
+  geom_line()
+
+# data pre-processing
+fig4_ssa <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
+                       range = cell_limits(c(1, 1), c(24, 43)))
+fig4_ssi <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina SSI MGAT1KO Final.xlsx',
+                       range = cell_limits(c(1, 1), c(26, 45)))
+
+fig4_ssa_wt <- fig4_ssa %>% 
+  select(1:20) %>% 
+  mutate(group = 'WT')
+colnames(fig4_ssa_wt) <- c('ID', 'Cap', 'G/Gmax', 'Slope', 'V1/2', 'Gmax/Cap', 
+                           seq(-85, -20, by = 5), 'group')
+fig4_ssa_ko <- fig4_ssa %>% 
+  select(24:43) %>% 
+  slice(1:16) %>% 
+  mutate(group = 'KO')
+colnames(fig4_ssa_ko) <- c('ID', 'Cap', 'G/Gmax', 'Slope', 'V1/2', 'Gmax/Cap', 
+                           seq(-85, -20, by = 5), 'group')
+
+fig4_ssa_2 <- bind_rows(fig4_ssa_wt, fig4_ssa_ko)
+fig4_ssa_2 <- fig4_ssa_2 %>% 
+  pivot_longer(colnames(fig4_ssa_2)[7:20], names_to = 'mV', values_to = 'ssa') %>% 
+  arrange(mV)
+fig4_ssa_2$mV <- fig4_ssa_2$mV %>% as.numeric()
+
+fig4_ssi_wt <- fig4_ssi %>% 
+  select(2:21) %>% 
+  slice(1:25) %>% 
+  mutate(group = 'WT')
+colnames(fig4_ssi_wt) <- c('ID', 'Imax', 'Slope', 'V1/2', seq(-130, -55, by = 5), 'group')
+fig4_ssi_ko <- fig4_ssi %>% 
+  select(26:45) %>% 
+  slice(1:16) %>% 
+  mutate(group = 'KO')
+colnames(fig4_ssi_ko) <- c('ID', 'Imax', 'Slope', 'V1/2', seq(-130, -55, by = 5), 'group')
+
+fig4_ssi_2 <- bind_rows(fig4_ssi_wt, fig4_ssi_ko)
+fig4_ssi_2 <- fig4_ssi_2 %>% 
+  pivot_longer(colnames(fig4_ssi_2)[5:20], names_to = 'mV', values_to = 'ssi') %>% 
+  arrange(mV)
+fig4_ssi_2$mV <- fig4_ssi_2$mV %>% as.numeric()
+
+# Fig 4-D
+fig4_ssa_2 %>% 
+  group_by(mV, group) %>% 
+  summarise(mean_ssa = mean(ssa)) %>% 
+  ggplot(aes(x = mV, y = mean_ssa, color = group)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2))
+fig4_ssi_2 %>% 
+  group_by(mV, group) %>% 
+  summarise(mean_ssi = mean(ssi)) %>% 
+  ggplot(aes(x = mV, y = mean_ssi, color = group)) +
+  geom_point() +
+  geom_line() +
+  scale_y_continuous(breaks = seq(0, 1, by = 0.2))
 
 
 ## Fig 6 -----
