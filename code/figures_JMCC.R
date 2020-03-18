@@ -86,16 +86,6 @@ fig4_bc %>%
   xlab('Voltage (mV)') +
   ylab('Amplitude (pA)')
 
-# SEM?
-fig4_bc %>% 
-  ggplot(aes(x = mV, y = norm_SEM, color = group)) +
-  geom_point() +
-  geom_line()
-fig4_bc %>% 
-  ggplot(aes(x = mV, y = SEM, color = group)) +
-  geom_point() +
-  geom_line()
-
 # data pre-processing
 fig4_ssa <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/Ina GV MGAT1KO Final.xlsx',
                        range = cell_limits(c(1, 1), c(24, 43)))
@@ -153,6 +143,11 @@ fig4_ssi_2 %>%
   geom_line() +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2))
 
+test <- read_excel('./MGAT1_Data_tidy/JMCC/test.xlsx')
+test %>% 
+  ggplot(aes(x = `Time mS`, y = `I2/I1`)) +
+  geom_point() +
+  geom_line()
 
 ## Fig 6 -----
 Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
