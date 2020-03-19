@@ -23,7 +23,7 @@ upper_bd = [60,60,60,60,60,60];
 fit_fn = @(X) Ito_fitness(X,Ito_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
 
 % run GA
-rst = zeros(9, 8);
+rst = zeros(10, 8);
 for i=2:10
     fprintf('### Iter %i / 10', i)
     
