@@ -3,6 +3,8 @@ close all
 clear variables
 
 
+%% preparation 
+
 %% Main
 % parameters for voltage clamp
 holding_p = -140; %mV
@@ -55,7 +57,7 @@ for i=1:length(P1s)
     title('[Ca^{2+}]_{ss}');
     hold off
     
-    % A67; I_Kto,f 
+    % A67; I_Kto,f
     hold on
     subplot(2,2,4);
     plot(t_container{i},A_container{i}(:,61));
@@ -63,5 +65,14 @@ for i=1:length(P1s)
     xlabel('Time (msec)');
     ylabel('pA/pF');
     title('I_{Kto,f}');
-    hold off    
+    hold off
 end
+
+% [t,S,A,C] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,[30,30,13.5,33.5,33.5,33.5]);
+% [t,S,A,C] = Rasmusson(holding_p,holding_t,P1,P1_t,P2,P2_t);
+
+% visualization
+% subplot(2,1,1)
+% plot(t, A(:,66))
+% subplot(2,1,2)
+% plot(t, A(:,61))
