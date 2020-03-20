@@ -3,8 +3,6 @@ close all
 clear variables
 
 
-%% preparation 
-
 %% Main
 % parameters for voltage clamp
 holding_p = -140; %mV
@@ -76,3 +74,16 @@ end
 % plot(t, A(:,66))
 % subplot(2,1,2)
 % plot(t, A(:,61))
+
+
+%% transform .mat arrays to Excel files
+file_names = dir('./results/*.mat');
+for i=1:length(file_names)
+    file_name = file_names(i);
+    read_path = sprintf('./results/%s', file_name.name);
+    load(read_path)
+    
+    [~, write_name, ~] = fileparts(file_name.name);
+    write_path = sprintf('./results/%s.xlsx', write_name);
+    xlswrite(write_path, rst)
+end
