@@ -160,23 +160,39 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A42; CNa3
     ALGEBRAIC(:,4) = 1.00000 - (STATES(:,20)+STATES(:,21)+STATES(:,22)+STATES(:,25)+STATES(:,23)+STATES(:,24)+STATES(:,26)+STATES(:,27));
     % A51; alpha_Na11
-    ALGEBRAIC(:,14) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
+    ALGEBRAIC(:,14) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(1))./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+X(1))./150.000));
+    % alpha_Na111
+    ALGEBRAIC(:,73) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(7))./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+X(7))./150.000));
     % A54; beta_Na11
-    ALGEBRAIC(:,36) =  0.191700.*exp( - (ALGEBRAIC(:,72)+2.50000)./20.3000);
+    ALGEBRAIC(:,36) =  0.191700.*exp( - (ALGEBRAIC(:,72)+X(2))./20.3000);
+    % beta_Na111
+    ALGEBRAIC(:,74) =  0.191700.*exp( - (ALGEBRAIC(:,72)+X(9))./20.3000);
     % A52; alpha_Na12
-    ALGEBRAIC(:,27) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
+    ALGEBRAIC(:,27) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(3))./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+X(3))./150.000));
+    % alpha_Na112
+    ALGEBRAIC(:,75) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(8))./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+X(8))./150.000));
     % A55; beta_Na12
-    ALGEBRAIC(:,38) =  0.200000.*exp( - (ALGEBRAIC(:,72) - 2.50000)./20.3000);
+    ALGEBRAIC(:,38) =  0.200000.*exp( - (ALGEBRAIC(:,72) - X(4))./20.3000);
+    % beta_Na112
+    ALGEBRAIC(:,76) =  0.200000.*exp( - (ALGEBRAIC(:,72) - X(10))./20.3000);
     % A57; alpha_Na3
-    ALGEBRAIC(:,42) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+7.00000)./7.70000);
+    ALGEBRAIC(:,42) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(11))./X(23));
+    % alpha_Na32
+    ALGEBRAIC(:,77) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(13))./X(24));
+    % alpha_Na33
+    ALGEBRAIC(:,78) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(15))./X(25));
     % A58; beta_Na3
-    ALGEBRAIC(:,44) = 0.00840000+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    ALGEBRAIC(:,44) = X(12)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    % beta_Na32
+    ALGEBRAIC(:,79) = X(14)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    % beta_Na33
+    ALGEBRAIC(:,80) = X(16)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
     % A43; CNa2
     RATES(:,22) = ( ALGEBRAIC(:,14).*ALGEBRAIC(:,4)+ ALGEBRAIC(:,38).*STATES(:,21)+ ALGEBRAIC(:,42).*STATES(:,26)) - ( ALGEBRAIC(:,36).*STATES(:,22)+ ALGEBRAIC(:,27).*STATES(:,22)+ ALGEBRAIC(:,44).*STATES(:,22));
     % A53; alpha_Na13
-    ALGEBRAIC(:,32) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./12.0000)+ 0.250000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
+    ALGEBRAIC(:,32) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(5))./12.0000)+ 0.250000.*exp( - (ALGEBRAIC(:,72)+X(5))./150.000));
     % A56; beta_Na13
-    ALGEBRAIC(:,40) =  0.220000.*exp( - (ALGEBRAIC(:,72) - 7.50000)./20.3000);
+    ALGEBRAIC(:,40) =  0.220000.*exp( - (ALGEBRAIC(:,72) - X(6))./20.3000);
     % A44; CNa1
     RATES(:,21) = ( ALGEBRAIC(:,27).*STATES(:,22)+ ALGEBRAIC(:,40).*STATES(:,20)+ ALGEBRAIC(:,42).*STATES(:,25)) - ( ALGEBRAIC(:,38).*STATES(:,21)+ ALGEBRAIC(:,32).*STATES(:,21)+ ALGEBRAIC(:,44).*STATES(:,21));
     % A49; ICNa2
@@ -194,15 +210,15 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A15; PRyR
     RATES(:,6) =   - 0.0400000.*STATES(:,6) -  (( 0.100000.*ALGEBRAIC(:,47))./CONSTANTS(:,34)).*exp( - power(ALGEBRAIC(:,72) - 5.00000, 2.00000)./648.000);
     % A59; alpha_Na2
-    ALGEBRAIC(:,46) = 1.00000./( 0.188495.*exp( - (ALGEBRAIC(:,72)+7.00000)./16.6000)+0.393956);
+    ALGEBRAIC(:,46) = 1.00000./( 0.188495.*exp( - (ALGEBRAIC(:,72)+X(17))./X(22))+0.393956);
     % A60; beta_Na2
     ALGEBRAIC(:,48) = ( ALGEBRAIC(:,32).*ALGEBRAIC(:,46).*ALGEBRAIC(:,42))./( ALGEBRAIC(:,40).*ALGEBRAIC(:,44));
     % A45; ONa
     RATES(:,20) = ( ALGEBRAIC(:,32).*STATES(:,21)+ ALGEBRAIC(:,48).*STATES(:,25)) - ( ALGEBRAIC(:,40).*STATES(:,20)+ ALGEBRAIC(:,46).*STATES(:,20));
     % A61; alpha_Na4
-    ALGEBRAIC(:,50) = ALGEBRAIC(:,46)./1000.00;
+    ALGEBRAIC(:,50) = ALGEBRAIC(:,46).*X(18);
     % A62; beta_Na4
-    ALGEBRAIC(:,52) = ALGEBRAIC(:,42);
+    ALGEBRAIC(:,52) = ALGEBRAIC(:,78).*X(19);
     % A46; IFNa
     RATES(:,25) = ( ALGEBRAIC(:,46).*STATES(:,20)+ ALGEBRAIC(:,44).*STATES(:,21)+ ALGEBRAIC(:,52).*STATES(:,23)+ ALGEBRAIC(:,27).*STATES(:,26)) - ( ALGEBRAIC(:,48).*STATES(:,25)+ ALGEBRAIC(:,42).*STATES(:,25)+ ALGEBRAIC(:,50).*STATES(:,25)+ ALGEBRAIC(:,38).*STATES(:,25));
     % A35; I_p(Ca)
@@ -220,9 +236,9 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A2; Cai
     RATES(:,2) =  ALGEBRAIC(:,12).*((ALGEBRAIC(:,41)+ALGEBRAIC(:,39)) - (ALGEBRAIC(:,43)+ALGEBRAIC(:,45)+( ((ALGEBRAIC(:,55)+ALGEBRAIC(:,49)) -  2.00000.*ALGEBRAIC(:,51)).*CONSTANTS(:,6).*CONSTANTS(:,1))./( 2.00000.*CONSTANTS(:,2).*CONSTANTS(:,12))));
     % A63; alpha_Na5
-    ALGEBRAIC(:,54) = ALGEBRAIC(:,46)./95000.0;
+    ALGEBRAIC(:,54) = ALGEBRAIC(:,46).*X(20);
     % A64; beta_Na5
-    ALGEBRAIC(:,56) = ALGEBRAIC(:,42)./50.0000;
+    ALGEBRAIC(:,56) = ALGEBRAIC(:,78).*X(21);
     % A47; I1Na
     RATES(:,23) = ( ALGEBRAIC(:,50).*STATES(:,25)+ ALGEBRAIC(:,56).*STATES(:,24)) - ( ALGEBRAIC(:,52).*STATES(:,23)+ ALGEBRAIC(:,54).*STATES(:,23));
     % A48; I2Na
@@ -272,10 +288,10 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,72) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
 
     ALGEBRAIC(:,2) = 1.00000 - (STATES(:,11)+STATES(:,9)+STATES(:,10));
-    ALGEBRAIC(:,5) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,72)+X(1)));
-    ALGEBRAIC(:,15) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,72)+X(2)));
-    ALGEBRAIC(:,6) = ( 0.000152000.*exp( - (ALGEBRAIC(:,72)+X(3))./7.00000))./( 0.00670830.*exp( - (ALGEBRAIC(:,72)+X(4))./7.00000)+1.00000);
-    ALGEBRAIC(:,16) = ( 0.000950000.*exp((ALGEBRAIC(:,72)+X(5))./7.00000))./( 0.0513350.*exp((ALGEBRAIC(:,72)+X(6))./7.00000)+1.00000);
+    ALGEBRAIC(:,5) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,72)+30.0000));
+    ALGEBRAIC(:,15) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,72)+30.0000));
+    ALGEBRAIC(:,6) = ( 0.000152000.*exp( - (ALGEBRAIC(:,72)+13.5000)./7.00000))./( 0.00670830.*exp( - (ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
+    ALGEBRAIC(:,16) = ( 0.000950000.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000))./( 0.0513350.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
     ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+22.5000)./7.70000));
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
@@ -303,29 +319,65 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,41) =  CONSTANTS(:,28).*(STATES(:,5) - STATES(:,2));
     ALGEBRAIC(:,43) = ( CONSTANTS(:,30).*power(STATES(:,2), 2.00000))./(power(CONSTANTS(:,31), 2.00000)+power(STATES(:,2), 2.00000));
     ALGEBRAIC(:,4) = 1.00000 - (STATES(:,20)+STATES(:,21)+STATES(:,22)+STATES(:,25)+STATES(:,23)+STATES(:,24)+STATES(:,26)+STATES(:,27));
-    ALGEBRAIC(:,14) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
-    ALGEBRAIC(:,36) =  0.191700.*exp( - (ALGEBRAIC(:,72)+2.50000)./20.3000);
-    ALGEBRAIC(:,27) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
-    ALGEBRAIC(:,38) =  0.200000.*exp( - (ALGEBRAIC(:,72) - 2.50000)./20.3000);
-    ALGEBRAIC(:,42) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+7.00000)./7.70000);
-    ALGEBRAIC(:,44) = 0.00840000+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
-    ALGEBRAIC(:,32) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+2.50000)./12.0000)+ 0.250000.*exp( - (ALGEBRAIC(:,72)+2.50000)./150.000));
-    ALGEBRAIC(:,40) =  0.220000.*exp( - (ALGEBRAIC(:,72) - 7.50000)./20.3000);
+    
+    % A51; alpha_Na11
+    ALGEBRAIC(:,14) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(1))./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+X(1))./150.000));
+    % alpha_Na111
+    ALGEBRAIC(:,73) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(7))./17.0000)+ 0.200000.*exp( - (ALGEBRAIC(:,72)+X(7))./150.000));
+    % A54; beta_Na11
+    ALGEBRAIC(:,36) =  0.191700.*exp( - (ALGEBRAIC(:,72)+X(2))./20.3000);
+    % beta_Na111
+    ALGEBRAIC(:,74) =  0.191700.*exp( - (ALGEBRAIC(:,72)+X(9))./20.3000);
+    % A52; alpha_Na12
+    ALGEBRAIC(:,27) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(3))./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+X(3))./150.000));
+    % alpha_Na112
+    ALGEBRAIC(:,75) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(8))./15.0000)+ 0.230000.*exp( - (ALGEBRAIC(:,72)+X(8))./150.000));
+    % A55; beta_Na12
+    ALGEBRAIC(:,38) =  0.200000.*exp( - (ALGEBRAIC(:,72) - X(4))./20.3000);
+    % beta_Na112
+    ALGEBRAIC(:,76) =  0.200000.*exp( - (ALGEBRAIC(:,72) - X(10))./20.3000);
+    % A57; alpha_Na3
+    ALGEBRAIC(:,42) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(11))./X(23));
+    % alpha_Na32
+    ALGEBRAIC(:,77) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(13))./X(24));
+    % alpha_Na33
+    ALGEBRAIC(:,78) =  7.00000e-07.*exp( - (ALGEBRAIC(:,72)+X(15))./X(25));
+    % A58; beta_Na3
+    ALGEBRAIC(:,44) = X(12)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    % beta_Na32
+    ALGEBRAIC(:,79) = X(14)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    % beta_Na33
+    ALGEBRAIC(:,80) = X(16)+ 2.00000e-05.*(ALGEBRAIC(:,72)+7.00000);
+    % A53; alpha_Na13
+    ALGEBRAIC(:,32) = 3.80200./( 0.102700.*exp( - (ALGEBRAIC(:,72)+X(5))./12.0000)+ 0.250000.*exp( - (ALGEBRAIC(:,72)+X(5))./150.000));
+    % A56; beta_Na13
+    ALGEBRAIC(:,40) =  0.220000.*exp( - (ALGEBRAIC(:,72) - X(6))./20.3000);
+    
     ALGEBRAIC(:,47) =  CONSTANTS(:,44).*STATES(:,12).*(ALGEBRAIC(:,72) - CONSTANTS(:,43));
     ALGEBRAIC(:,25) = power(1.00000+( CONSTANTS(:,18).*CONSTANTS(:,20))./power(CONSTANTS(:,20)+STATES(:,3), 2.00000),  - 1.00000);
     ALGEBRAIC(:,39) = (STATES(:,3) - STATES(:,2))./CONSTANTS(:,29);
-    ALGEBRAIC(:,46) = 1.00000./( 0.188495.*exp( - (ALGEBRAIC(:,72)+7.00000)./16.6000)+0.393956);
+    
+    % A59; alpha_Na2
+    ALGEBRAIC(:,46) = 1.00000./( 0.188495.*exp( - (ALGEBRAIC(:,72)+X(17))./X(22))+0.393956);
+    % A60; beta_Na2
     ALGEBRAIC(:,48) = ( ALGEBRAIC(:,32).*ALGEBRAIC(:,46).*ALGEBRAIC(:,42))./( ALGEBRAIC(:,40).*ALGEBRAIC(:,44));
-    ALGEBRAIC(:,50) = ALGEBRAIC(:,46)./1000.00;
-    ALGEBRAIC(:,52) = ALGEBRAIC(:,42);
+    % A61; alpha_Na4
+    ALGEBRAIC(:,50) = ALGEBRAIC(:,46).*X(18);
+    % A62; beta_Na4
+    ALGEBRAIC(:,52) = ALGEBRAIC(:,78).*X(19);
+
     ALGEBRAIC(:,49) = ( CONSTANTS(:,48).*power(STATES(:,2), 2.00000))./(power(CONSTANTS(:,49), 2.00000)+power(STATES(:,2), 2.00000));
     ALGEBRAIC(:,51) =  (( (( (( CONSTANTS(:,50).*1.00000)./(power(CONSTANTS(:,51), 3.00000)+power(CONSTANTS(:,8), 3.00000))).*1.00000)./(CONSTANTS(:,52)+CONSTANTS(:,9))).*1.00000)./(1.00000+ CONSTANTS(:,53).*exp(( (CONSTANTS(:,54) - 1.00000).*ALGEBRAIC(:,72).*CONSTANTS(:,12))./( CONSTANTS(:,10).*CONSTANTS(:,11))))).*( exp(( CONSTANTS(:,54).*ALGEBRAIC(:,72).*CONSTANTS(:,12))./( CONSTANTS(:,10).*CONSTANTS(:,11))).*power(STATES(:,19), 3.00000).*CONSTANTS(:,9) -  exp(( (CONSTANTS(:,54) - 1.00000).*ALGEBRAIC(:,72).*CONSTANTS(:,12))./( CONSTANTS(:,10).*CONSTANTS(:,11))).*power(CONSTANTS(:,8), 3.00000).*STATES(:,2));
     ALGEBRAIC(:,53) =  (( CONSTANTS(:,10).*CONSTANTS(:,11))./( 2.00000.*CONSTANTS(:,12))).*log(CONSTANTS(:,9)./STATES(:,2));
     ALGEBRAIC(:,55) =  CONSTANTS(:,55).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,53));
     ALGEBRAIC(:,12) = power(1.00000+( CONSTANTS(:,18).*CONSTANTS(:,20))./power(CONSTANTS(:,20)+STATES(:,2), 2.00000),  - 1.00000);
     ALGEBRAIC(:,45) = ( CONSTANTS(:,22).*STATES(:,2).*(CONSTANTS(:,33) - STATES(:,8))+ CONSTANTS(:,24).*STATES(:,2).*(CONSTANTS(:,32) - STATES(:,7))) - ( CONSTANTS(:,23).*STATES(:,8)+ CONSTANTS(:,25).*STATES(:,7));
-    ALGEBRAIC(:,54) = ALGEBRAIC(:,46)./95000.0;
-    ALGEBRAIC(:,56) = ALGEBRAIC(:,42)./50.0000;
+
+    % A63; alpha_Na5
+    ALGEBRAIC(:,54) = ALGEBRAIC(:,46).*X(20);
+    % A64; beta_Na5
+    ALGEBRAIC(:,56) = ALGEBRAIC(:,78).*X(21);    
+
     ALGEBRAIC(:,57) =  (( CONSTANTS(:,10).*CONSTANTS(:,11))./CONSTANTS(:,12)).*log(( 0.900000.*CONSTANTS(:,8)+ 0.100000.*CONSTANTS(:,7))./( 0.900000.*STATES(:,19)+ 0.100000.*STATES(:,28)));
     ALGEBRAIC(:,58) =  CONSTANTS(:,56).*STATES(:,20).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,57));
     ALGEBRAIC(:,59) =  CONSTANTS(:,57).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,57));
@@ -377,7 +429,7 @@ function [algebraicVariableCount] = getAlgebraicVariableCount()
     % Used later when setting a global variable with the number of algebraic variables.
     % There are a total of 41 entries in each of the rate and state variable arrays.
     % There are a total of 73 entries in the constant variable array.
-    algebraicVariableCount =72;
+    algebraicVariableCount = (72+8);
 end
 
 function [STATES, CONSTANTS] = initConsts()
