@@ -412,7 +412,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     ALGEBRAIC(:,71) =  (( CONSTANTS(:,69).*ALGEBRAIC(:,70).*STATES(:,2))./(STATES(:,2)+CONSTANTS(:,71))).*(ALGEBRAIC(:,72) - CONSTANTS(:,70));
     % A1; V
     RATES(:,1) =  0;
-   RATES = RATES';
+    RATES = RATES';
 end
 
 function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2)

@@ -1,6 +1,3 @@
-% SSA = table2array(na_gv_ko(:,7:20));
-% SSI = table2array(na_ssi_ko(:,5:20));
-
 function e = INa_fitness(X, SSA, SSI, Gmax)
     %% SSA
     % SSA protocol

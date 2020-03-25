@@ -34,15 +34,15 @@ ga_Ito <- bind_rows(mutate(ga_Ito_ko, group = 'KO'), mutate(ga_Ito_wt, group = '
 k_4barplot <- k %>% 
   group_by(group) %>% 
   summarise(mean_Iss = mean(Iss, na.rm = TRUE), mean_Ito = mean(A3, na.rm = TRUE),
-            std_Iss = sd(Iss, na.rm = TRUE), std_Ito = sd(A3, na.rm = TRUE)) %>% 
+            sem_Iss = sd(Iss, na.rm = TRUE)/sqrt(n()), sem_Ito = sd(A3, na.rm = TRUE)/sqrt(n())) %>% 
   mutate(clf = 'Real Data')
 ga_Iss_4barplot <- ga_Iss %>% 
   group_by(group) %>% 
-  summarise(mean_Iss = mean(Iss_hat, na.rm = TRUE), std_Iss = sd(Iss_hat, na.rm = TRUE)) %>% 
+  summarise(mean_Iss = mean(Iss_hat, na.rm = TRUE), sem_Iss = sd(Iss_hat, na.rm = TRUE)/sqrt(n())) %>% 
   mutate(clf = 'Simulated')
 ga_Ito_4barplot <- ga_Ito %>% 
   group_by(group) %>% 
-  summarise(mean_Ito = mean(Ito_hat, na.rm = TRUE), std_Ito = sd(Ito_hat, na.rm = TRUE)) %>% 
+  summarise(mean_Ito = mean(Ito_hat, na.rm = TRUE), sem_Ito = sd(Ito_hat, na.rm = TRUE)/sqrt(n())) %>% 
   mutate(clf = 'Simulated')
 
 
@@ -68,18 +68,18 @@ ga_Ito %>%
 
 # bar plot with error bars of mean Iss & Ito
 z95 <- qnorm(0.975, mean = 0, sd = 1)
-p1 <- bind_rows(select(k_4barplot, -mean_Ito, -std_Ito), ga_Iss_4barplot) %>% 
+p1 <- bind_rows(select(k_4barplot, -mean_Ito, -sem_Ito), ga_Iss_4barplot) %>% 
   ggplot(aes(x = clf, y = mean_Iss, fill = group)) +
   geom_bar(stat = 'identity', color = 'black', position = position_dodge()) +
-  geom_errorbar(aes(ymin = mean_Iss - std_Iss, ymax = mean_Iss + std_Iss), width = 0.2,
+  geom_errorbar(aes(ymin = mean_Iss - sem_Iss, ymax = mean_Iss + sem_Iss), width = 0.2,
                 position = position_dodge(0.9)) +
   xlab('') +
   ylab('Density (pA/pF)')
 
-p2 <- bind_rows(select(k_4barplot, -mean_Iss, -std_Iss), ga_Ito_4barplot) %>% 
+p2 <- bind_rows(select(k_4barplot, -mean_Iss, -sem_Iss), ga_Ito_4barplot) %>% 
   ggplot(aes(x = clf, y = mean_Ito, fill = group)) +
   geom_bar(stat = 'identity', color = 'black', position = position_dodge()) +
-  geom_errorbar(aes(ymin = mean_Ito - std_Ito, ymax = mean_Ito + std_Ito), width = 0.2,
+  geom_errorbar(aes(ymin = mean_Ito - sem_Ito, ymax = mean_Ito + sem_Ito), width = 0.2,
                 position = position_dodge(0.9)) +
   xlab('') +
   ylab('Density (pA/pF)') 

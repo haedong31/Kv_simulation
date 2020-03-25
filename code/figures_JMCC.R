@@ -143,11 +143,13 @@ fig4_ssi_2 %>%
   geom_line() +
   scale_y_continuous(breaks = seq(0, 1, by = 0.2))
 
+# Fig 4-G
 test <- read_excel('./MGAT1_Data_tidy/JMCC/test.xlsx')
 test %>% 
   ggplot(aes(x = `Time mS`, y = `I2/I1`)) +
   geom_point() +
   geom_line()
+
 
 ## Fig 6 -----
 Ca_WT <- read_excel('./MGAT1_Data_tidy/JMCC/Ca Imaging 37 Degrees/Ca Imaging MGAT1KO Final.xlsx', 
@@ -327,3 +329,12 @@ iimax_mean_wt %>%
   geom_point() +
   geom_line() +
   ylab('SS Inactivation')
+
+
+## misc -----
+fig4_ssa_ko$ID[]
+!(fig4_ssa_ko$ID %in% fig4_ssa_wt$ID)
+!(fig4_ssa_wt$ID %in% fig4_ssa_ko$ID)
+
+fig4_ssa_ko$ID[!ssi_idx]
+fig4_ssa_wt$ID[!ssi_idx]

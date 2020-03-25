@@ -15,8 +15,15 @@ import matplotlib.pyplot as plt
 ## functions for generating protocols -----
 def voltage_clamp(t, holding_p, holding_t, P1, P1_t, P2):
     v = np.piecewise(t, 
-                     [t < holding_t, (t >= holding_t) & (t <= P1_t), t > P1_t],
-                     [holding_p, P1, P2])
+        [t < holding_t, (t >= holding_t) & (t < P1_t), t >= P1_t],
+        [holding_p, P1, P2])
+    return v
+
+
+def twin_pulse(t, holding_p, holding_t, P1, P1_t, itv, P2):
+    v = np.piecewise(t,
+        [t < holding_t, (t >= holding_t) & (t < P1_t), (t >= P1_t) & (t< itv), t >= itv],
+        [holding_p, P1, holding_p, P2])
     return v
 
 
@@ -40,7 +47,7 @@ plt.xlabel('Time (sec)')
 ## Na2+ SSA -----
 holding_p = - 100
 holding_t = 10
-P1s = np.arange(-85, 20+1, 5)
+P1s = np.arange(-85, -20+1, 5)
 P1_t = 120 + holding_t
 P2 = -100
 t = np.arange(0, P1_t+10, 0.001)
@@ -75,13 +82,14 @@ plt.xlabel('Time (ms)')
 holding_p = - 100
 holding_t = 10
 P1 = -20
-P1_ts = np.arange((50+holding_t+1), (50+holding_t+88+1), 3)
-P2 = -100
-t = np.arange(0, max(P1_ts)+1, 0.001)
+P1_t = 50 + holding_t
+itv = np.arange(P1_t + 1, P1_t + 88 + 1, 3)
+P2 = -20
 
 plt.figure(3)
-for P1_t in P1_ts:
-    k = voltage_clamp(t, holding_p, holding_t, P1, P1_t, P2)
+for i in itv:
+    t = np.arange(0, i+50+1, 0.001)
+    k = twin_pulse(t, holding_p, holding_t, P1, P1_t, i, P2)
     plt.plot(t, k)
 plt.title('Na2+ Rec')
 plt.ylabel('Clamp Voltage (mV)')

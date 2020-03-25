@@ -18,3 +18,18 @@ for k = 2:length(t)
     p.YData = S(k,1);
     drawnow
 end
+
+
+%%
+clc
+close all
+clear variables
+
+I = imread('./graph.jpg');
+gray_I = rgb2gray(I);
+
+figure(1)
+imshow(gray_I, [])
+% d = imdistline;
+
+[centers, radii] = imfindcircles(gray_I,[100,170],'ObjectPolarity','dark','Sensitivity',0.95);
