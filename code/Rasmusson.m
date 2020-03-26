@@ -4,13 +4,6 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = Rasmusson(holding_p, holding_t, P1,
    [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
 end
 
-function [algebraicVariableCount] = getAlgebraicVariableCount() 
-    % Used later when setting a global variable with the number of algebraic variables.
-    % There are a total of 41 entries in each of the rate and state variable arrays.
-    % There are a total of 73 entries in the constant variable array.
-    algebraicVariableCount =72;
-end
-
 function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % Create ALGEBRAIC of correct size
     global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
@@ -30,146 +23,6 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     % Compute algebraic variables
     [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
     ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
-end
-
-function [STATES, CONSTANTS] = initConsts()
-    CONSTANTS = []; STATES = [];
-
-    % Table 8. Initial conditions
-    STATES(:,1) = -82.4202;  % V; Membrane potential:mV
-    STATES(:,2) = 0.115001;  % Cai; Myoplasmic Ca+ concentration:uM
-    STATES(:,3) = 0.115001;  % Cass; Subspace SR Ca+ concentration:uM
-    STATES(:,4) = 1299.5;  % CaJSR; JSR Ca+ concentration:uM
-    STATES(:,5) = 1299.5;  % CaNSR; NSR Ca+ concentration:uM
-    STATES(:,6) = 0;  % PRyR; RyR modulation factor
-    STATES(:,7) = 11.2684;  % LTRPNCa; Concentration Ca+ bound low-affinity troponin-binding sites:uM
-    STATES(:,8) = 125.29;  % HTEPNCa; Concentration Ca+ bound high-affinity troponin-binding sites:uM
-    STATES(:,9) = 0.149102e-4;  % PO1; %Fraction of RyR channels in sate POl
-    STATES(:,10) = 0.951726e-10;  % PO2; %Fraction of RyR channels in sate POl
-    STATES(:,11) = 0.16774e-3;  % PC2; Fraction of RyR channels in sate PC2
-    STATES(:,12) = 0.930308e-18;  % O; L-type Ca+ channel conducting state
-    STATES(:,13) = 0.124216e-3;  % C2; L-type Ca+ channel closed state
-    STATES(:,14) = 0.578679e-8;  % C3; L-type Ca+ channel closed state
-    STATES(:,15) = 0.119816e-12;  % C4; L-type Ca+ channel closed state
-    STATES(:,16) = 0.497923e-18;  % I1; L-type Ca+ channel inacticated state
-    STATES(:,17) = 0.345847e-13;  % I2; L-type Ca+ channel inacticated state
-    STATES(:,18) = 0.185106e-13;  % I3; L-type Ca+ channel inacticated state
-    STATES(:,19) = 14237.1;  % Nai; Myoplasmic Na+ concentration:uM
-    STATES(:,20) = 0.713483e-6;  % ONa; Open state of fast Na+ channel
-    STATES(:,21) = 0.279132e-3;  % CNa1; Closed state of fast Na+ channel
-    STATES(:,22) = 0.020752;  % CNa2; Closed state of fast Na+ channel
-    STATES(:,23) = 0.673345e-6;  % I1Na; Slow inactivated state 1 of fast Na+ channel
-    STATES(:,24) = 0.155787e-8;  % I2Na; Slow inactivated state 2 of fast Na+ channel
-    STATES(:,25) = 0.153176e-3;  % IFNa; Fast inactivated state of fast Na+ channel
-    STATES(:,26) = 0.0113879;  % ICNa2; Cloesd-inactivated state of fast Na+ channel
-    STATES(:,27) = 0.34278;  % ICNa3; Cloesd-inactivated state of fast Na+ channel
-    STATES(:,28) = 143720;  % Ki; Myoplasmic K+ concentration:uM
-    STATES(:,29) = 0.265563e-2;  % ato_f; Gating variable for transient outward K+ current
-    STATES(:,30) = 0.999977;  % ito_f; Gating variable for transient outward K+ current
-    STATES(:,31) = 0.417069e-3;  % ato_s; Gating variable for transient outward K+ current
-    STATES(:,32) = 0.998543;  % ito_s; Gating variable for transient outward K+ current
-    STATES(:,33) = 0.262753e-3;  % nKs; Gating variable for slow delayed-rectifier K+ current
-    STATES(:,34) = 0.417069e-3;  % aur; Gating variable for ultrarapidly activating delayed-rectifier K+ current
-    STATES(:,35) = 0.998543;  % iur; Gating variable for ultrarapidly activating delayed-rectifier K+ current
-    STATES(:,36) = 0.417069e-3;  % aKss; Gating variable for noninactivating steady-state K+ current
-    STATES(:,37) = 1;  % iKss; Gating variable for noninactivating steady-state K+ current
-    STATES(:,38) = 0.175298e-3;  % OK; mERG channel open state
-    STATES(:,39) = 0.992513e-3;  % CK1; mERG channel closed state
-    STATES(:,40) = 0.641229e-3;  % CK2; mERG channel closed state
-    STATES(:,41) = 0.319129e-4;  % IK; mERG channel inactivated state
-    
-    % Table 2. Cell geometry parameters
-    CONSTANTS(:,2) = 25.84e-6;  % Vmyo; Myoplasmic volume:ul
-    CONSTANTS(:,3) = 0.12e-6;  % VJS; Juncional SR volume:ul
-    CONSTANTS(:,4) = 2.098e-6;  % VNSR; Network SR volume:ul
-    CONSTANTS(:,5) = 1.485e-9;  % Vss; Subspace volume:ul
-    CONSTANTS(:,6) = 1.534e-4;  % Acap; Capacitive membrane area:cm^2
-    
-    % Table 3. Extracellular ion concentrations
-    CONSTANTS(:,7) = 5400;  % Ko; Exracellular K+ concentration:uM
-    CONSTANTS(:,8) = 140000;  % Nao; Exracellular Na+ concentration:uM
-    CONSTANTS(:,9) = 1800;  % Cao; Exracellular Ca+ concentration:uM
-    
-    % Table 4. SR parameters
-    CONSTANTS(:,26) = 4.5;  % nu1; Maximum RyR channel Ca+ permeability:ms^-1
-    CONSTANTS(:,28) = 1.74e-5;  % nu2; Ca+ leak rate constant from the NSR:ms^-1
-    CONSTANTS(:,27) = 20;  % tautr; Time constant for transfer from NSR to JSR:ms
-    CONSTANTS(:,29) = 8;  % tauxfer; Time constant for transfer from subspace to myoplasm:ms
-    CONSTANTS(:,30) = 0.45;  % nu3; SR Ca+-ATPase maximum pump rate:uM/ms
-    CONSTANTS(:,31) = 0.5;  % Km_up; Half-saturation constant for SR Ca+-ATPase pump:uM
-    CONSTANTS(:,35) = 0.006075;  % ka1; RyR Pc1-Po1 rate constant:uM^-4/ms
-    CONSTANTS(:,36) = 0.07125;  % ka2; RyR Po1-Pc1 rate constant:ms^-1
-    CONSTANTS(:,37) = 0.00405;  % kb1; RyR Po1-Po2 rate constant:uM^-3/ms
-    CONSTANTS(:,38) = 0.965;  % kb2; RyR Po2-Po1 rate constant:ms^-1
-    CONSTANTS(:,39) = 0.009;  % kc1; RyR Po1-Pc2 rate constant:ms^-1
-    CONSTANTS(:,40) = 0.0008;  % kc2; RyR Pc2-Po1 rate constant:ms^-1
-    CONSTANTS(:,41) = 3;  % m; RyR Ca+ cooperativity parameter Po1-Po2
-    CONSTANTS(:,42) = 4;  % n; RyR Ca+ cooperativity parameter Pc1-Po1
-    
-    % Table 5. L-type Ca+ channel parameters
-    CONSTANTS(:,44) = 0.1729;  % GCaL; Specific maximum conductivity for L-type Ca+ channel:mS/uF
-    CONSTANTS(:,43) = 63;  % ECa; Reversal potential for L-type Ca+ channel:mV
-    CONSTANTS(:,46) = 0.23324;  % Kpc_max; Maximum time constant for Ca+-induced inactivation:ms^-1
-    CONSTANTS(:,47) = 20;  % Kpc_half; Half-saturation constant for Ca+-induced inactivation:uM
-    CONSTANTS(:,45) = 0.0005;  % Kpcb; Voltage-insensitive rate constant for inactivation:ms^-1
-    CONSTANTS(:,34) = 7;  % ICaL_max; Normalization constant for L-type Ca+ current:pA/pF 
-    
-    % Table 6. Buffering parameters
-    CONSTANTS(:,32) = 70;  % LTRPN_tot; Total myoplasmic troponin low-affinity site concentration:uM
-    CONSTANTS(:,33) = 140;  % HTRPN_tot; Total myoplasmic troponin high-affinity site concentration:uM
-    CONSTANTS(:,22) = 0.00237;  % khtrpn1; Ca+ on rate constant for troponin high-affinity sites:uM^-1/ms
-    CONSTANTS(:,23) = 3.2e-5;  % khtrpn2; Ca+ off rate constant for troponin high-affinity sites:ms^-1
-    CONSTANTS(:,24) = 0.0327;  % kltrpn1; Ca+ on rate constant for troponin low-affinity sites:uM^-1/ms
-    CONSTANTS(:,25) = 0.0196;  % kltrpn2; Ca+ off rate constant for troponin low-affinity sites:ms^-1
-    CONSTANTS(:,18) = 50;  % CMDN_tot; Total myoplasmic calmodulin concentration:uM
-    CONSTANTS(:,19) = 15000;  % CSQN_tot; Total junctional SR calsequestrin concentration:uM
-    CONSTANTS(:,20) = 0.238;  % Km_CMDN; Ca+ half-saturaion constant for calmodulin:uM
-    CONSTANTS(:,21) = 800;  % Km_CSQN; Ca+ half-saturaion constant for calsequestrin:uM
-    
-    % Table 7. Membrane current parameters
-    CONSTANTS(:,12) = 96.5;  % F; Faraday constant:C/mmol
-    CONSTANTS(:,11) = 298;  % T; Absolute temperature:K
-    CONSTANTS(:,10) = 8.314;  % R; Ideal gas constant:J*mol^-1*K^-1
-    CONSTANTS(:,50) = 292.8;  % kNaCa; Scaling factor of Na+/Ca+ exchange:pA/pF
-    CONSTANTS(:,51) = 87500;  % Km_Na; Na+ half-saturation constant for Na+/Ca+ exchange:uM
-    CONSTANTS(:,52) = 1380;  %  Km_Ca; Ca+ half-saturation constant for Na+/Ca+ exchange:uM
-    CONSTANTS(:,53) = 0.1;  % ksat; Na+/Ca+ exchange saaturation factor at very negative potentials
-    CONSTANTS(:,54) = 0.35;  % yita; Contals voltage dependence of Na+/Ca+ exchange
-    CONSTANTS(:,66) = 0.88;  % INaK_max; Maximum Na+/K+ exchange current:pA/pF 
-    CONSTANTS(:,67) = 21000;  % Km_Nai; Na+ half-saturation constant for Na+/K+ exchange currant:uM
-    CONSTANTS(:,68) = 1500;  % Km_Ko; K+ half-saturation constant for Na+/K+ exchange currant:uM
-    CONSTANTS(:,48) = 1;  % Ip_Ca_max; Maximun Ca+ pump current:pA/pF
-    CONSTANTS(:,49) = 0.5;  % Km_p_Ca; Ca+ half-saturation constant for Ca+pump current:uM
-    CONSTANTS(:,55) = 0.000367;  % GCab; Maximun background Ca+ current conductance:mS/uF
-    CONSTANTS(:,56) = 13;  % GNa; Maximun fast Na+ current conductance:mS/uF
-    CONSTANTS(:,57) = 0.0026;  % GNab; Maximun background Na+ current conductance:mS/uF
-    CONSTANTS(:,60) = 0.00575;  % GKs; Maximum slow delayed-rectifier K+ current conductance:mS/uF
-    
-    % Table 7. Parameters for apex
-    CONSTANTS(:,58) = 0.4067;  % GKtof; Maximum transient outward K+ current conductance(apex):mS/uF
-    CONSTANTS(:,59) = 0;  % GKtos; Maximum transient outward K+ current conductance(apex):mS/uF
-    CONSTANTS(:,61) = 0.16;  % GKur; Maximum ultrarapidly delayed-rectifier K+ current conductance(apex):mS/uF
-    CONSTANTS(:,62) = 0.05;  % GKss; Maximum noninactivating steady-state K+ current conductance(apex):mS/uF
-    
-    % Table 7. Membrane current parameters
-    CONSTANTS(:,63) = 0.078;  % GKr; Maximum rapid delayed-rectifier K+ current conductance:mS/uF
-    CONSTANTS(:,65) = 0.023761;  % kf; Rate constant for rapid delayed-rectifier K+ current:ms^-1
-    CONSTANTS(:,64) = 0.036778;  % kb; Rate constant for rapid delayed-rectifier K+ current:ms^-1
-    CONSTANTS(:,69) = 10;  % GCl_Ca; Maximum Ca+-activated Cl- current conductance:mS/uF
-    CONSTANTS(:,71) = 10;  % Km_Cl; Half-saturaon constant for Ca+-activated Cl- current:uM
-    CONSTANTS(:,70) = -40;  % ECl; Reversal potential for Ca+-activated Cl- current:mV
-    
-    % Parameters not in the Simulink model
-    CONSTANTS(:,1) = 1;
-    CONSTANTS(:,13) = 20;
-    CONSTANTS(:,14) = 100000;
-    CONSTANTS(:,15) = 71.43;
-    CONSTANTS(:,16) = 0.5;
-    CONSTANTS(:,17) = -80;
-    CONSTANTS(:,72) =  (1.00000./7.00000).*(exp(CONSTANTS(:,8)./67300.0) - 1.00000);
-    CONSTANTS(:,72) = 0.00000;
-
-    if (isempty(STATES)), warning('Initial values for states not set'); end
 end
 
 function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2)
@@ -518,4 +371,151 @@ function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t, P2)
     else
         VC = P2;
     end
+end
+
+function [algebraicVariableCount] = getAlgebraicVariableCount() 
+    % Used later when setting a global variable with the number of algebraic variables.
+    % There are a total of 41 entries in each of the rate and state variable arrays.
+    % There are a total of 73 entries in the constant variable array.
+    algebraicVariableCount =72;
+end
+
+function [STATES, CONSTANTS] = initConsts()
+    CONSTANTS = []; STATES = [];
+
+    % Table 8. Initial conditions
+    STATES(:,1) = -82.4202;  % V; Membrane potential:mV
+    STATES(:,2) = 0.115001;  % Cai; Myoplasmic Ca+ concentration:uM
+    STATES(:,3) = 0.115001;  % Cass; Subspace SR Ca+ concentration:uM
+    STATES(:,4) = 1299.5;  % CaJSR; JSR Ca+ concentration:uM
+    STATES(:,5) = 1299.5;  % CaNSR; NSR Ca+ concentration:uM
+    STATES(:,6) = 0;  % PRyR; RyR modulation factor
+    STATES(:,7) = 11.2684;  % LTRPNCa; Concentration Ca+ bound low-affinity troponin-binding sites:uM
+    STATES(:,8) = 125.29;  % HTEPNCa; Concentration Ca+ bound high-affinity troponin-binding sites:uM
+    STATES(:,9) = 0.149102e-4;  % PO1; %Fraction of RyR channels in sate POl
+    STATES(:,10) = 0.951726e-10;  % PO2; %Fraction of RyR channels in sate POl
+    STATES(:,11) = 0.16774e-3;  % PC2; Fraction of RyR channels in sate PC2
+    STATES(:,12) = 0.930308e-18;  % O; L-type Ca+ channel conducting state
+    STATES(:,13) = 0.124216e-3;  % C2; L-type Ca+ channel closed state
+    STATES(:,14) = 0.578679e-8;  % C3; L-type Ca+ channel closed state
+    STATES(:,15) = 0.119816e-12;  % C4; L-type Ca+ channel closed state
+    STATES(:,16) = 0.497923e-18;  % I1; L-type Ca+ channel inacticated state
+    STATES(:,17) = 0.345847e-13;  % I2; L-type Ca+ channel inacticated state
+    STATES(:,18) = 0.185106e-13;  % I3; L-type Ca+ channel inacticated state
+    STATES(:,19) = 14237.1;  % Nai; Myoplasmic Na+ concentration:uM
+    STATES(:,20) = 0.713483e-6;  % ONa; Open state of fast Na+ channel
+    STATES(:,21) = 0.279132e-3;  % CNa1; Closed state of fast Na+ channel
+    STATES(:,22) = 0.020752;  % CNa2; Closed state of fast Na+ channel
+    STATES(:,23) = 0.673345e-6;  % I1Na; Slow inactivated state 1 of fast Na+ channel
+    STATES(:,24) = 0.155787e-8;  % I2Na; Slow inactivated state 2 of fast Na+ channel
+    STATES(:,25) = 0.153176e-3;  % IFNa; Fast inactivated state of fast Na+ channel
+    STATES(:,26) = 0.0113879;  % ICNa2; Cloesd-inactivated state of fast Na+ channel
+    STATES(:,27) = 0.34278;  % ICNa3; Cloesd-inactivated state of fast Na+ channel
+    STATES(:,28) = 143720;  % Ki; Myoplasmic K+ concentration:uM
+    STATES(:,29) = 0.265563e-2;  % ato_f; Gating variable for transient outward K+ current
+    STATES(:,30) = 0.999977;  % ito_f; Gating variable for transient outward K+ current
+    STATES(:,31) = 0.417069e-3;  % ato_s; Gating variable for transient outward K+ current
+    STATES(:,32) = 0.998543;  % ito_s; Gating variable for transient outward K+ current
+    STATES(:,33) = 0.262753e-3;  % nKs; Gating variable for slow delayed-rectifier K+ current
+    STATES(:,34) = 0.417069e-3;  % aur; Gating variable for ultrarapidly activating delayed-rectifier K+ current
+    STATES(:,35) = 0.998543;  % iur; Gating variable for ultrarapidly activating delayed-rectifier K+ current
+    STATES(:,36) = 0.417069e-3;  % aKss; Gating variable for noninactivating steady-state K+ current
+    STATES(:,37) = 1;  % iKss; Gating variable for noninactivating steady-state K+ current
+    STATES(:,38) = 0.175298e-3;  % OK; mERG channel open state
+    STATES(:,39) = 0.992513e-3;  % CK1; mERG channel closed state
+    STATES(:,40) = 0.641229e-3;  % CK2; mERG channel closed state
+    STATES(:,41) = 0.319129e-4;  % IK; mERG channel inactivated state
+    
+    % Table 2. Cell geometry parameters
+    CONSTANTS(:,2) = 25.84e-6;  % Vmyo; Myoplasmic volume:ul
+    CONSTANTS(:,3) = 0.12e-6;  % VJS; Juncional SR volume:ul
+    CONSTANTS(:,4) = 2.098e-6;  % VNSR; Network SR volume:ul
+    CONSTANTS(:,5) = 1.485e-9;  % Vss; Subspace volume:ul
+    CONSTANTS(:,6) = 1.534e-4;  % Acap; Capacitive membrane area:cm^2
+    
+    % Table 3. Extracellular ion concentrations
+    CONSTANTS(:,7) = 5400;  % Ko; Exracellular K+ concentration:uM
+    CONSTANTS(:,8) = 140000;  % Nao; Exracellular Na+ concentration:uM
+    CONSTANTS(:,9) = 1800;  % Cao; Exracellular Ca+ concentration:uM
+    
+    % Table 4. SR parameters
+    CONSTANTS(:,26) = 4.5;  % nu1; Maximum RyR channel Ca+ permeability:ms^-1
+    CONSTANTS(:,28) = 1.74e-5;  % nu2; Ca+ leak rate constant from the NSR:ms^-1
+    CONSTANTS(:,27) = 20;  % tautr; Time constant for transfer from NSR to JSR:ms
+    CONSTANTS(:,29) = 8;  % tauxfer; Time constant for transfer from subspace to myoplasm:ms
+    CONSTANTS(:,30) = 0.45;  % nu3; SR Ca+-ATPase maximum pump rate:uM/ms
+    CONSTANTS(:,31) = 0.5;  % Km_up; Half-saturation constant for SR Ca+-ATPase pump:uM
+    CONSTANTS(:,35) = 0.006075;  % ka1; RyR Pc1-Po1 rate constant:uM^-4/ms
+    CONSTANTS(:,36) = 0.07125;  % ka2; RyR Po1-Pc1 rate constant:ms^-1
+    CONSTANTS(:,37) = 0.00405;  % kb1; RyR Po1-Po2 rate constant:uM^-3/ms
+    CONSTANTS(:,38) = 0.965;  % kb2; RyR Po2-Po1 rate constant:ms^-1
+    CONSTANTS(:,39) = 0.009;  % kc1; RyR Po1-Pc2 rate constant:ms^-1
+    CONSTANTS(:,40) = 0.0008;  % kc2; RyR Pc2-Po1 rate constant:ms^-1
+    CONSTANTS(:,41) = 3;  % m; RyR Ca+ cooperativity parameter Po1-Po2
+    CONSTANTS(:,42) = 4;  % n; RyR Ca+ cooperativity parameter Pc1-Po1
+    
+    % Table 5. L-type Ca+ channel parameters
+    CONSTANTS(:,44) = 0.1729;  % GCaL; Specific maximum conductivity for L-type Ca+ channel:mS/uF
+    CONSTANTS(:,43) = 63;  % ECa; Reversal potential for L-type Ca+ channel:mV
+    CONSTANTS(:,46) = 0.23324;  % Kpc_max; Maximum time constant for Ca+-induced inactivation:ms^-1
+    CONSTANTS(:,47) = 20;  % Kpc_half; Half-saturation constant for Ca+-induced inactivation:uM
+    CONSTANTS(:,45) = 0.0005;  % Kpcb; Voltage-insensitive rate constant for inactivation:ms^-1
+    CONSTANTS(:,34) = 7;  % ICaL_max; Normalization constant for L-type Ca+ current:pA/pF 
+    
+    % Table 6. Buffering parameters
+    CONSTANTS(:,32) = 70;  % LTRPN_tot; Total myoplasmic troponin low-affinity site concentration:uM
+    CONSTANTS(:,33) = 140;  % HTRPN_tot; Total myoplasmic troponin high-affinity site concentration:uM
+    CONSTANTS(:,22) = 0.00237;  % khtrpn1; Ca+ on rate constant for troponin high-affinity sites:uM^-1/ms
+    CONSTANTS(:,23) = 3.2e-5;  % khtrpn2; Ca+ off rate constant for troponin high-affinity sites:ms^-1
+    CONSTANTS(:,24) = 0.0327;  % kltrpn1; Ca+ on rate constant for troponin low-affinity sites:uM^-1/ms
+    CONSTANTS(:,25) = 0.0196;  % kltrpn2; Ca+ off rate constant for troponin low-affinity sites:ms^-1
+    CONSTANTS(:,18) = 50;  % CMDN_tot; Total myoplasmic calmodulin concentration:uM
+    CONSTANTS(:,19) = 15000;  % CSQN_tot; Total junctional SR calsequestrin concentration:uM
+    CONSTANTS(:,20) = 0.238;  % Km_CMDN; Ca+ half-saturaion constant for calmodulin:uM
+    CONSTANTS(:,21) = 800;  % Km_CSQN; Ca+ half-saturaion constant for calsequestrin:uM
+    
+    % Table 7. Membrane current parameters
+    CONSTANTS(:,12) = 96.5;  % F; Faraday constant:C/mmol
+    CONSTANTS(:,11) = 298;  % T; Absolute temperature:K
+    CONSTANTS(:,10) = 8.314;  % R; Ideal gas constant:J*mol^-1*K^-1
+    CONSTANTS(:,50) = 292.8;  % kNaCa; Scaling factor of Na+/Ca+ exchange:pA/pF
+    CONSTANTS(:,51) = 87500;  % Km_Na; Na+ half-saturation constant for Na+/Ca+ exchange:uM
+    CONSTANTS(:,52) = 1380;  %  Km_Ca; Ca+ half-saturation constant for Na+/Ca+ exchange:uM
+    CONSTANTS(:,53) = 0.1;  % ksat; Na+/Ca+ exchange saaturation factor at very negative potentials
+    CONSTANTS(:,54) = 0.35;  % yita; Contals voltage dependence of Na+/Ca+ exchange
+    CONSTANTS(:,66) = 0.88;  % INaK_max; Maximum Na+/K+ exchange current:pA/pF 
+    CONSTANTS(:,67) = 21000;  % Km_Nai; Na+ half-saturation constant for Na+/K+ exchange currant:uM
+    CONSTANTS(:,68) = 1500;  % Km_Ko; K+ half-saturation constant for Na+/K+ exchange currant:uM
+    CONSTANTS(:,48) = 1;  % Ip_Ca_max; Maximun Ca+ pump current:pA/pF
+    CONSTANTS(:,49) = 0.5;  % Km_p_Ca; Ca+ half-saturation constant for Ca+pump current:uM
+    CONSTANTS(:,55) = 0.000367;  % GCab; Maximun background Ca+ current conductance:mS/uF
+    CONSTANTS(:,56) = 13;  % GNa; Maximun fast Na+ current conductance:mS/uF
+    CONSTANTS(:,57) = 0.0026;  % GNab; Maximun background Na+ current conductance:mS/uF
+    CONSTANTS(:,60) = 0.00575;  % GKs; Maximum slow delayed-rectifier K+ current conductance:mS/uF
+    
+    % Table 7. Parameters for apex
+    CONSTANTS(:,58) = 0.4067;  % GKtof; Maximum transient outward K+ current conductance(apex):mS/uF
+    CONSTANTS(:,59) = 0;  % GKtos; Maximum transient outward K+ current conductance(apex):mS/uF
+    CONSTANTS(:,61) = 0.16;  % GKur; Maximum ultrarapidly delayed-rectifier K+ current conductance(apex):mS/uF
+    CONSTANTS(:,62) = 0.05;  % GKss; Maximum noninactivating steady-state K+ current conductance(apex):mS/uF
+    
+    % Table 7. Membrane current parameters
+    CONSTANTS(:,63) = 0.078;  % GKr; Maximum rapid delayed-rectifier K+ current conductance:mS/uF
+    CONSTANTS(:,65) = 0.023761;  % kf; Rate constant for rapid delayed-rectifier K+ current:ms^-1
+    CONSTANTS(:,64) = 0.036778;  % kb; Rate constant for rapid delayed-rectifier K+ current:ms^-1
+    CONSTANTS(:,69) = 10;  % GCl_Ca; Maximum Ca+-activated Cl- current conductance:mS/uF
+    CONSTANTS(:,71) = 10;  % Km_Cl; Half-saturaon constant for Ca+-activated Cl- current:uM
+    CONSTANTS(:,70) = -40;  % ECl; Reversal potential for Ca+-activated Cl- current:mV
+    
+    % Parameters not in the Simulink model
+    CONSTANTS(:,1) = 1;
+    CONSTANTS(:,13) = 20;
+    CONSTANTS(:,14) = 100000;
+    CONSTANTS(:,15) = 71.43;
+    CONSTANTS(:,16) = 0.5;
+    CONSTANTS(:,17) = -80;
+    CONSTANTS(:,72) =  (1.00000./7.00000).*(exp(CONSTANTS(:,8)./67300.0) - 1.00000);
+    CONSTANTS(:,72) = 0.00000;
+
+    if (isempty(STATES)), warning('Initial values for states not set'); end
 end
