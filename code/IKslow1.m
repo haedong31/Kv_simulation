@@ -1,7 +1,7 @@
 
 function [t, STATES, ALGEBRAIC, CONSTANTS] = IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
+   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X);
 end
 
 function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
@@ -21,8 +21,8 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X), tspan, INIT_STATES, options);
 
     % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
-    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
+    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X);
+    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2, X);
 end
 
 function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X)
