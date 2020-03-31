@@ -1,10 +1,10 @@
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = Rasmusson(holding_p, holding_t, P1, P1_t, P2, P2_t)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
+   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X);
 end
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
     % Create ALGEBRAIC of correct size
     global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
     
@@ -18,14 +18,14 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
 
     % Solve model with ODE solver
-    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2), tspan, INIT_STATES, options);
+    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X), tspan, INIT_STATES, options);
 
     % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
-    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
+    [~, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X);
+    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2, X);
 end
 
-function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2)
+function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X)
     global algebraicVariableCount;
     statesSize = size(STATES);
     statesColumnCount = statesSize(2);
@@ -68,7 +68,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A70; ito_f
     RATES(:,30) =  ALGEBRAIC(:,6).*(1.00000 - STATES(:,30)) -  ALGEBRAIC(:,16).*STATES(:,30);
     % A78; a_ss
-    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+22.5000)./7.70000));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+X(1))./7.70000));
     % A80; tau_tas
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     % A76; ato_s
@@ -94,7 +94,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A89; iur
     RATES(:,35) = (ALGEBRAIC(:,8) - STATES(:,35))./ALGEBRAIC(:,21);
     % A95; tau_Kss
-    ALGEBRAIC(:,22) =  39.3000.*exp(  - 0.0862000.*ALGEBRAIC(:,72))+13.1700;
+    ALGEBRAIC(:,22) =  39.3000.*exp(  X(2).*ALGEBRAIC(:,72))+X(3);
     % A93; aKss
     RATES(:,36) = (ALGEBRAIC(:,7) - STATES(:,36))./ALGEBRAIC(:,22);
     % A104; alpha_a1
@@ -252,7 +252,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A87; I_kUR
     ALGEBRAIC(:,65) =  CONSTANTS(:,61).*STATES(:,34).*STATES(:,35).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
     % A92; I_Kss
-    ALGEBRAIC(:,66) =  CONSTANTS(:,62).*STATES(:,36).*STATES(:,37).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
+    ALGEBRAIC(:,66) =  CONSTANTS(:,62).*STATES(:,36).*X(4).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
     % A96; I_Kr
     ALGEBRAIC(:,67) =  CONSTANTS(:,63).*STATES(:,38).*(ALGEBRAIC(:,72) -  (( CONSTANTS(:,10).*CONSTANTS(:,11))./CONSTANTS(:,12)).*log(( 0.980000.*CONSTANTS(:,7)+ 0.0200000.*CONSTANTS(:,8))./( 0.980000.*STATES(:,28)+ 0.0200000.*STATES(:,19))));
     % A66; Ki
@@ -265,10 +265,10 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     ALGEBRAIC(:,71) =  (( CONSTANTS(:,69).*ALGEBRAIC(:,70).*STATES(:,2))./(STATES(:,2)+CONSTANTS(:,71))).*(ALGEBRAIC(:,72) - CONSTANTS(:,70));
     % A1; V
     RATES(:,1) =  0;
-    RATES = RATES';
+   RATES = RATES';
 end
 
-function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2)
+function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2, X)
     ALGEBRAIC(:,72) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
 
     ALGEBRAIC(:,2) = 1.00000 - (STATES(:,11)+STATES(:,9)+STATES(:,10));
@@ -276,7 +276,7 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,15) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,72)+30.0000));
     ALGEBRAIC(:,6) = ( 0.000152000.*exp( - (ALGEBRAIC(:,72)+13.5000)./7.00000))./( 0.00670830.*exp( - (ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
     ALGEBRAIC(:,16) = ( 0.000950000.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000))./( 0.0513350.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
-    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+22.5000)./7.70000));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+X(1))./7.70000));
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
     ALGEBRAIC(:,18) = 270.000+1050.00./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
@@ -284,7 +284,7 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,19) =  9.53333e-05.*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+26.5000));
     ALGEBRAIC(:,20) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     ALGEBRAIC(:,21) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
-    ALGEBRAIC(:,22) =  39.3000.*exp(  - 0.0862000.*ALGEBRAIC(:,72))+13.1700;
+    ALGEBRAIC(:,22) =  39.3000.*exp(  X(2).*ALGEBRAIC(:,72))+X(3);
     ALGEBRAIC(:,11) =  0.0137330.*exp( 0.0381980.*ALGEBRAIC(:,72));
     ALGEBRAIC(:,24) =  6.89000e-05.*exp(  - 0.0417800.*ALGEBRAIC(:,72));
     ALGEBRAIC(:,3) = 1.00000 - (STATES(:,12)+STATES(:,13)+STATES(:,14)+STATES(:,15)+STATES(:,16)+STATES(:,17)+STATES(:,18));
@@ -337,7 +337,7 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,63) = ( (( 0.293800.*CONSTANTS(:,7))./(CONSTANTS(:,7)+210.000)).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60)))./(1.00000+exp( 0.0896000.*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60))));
     ALGEBRAIC(:,64) =  CONSTANTS(:,60).*power(STATES(:,33), 2.00000).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
     ALGEBRAIC(:,65) =  CONSTANTS(:,61).*STATES(:,34).*STATES(:,35).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
-    ALGEBRAIC(:,66) =  CONSTANTS(:,62).*STATES(:,36).*STATES(:,37).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
+    ALGEBRAIC(:,66) =  CONSTANTS(:,62).*STATES(:,36).*X(4).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
     ALGEBRAIC(:,67) =  CONSTANTS(:,63).*STATES(:,38).*(ALGEBRAIC(:,72) -  (( CONSTANTS(:,10).*CONSTANTS(:,11))./CONSTANTS(:,12)).*log(( 0.980000.*CONSTANTS(:,7)+ 0.0200000.*CONSTANTS(:,8))./( 0.980000.*STATES(:,28)+ 0.0200000.*STATES(:,19))));
     ALGEBRAIC(:,1) = piecewise({t>=CONSTANTS(:,13)&t<=CONSTANTS(:,14)&(t - CONSTANTS(:,13)) -  floor((t - CONSTANTS(:,13))./CONSTANTS(:,15)).*CONSTANTS(:,15)<=CONSTANTS(:,16), CONSTANTS(:,17) }, 0.00000);
     ALGEBRAIC(:,70) = 0.200000./(1.00000+exp( - (ALGEBRAIC(:,72) - 46.7000)./7.80000));
