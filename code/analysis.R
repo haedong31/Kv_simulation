@@ -135,7 +135,7 @@ p2 <- ga_Ikslow1_2 %>%
 ggarrange(p1, p2, nrow = 1, ncol = 2)
 
 p1 <- ga_Ikslow2 %>% 
-  pivot_longer(colnames(ga_Ikslow1_2)[c(1, 4)], names_to = 'param', values_to = 'value') %>% 
+  pivot_longer(c(1, 4), names_to = 'param', values_to = 'value') %>% 
   ggplot(aes(x = param, y = value, color = group)) +
   geom_boxplot() +
   xlab('Tuning Parameters') +
@@ -143,7 +143,7 @@ p1 <- ga_Ikslow2 %>%
   ggtitle('Ikslow2 Parameters - Genetic Algorithm') +
   theme(plot.title = element_text(hjust = 0.5), legend.position = 'bottom')
 p2 <- ga_Ikslow2 %>% 
-  pivot_longer(colnames(ga_Ikslow1_2)[c(2, 3, 5)], names_to = 'param', values_to = 'value') %>% 
+  pivot_longer(c(2, 3, 5), names_to = 'param', values_to = 'value') %>% 
   ggplot(aes(x = param, y = value, color = group)) +
   geom_boxplot() +
   xlab('Tuning Parameters') +
@@ -153,7 +153,7 @@ p2 <- ga_Ikslow2 %>%
 ggarrange(p1, p2, nrow = 1, ncol = 2)
 
 
-## bar plots with error bars of mean Iss & Ito -----
+## bar plots with error bars -----
 z95 <- qnorm(0.975, mean = 0, sd = 1)
 p1 <- bind_rows(select(k_4barplot, mean_Iss, sem_Iss, group, clf), ga_Iss_4barplot) %>% 
   ggplot(aes(x = clf, y = mean_Iss, fill = group)) +
