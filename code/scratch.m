@@ -102,6 +102,60 @@ load('./results/GA_Ito_ko_10.mat')
 ga_ito_ko = mean(rst, 1);
 load('./results/GA_Ito_wt_10.mat')
 ga_ito_wt = mean(rst, 1);
+raw_trace = readtable('trace.xlsx');
+
+holding_p = -70; %mV
+holding_t = 4.5*1000; %ms
+P1 = 50; %mV
+P1_t = 29.5*1000; % ms
+P2 = -70; % mV
+P2_t = P1_t; % ms
+
+% fit models
+[t1, ~, A1, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_ko(1:4));
+[t2, ~, A2, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_wt(1:4));
+[t3, ~, A3, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_ko(1:6));
+[t4, ~, A4, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_wt(1:6));
+
+% plots
+figure(1)
+plot(raw_trace.time, raw_trace.trace)
+hold on
+plot(t1, A1(:,66))
+plot(t2, A2(:,66))
+hold off
+title('I_{SS}')
+xlabel('Time (sec)')
+ylabel('pA/pF')
+legend('Rasmusson', 'GA KO', 'GA WT')
+axis tight
+
+figure(2)
+plot(raw_trace.time, raw_trace.trace)
+hold on
+plot(t3, A3(:,61)*257.9375)
+plot(t4, A4(:,61)*207.8214)
+hold off
+title('I_{to}')
+xlabel('Time (sec)')
+ylabel('pA/pF')
+legend('Rasmusson', 'GA KO', 'GA WT')
+axis tight
+
+
+%% compare GA-fitted models and the raw traces
+clc
+close all
+clear variables
+
+load('./results/GA_Iss_ko_10.mat')
+ga_iss_ko = mean(rst, 1);
+load('./results/GA_Iss_wt_10.mat')
+ga_iss_wt = mean(rst, 1);
+load('./results/GA_Ito_ko_10.mat')
+ga_ito_ko = mean(rst, 1);
+load('./results/GA_Ito_wt_10.mat')
+ga_ito_wt = mean(rst, 1);
 
 holding_p = -70; %mV
 holding_t = 4.5; %ms
@@ -114,27 +168,3 @@ P2_t = P1_t; % msec
 [t2, ~, A2, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_wt(1:4));
 [t3, ~, A3, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_ko(1:6));
 [t4, ~, A4, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_wt(1:6));
-
-figure(1)
-plot(t, A(:,66))
-hold on
-plot(t1, A1(:,66))
-plot(t2, A2(:,66))
-hold off
-title('I_{SS}')
-xlabel('Time (sec)')
-ylabel('pA/pF')
-legend('Rasmusson', 'GA KO', 'GA WT')
-axis tight
-
-figure(2)
-plot(t, A(:,61))
-hold on
-plot(t3, A3(:,61))
-plot(t4, A4(:,61))
-hold off
-title('I_{to}')
-xlabel('Time (sec)')
-ylabel('pA/pF')
-legend('Rasmusson', 'GA KO', 'GA WT')
-axis tight

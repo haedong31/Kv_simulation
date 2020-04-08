@@ -51,8 +51,17 @@ fig3 %>%
   xlab('Capacitance') +
   ylab('pF') +
   scale_y_continuous(n.breaks = 6)
+fig3 %>% 
+  select(1:6, group) %>%
+  mutate(Peak = Peak * Cap, Iss = Iss * Cap, A1 = A1 * Cap, A2 = A2 * Cap, A3 = A3 *Cap) %>% 
+  rename(IPeak = Peak, IKslow1 = A2, IKslow2 = A1, Ito = A3) %>% 
+  pivot_longer(2:6, names_to = 'measure') %>% 
+  ggplot(aes(x = measure, y = value, fill = group)) +
+  geom_bar(stat = 'identity', position = position_dodge()) +
+  xlab('')
+  ylab('Density (pA/pF)')
 
-
+  
 ## Fig 4 -----
 fig4_bc <- read_excel('./MGAT1_Data_tidy/JMCC/Nav Currents/FF IV 01-11-2018 - 3-22-19 - final.xlsx',
                       range = cell_limits(c(1, 51), c(21, 59)))
