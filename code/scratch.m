@@ -168,3 +168,13 @@ P2_t = P1_t; % msec
 [t2, ~, A2, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_wt(1:4));
 [t3, ~, A3, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_ko(1:6));
 [t4, ~, A4, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_wt(1:6));
+
+
+%% draw raw traces
+plot(trace.time, trace.KO, 'LineWidth', 2)
+hold on
+plot(trace.time, trace.WT, 'LineWidth', 2)
+plot(Itotrace.time, Itotrace.KO, 'LineWidth', 2)
+plot(Itotrace.time, Itotrace.WT, 'LineWidth', 2)
+hold off
+legend('KO', 'WT', 'Ito KO', 'Ito WT')
