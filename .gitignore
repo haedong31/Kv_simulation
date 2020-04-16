@@ -17,6 +17,8 @@
 *.png
 *.zip
 *.csv
+*.xlsx
+**.DS_Store
 
 # History files
 /code/.Rhistory
