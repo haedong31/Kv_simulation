@@ -1,6 +1,5 @@
 import csv
 import numpy as np
-import matlab.engine
 import matplotlib.pyplot as plt
 
 
@@ -55,18 +54,6 @@ def evolve(chroms, fits, N1, N2):
 
 
 ## import data -----
-holding_p = -70
-holding_t = 4.5 
-P1 = 50
-P1_t = 29.5 
-P2 = 50
-P2_t = 29.5 
-X = matlab.double([0.01176, -0.0631, 0.038198, -0.04178, 0.023391, 5.0, -0.03268, 5.0])
-
-eng = matlab.engine.start_matlab()
-outputs = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X, nargout=4)
-
-
 ssa = list()
 voltages = list()
 num_pts = 0
