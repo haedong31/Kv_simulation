@@ -15,7 +15,7 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     tspan = [0, P2_t];
 
     % Set numerical accuracy options for ODE solver
-    options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
+    options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 0.001);
 
     % Solve model with ODE solver
     [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X), tspan, INIT_STATES, options);
