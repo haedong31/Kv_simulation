@@ -16,14 +16,14 @@ P2 = 50; % mV
 P2_t = 29.5; % sec
 
 % GA parameters
-% X = [0.01176, -0.0631, 0.038198, -0.04178, 0.023391, 5.0, -0.03268, 5.0]
-num_vars = 8;
-lower_bd = [-0.1, -0.1, -0.1, -0.1, -0.1, -10, -0.1, -10];
-upper_bd = [0.1, 0.1, 0.1, 0.1, 0.1, 20, 0.1, 20];
+% X = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000]
+num_vars = 7;
+lower_bd = [-22.5, -2.058, -45.2, -1200.0, -45.0, -0.5, -100.0];
+upper_bd = [67.5, 6.174, 135.6, 3600.0, 90.0, 1.5, 400.0];
 fit_fn = @(X) IKslow1_fitness(X,IKslow1_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
 
 % run GA
-rst = zeros(10, 10);
+rst = zeros(10, 9);
 for i=1:10
     fprintf('### Iter %i / 10', i)
     
@@ -33,11 +33,11 @@ for i=1:10
     [~,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,X);
     
     % fitted value 
-    fitted_IKslow1 = A(:,67);
+    fitted_IKslow1 = A(:,65);
     
     % save the results
-    file_path = sprintf('./GA_IKslow1_2_ko_%i.mat', i);
-    rst(i,:) = [X, fval, fitted_IKslow1(end)];
+    file_path = sprintf('./GA_IKslow1_ko_%i.mat', i);
+    rst(i,:) = [X, fval, max(fitted_IKslow1)];
     save(file_path, 'rst');
     disp(rst)
 end
@@ -51,19 +51,19 @@ IKslow1_wt = K_wt.A2;
 holding_p = -70; % mV
 holding_t = 4.5; % sec
 P1 = 50; % mV
-P1_t = 2900.5; % sec
+P1_t = 29.5; % sec
 P2 = 50; % mV
-P2_t = 2900.5; % sec
+P2_t = 29.5; % sec
 
 % GA parameters
-% X = [0.01176, -0.0631, 0.038198, -0.04178, 0.023391, 5.0, -0.03268, 5.0]
-num_vars = 8;
-lower_bd = [-0.1, -0.1, -0.1, -0.1, -0.1, -10, -0.1, -10];
-upper_bd = [0.1, 0.1, 0.1, 0.1, 0.1, 20, 0.1, 20];
-fit_fn = @(X) IKslow1_fitness(X,IKslow1_wt,holding_p,holding_t,P1,P1_t,P2,P2_t);
+% X = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000]
+num_vars = 7;
+lower_bd = [-22.5, -2.058, -45.2, -1200.0, -45.0, -0.5, -100.0];
+upper_bd = [67.5, 6.174, 135.6, 3600.0, 90.0, 1.5, 400.0];
+fit_fn = @(X) IKslow1_fitness(X,IKslow1_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
 
 % run GA
-rst = zeros(10, 10);
+rst = zeros(10, 9);
 for i=1:10
     fprintf('### Iter %i / 10', i)
     
@@ -76,7 +76,7 @@ for i=1:10
     fitted_IKslow1 = A(:,65);
     
     % save the results
-    file_path = sprintf('./GA_IKslow1_2_wt_%i.mat', i);
+    file_path = sprintf('./GA_IKslow1_wt_%i.mat', i);
     rst(i,:) = [X, fval, max(fitted_IKslow1)];
     save(file_path, 'rst');
     disp(rst)
