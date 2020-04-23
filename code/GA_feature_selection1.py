@@ -3,22 +3,24 @@ import numpy as np
 import time
 import matplotlib.pyplot as plt
 
+
 ## global variables -----
-begin_time = time.time()
 holding_p = -70
 holding_t = 4.5 
 P1 = 50
-P1_t = 29.5 
+P1_t = 29.5
 P2 = 50
-P2_t = 29.5 
-X0 = [26.5, 26.5, 26.5, 0.00000481333, 0.0000953333]
+P2_t = P1_t
+X0 = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000]
+idx = 64
 
 eng = matlab.engine.start_matlab()
-outputs = eng.IKslow2(holding_p, holding_t, P1, P1_t, P2, P2_t, matlab.double(X0), nargout=4)
+outputs = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, matlab.double(X0), nargout=4)
 A = np.array(outputs[2]._data).reshape(outputs[2].size[::-1]).T
-IKslow20 = np.max(A[:, 63])
+y0 = np.max(A[:, idx])
+# plt.plot(A[:, idx])
 
-iters = 1000
+iters = 100
 pop_size = 100
 num_elites = 2
 chroms = [None] * (iters+1)
@@ -26,16 +28,17 @@ effs = [None] * (iters+1)
 
 
 ## custom functions -----
-def fitness(y0, chroms):
+def fitness(y0, chroms, idx):
     # |y_hat(i) - y0|
     
     fits = list()
     for i in range(len(chroms)):
         X = matlab.double(chroms[i])
         
-        outputs = eng.IKslow2(holding_p, holding_t, P1, P1_t, P2, P2_t, X, nargout=4)
+        outputs = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X, nargout=4)
         A = np.array(outputs[2]._data).reshape(outputs[2].size[::-1]).T
-        y_hat = np.max(A[:, 63])
+        lnA = np.log(A[:, idx])
+        y_hat = np.max(lnA)
         
         num_sig = sum([1 for elt in chroms[i] if elt == 0.0 or elt == 1.0])
         if num_sig == 0:
@@ -140,24 +143,24 @@ def mutate(candidates, rate, x0, pt):
 
 ## main function -----
 # initialization
-chroms0 = init_pop(pop_size, X0[0:3], X0[3:5], 0.3)
-chroms[0] = chroms0
+chroms = init_pop(pop_size, X0[0:5], X0[5:7], 0.3)
 
 # run GA
 for i in range(iters):
+    begin_time = time.time()
+    
     if (i+1)%10 == 0:
         print(f"### Iter {i+1}/{iters}")
     
-    fits = fitness(IKslow20, chroms[i])
+    fits = fitness(y0, chroms, idx)
     effs[i] = np.max(fits)
 
-    elites = np.take(chroms[i], elite_idx(fits, num_elites=2), axis=0)
-    co_gen = cross_over(pop_size, num_elites, chroms[i], fits)
-    mutant_gen = mutate(co_gen, 0.01, X0, 2)
-    next_gen = np.vstack((elites, mutant_gen)).tolist()
+    elites = np.take(chroms, elite_idx(fits, num_elites=2), axis=0)
+    cross_over_gen = cross_over(pop_size, num_elites, chroms, fits)
+    mutate_gen = mutate(cross_over_gen, 0.01, X0, 4)
+    chroms = np.vstack((elites, mutate_gen)).tolist()
     
-    chroms[i+1] = next_gen
-    
-fits = fitness(IKslow20, chroms[iters])
-effs[iters] = np.max(fits)
-end_time = time.time()
+    end_time = time.time()
+    print(end_time - begin_time)
+
+fits = fitness(y0, chroms, idx)
