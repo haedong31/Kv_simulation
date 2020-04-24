@@ -1,10 +1,10 @@
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = IKslow2(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = RasmussonUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X);
+   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
 end
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t, X)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % Create ALGEBRAIC of correct size
     global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
     
@@ -18,14 +18,14 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
 
     % Solve model with ODE solver
-    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X), tspan, INIT_STATES, options);
+    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2), tspan, INIT_STATES, options);
 
     % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X);
-    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2, X);
+    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
+    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
 end
 
-function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2, X)
+function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2)
     global algebraicVariableCount;
     statesSize = size(STATES);
     statesColumnCount = statesSize(2);
@@ -80,9 +80,9 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A77; ito_s
     RATES(:,32) = (ALGEBRAIC(:,8) - STATES(:,32))./ALGEBRAIC(:,18);
     % A85; alpha_n
-    ALGEBRAIC(:,9) = ( X(4).*(ALGEBRAIC(:,72)+X(1)))./(1.00000 - exp(  - 0.128000.*(ALGEBRAIC(:,72)+X(2))));
+    ALGEBRAIC(:,9) = ( 4.81333e-06.*(ALGEBRAIC(:,72)+26.5000))./(1.00000 - exp(  - 0.128000.*(ALGEBRAIC(:,72)+26.5000)));
     % A86; beta_n
-    ALGEBRAIC(:,19) =  X(5).*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+X(3)));
+    ALGEBRAIC(:,19) =  9.53333e-05.*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+26.5000));
     % A84; nKs
     RATES(:,33) =  ALGEBRAIC(:,9).*(1.00000 - STATES(:,33)) -  ALGEBRAIC(:,19).*STATES(:,33);
     % A90; tau_aur
@@ -268,7 +268,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     RATES = RATES';
 end
 
-function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2, X)
+function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2)
     ALGEBRAIC(:,72) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
 
     ALGEBRAIC(:,2) = 1.00000 - (STATES(:,11)+STATES(:,9)+STATES(:,10));
@@ -280,8 +280,8 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
     ALGEBRAIC(:,18) = 270.000+1050.00./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
-    ALGEBRAIC(:,9) = ( X(4).*(ALGEBRAIC(:,72)+X(1)))./(1.00000 - exp(  - 0.128000.*(ALGEBRAIC(:,72)+X(2))));
-    ALGEBRAIC(:,19) =  X(5).*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+X(3)));
+    ALGEBRAIC(:,9) = ( 4.81333e-06.*(ALGEBRAIC(:,72)+26.5000))./(1.00000 - exp(  - 0.128000.*(ALGEBRAIC(:,72)+26.5000)));
+    ALGEBRAIC(:,19) =  9.53333e-05.*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+26.5000));
     ALGEBRAIC(:,20) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     ALGEBRAIC(:,21) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
     ALGEBRAIC(:,22) =  39.3000.*exp(  - 0.0862000.*ALGEBRAIC(:,72))+13.1700;

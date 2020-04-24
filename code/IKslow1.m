@@ -68,13 +68,13 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A70; ito_f
     RATES(:,30) =  ALGEBRAIC(:,6).*(1.00000 - STATES(:,30)) -  ALGEBRAIC(:,16).*STATES(:,30);
     % A78; a_ss
-    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+22.5000)./7.70000));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+X(1))./7.70000));
     % A80; tau_tas
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
     % A76; ato_s
     RATES(:,31) = (ALGEBRAIC(:,7) - STATES(:,31))./ALGEBRAIC(:,17);
     % A79; i_ss
-    ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
+    ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+X(3))./5.70000));
     % A81; tau_tis
     ALGEBRAIC(:,18) = 270.000+1050.00./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
     % A77; ito_s
@@ -86,11 +86,11 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A84; nKs
     RATES(:,33) =  ALGEBRAIC(:,9).*(1.00000 - STATES(:,33)) -  ALGEBRAIC(:,19).*STATES(:,33);
     % A90; tau_aur
-    ALGEBRAIC(:,20) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
+    ALGEBRAIC(:,20) =  X(6).*exp(  - 0.0629000.*ALGEBRAIC(:,72))+X(2);
     % A88; aur
     RATES(:,34) = (ALGEBRAIC(:,7) - STATES(:,34))./ALGEBRAIC(:,20);
     % A91; tau_iur
-    ALGEBRAIC(:,21) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
+    ALGEBRAIC(:,21) = X(4) - X(7)./(1.00000+exp((ALGEBRAIC(:,72)+X(5))./5.70000));
     % A89; iur
     RATES(:,35) = (ALGEBRAIC(:,8) - STATES(:,35))./ALGEBRAIC(:,21);
     % A95; tau_Kss
@@ -98,9 +98,9 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A93; aKss
     RATES(:,36) = (ALGEBRAIC(:,7) - STATES(:,36))./ALGEBRAIC(:,22);
     % A104; alpha_a1
-    ALGEBRAIC(:,11) =  0.0137330.*exp( X(3).*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,11) =  0.0137330.*exp( 0.0381980.*ALGEBRAIC(:,72));
     % A105; beta_a1
-    ALGEBRAIC(:,24) =  6.89000e-05.*exp(  X(4).*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,24) =  6.89000e-05.*exp(  - 0.0417800.*ALGEBRAIC(:,72));
     % A99; CK2
     RATES(:,40) = ( CONSTANTS(:,65).*STATES(:,39)+ ALGEBRAIC(:,24).*STATES(:,38)) - ( CONSTANTS(:,64).*STATES(:,40)+ ALGEBRAIC(:,11).*STATES(:,40));
     % A24; C1
@@ -116,15 +116,15 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A97; CK0
     ALGEBRAIC(:,10) = 1.00000 - (STATES(:,39)+STATES(:,40)+STATES(:,38)+STATES(:,41));
     % A102; alpha_a0
-    ALGEBRAIC(:,23) =  0.0223480.*exp( X(1).*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,23) =  0.0223480.*exp( 0.0117600.*ALGEBRAIC(:,72));
     % A103; beta_a0
-    ALGEBRAIC(:,28) =  0.0470020.*exp(  X(2).*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,28) =  0.0470020.*exp(  - 0.0631000.*ALGEBRAIC(:,72));
     % A98; CK1
     RATES(:,39) = ( ALGEBRAIC(:,23).*ALGEBRAIC(:,10)+ CONSTANTS(:,64).*STATES(:,40)) - ( ALGEBRAIC(:,28).*STATES(:,39)+ CONSTANTS(:,65).*STATES(:,39));
     % A106; alpha_i
-    ALGEBRAIC(:,29) =  0.0908210.*exp( X(5).*(ALGEBRAIC(:,72)+X(6)));
+    ALGEBRAIC(:,29) =  0.0908210.*exp( 0.0233910.*(ALGEBRAIC(:,72)+5.00000));
     % A107; beta_i
-    ALGEBRAIC(:,33) =  0.00649700.*exp(  X(7).*(ALGEBRAIC(:,72)+X(8)));
+    ALGEBRAIC(:,33) =  0.00649700.*exp(  - 0.0326800.*(ALGEBRAIC(:,72)+5.00000));
     % A100; OK
     RATES(:,38) = ( ALGEBRAIC(:,11).*STATES(:,40)+ ALGEBRAIC(:,33).*STATES(:,41)) - ( ALGEBRAIC(:,24).*STATES(:,38)+ ALGEBRAIC(:,29).*STATES(:,38));
     % A101; IK
@@ -249,7 +249,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     ALGEBRAIC(:,63) = ( (( 0.293800.*CONSTANTS(:,7))./(CONSTANTS(:,7)+210.000)).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60)))./(1.00000+exp( 0.0896000.*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60))));
     % A83; I_Ks
     ALGEBRAIC(:,64) =  CONSTANTS(:,60).*power(STATES(:,33), 2.00000).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
-    % A87; I_kUR
+    % A87; I_Kur
     ALGEBRAIC(:,65) =  CONSTANTS(:,61).*STATES(:,34).*STATES(:,35).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
     % A92; I_Kss
     ALGEBRAIC(:,66) =  CONSTANTS(:,62).*STATES(:,36).*STATES(:,37).*(ALGEBRAIC(:,72) - ALGEBRAIC(:,60));
@@ -276,25 +276,25 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,15) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,72)+30.0000));
     ALGEBRAIC(:,6) = ( 0.000152000.*exp( - (ALGEBRAIC(:,72)+13.5000)./7.00000))./( 0.00670830.*exp( - (ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
     ALGEBRAIC(:,16) = ( 0.000950000.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000))./( 0.0513350.*exp((ALGEBRAIC(:,72)+33.5000)./7.00000)+1.00000);
-    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+22.5000)./7.70000));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,72)+X(1))./7.70000));
     ALGEBRAIC(:,17) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
-    ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
+    ALGEBRAIC(:,8) = 1.00000./(1.00000+exp((ALGEBRAIC(:,72)+X(3))./5.70000));
     ALGEBRAIC(:,18) = 270.000+1050.00./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
     ALGEBRAIC(:,9) = ( 4.81333e-06.*(ALGEBRAIC(:,72)+26.5000))./(1.00000 - exp(  - 0.128000.*(ALGEBRAIC(:,72)+26.5000)));
     ALGEBRAIC(:,19) =  9.53333e-05.*exp(  - 0.0380000.*(ALGEBRAIC(:,72)+26.5000));
-    ALGEBRAIC(:,20) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,72))+2.05800;
-    ALGEBRAIC(:,21) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,72)+45.2000)./5.70000));
+    ALGEBRAIC(:,20) =  X(6).*exp(  - 0.0629000.*ALGEBRAIC(:,72))+X(2);
+    ALGEBRAIC(:,21) = X(4) - X(7)./(1.00000+exp((ALGEBRAIC(:,72)+X(5))./5.70000));
     ALGEBRAIC(:,22) =  39.3000.*exp(  - 0.0862000.*ALGEBRAIC(:,72))+13.1700;
-    ALGEBRAIC(:,11) =  0.0137330.*exp( X(3).*ALGEBRAIC(:,72));
-    ALGEBRAIC(:,24) =  6.89000e-05.*exp(  X(4).*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,11) =  0.0137330.*exp( 0.0381980.*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,24) =  6.89000e-05.*exp(  - 0.0417800.*ALGEBRAIC(:,72));
     ALGEBRAIC(:,3) = 1.00000 - (STATES(:,12)+STATES(:,13)+STATES(:,14)+STATES(:,15)+STATES(:,16)+STATES(:,17)+STATES(:,18));
     ALGEBRAIC(:,13) = ( 0.400000.*exp((ALGEBRAIC(:,72)+12.0000)./10.0000).*((1.00000+ 0.700000.*exp( - power(ALGEBRAIC(:,72)+40.0000, 2.00000)./10.0000)) -  0.750000.*exp( - power(ALGEBRAIC(:,72)+20.0000, 2.00000)./400.000)))./(1.00000+ 0.120000.*exp((ALGEBRAIC(:,72)+12.0000)./10.0000));
     ALGEBRAIC(:,26) =  0.0500000.*exp( - (ALGEBRAIC(:,72)+12.0000)./13.0000);
     ALGEBRAIC(:,10) = 1.00000 - (STATES(:,39)+STATES(:,40)+STATES(:,38)+STATES(:,41));
-    ALGEBRAIC(:,23) =  0.0223480.*exp( X(1).*ALGEBRAIC(:,72));
-    ALGEBRAIC(:,28) =  0.0470020.*exp(  X(2).*ALGEBRAIC(:,72));
-    ALGEBRAIC(:,29) =  0.0908210.*exp( X(5).*(ALGEBRAIC(:,72)+X(6)));
-    ALGEBRAIC(:,33) =  0.00649700.*exp(  X(7).*(ALGEBRAIC(:,72)+X(8)));
+    ALGEBRAIC(:,23) =  0.0223480.*exp( 0.0117600.*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,28) =  0.0470020.*exp(  - 0.0631000.*ALGEBRAIC(:,72));
+    ALGEBRAIC(:,29) =  0.0908210.*exp( 0.0233910.*(ALGEBRAIC(:,72)+5.00000));
+    ALGEBRAIC(:,33) =  0.00649700.*exp(  - 0.0326800.*(ALGEBRAIC(:,72)+5.00000));
     ALGEBRAIC(:,31) = ( CONSTANTS(:,46).*STATES(:,3))./(CONSTANTS(:,47)+STATES(:,3));
     ALGEBRAIC(:,35) =  13.0000.*(1.00000 - exp( - power(ALGEBRAIC(:,72)+14.5000, 2.00000)./100.000));
     ALGEBRAIC(:,30) = power(1.00000+( CONSTANTS(:,19).*CONSTANTS(:,21))./power(CONSTANTS(:,21)+STATES(:,4), 2.00000),  - 1.00000);
