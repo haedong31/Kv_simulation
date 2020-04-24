@@ -1,124 +1,165 @@
-import numpy as np
 import matlab.engine
+import time
+import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
 
 
+## MATLAB model arguments -----
+holding_p = -70
+holding_t = 4.5 
+P1 = 50
+P1_t = 29.5
+P2 = 50
+P2_t = P1_t
+eng = matlab.engine.start_matlab()
+
+
 ## custom functions -----
-def init_pop(N, add_x0, mul_x0, drop_rate, step_size=1.0):
+def init_pop(N, X0, step_size=1.0):
+    """generate the initial population
+
+    Arguments:
+        N {int} -- [population size]
+        X0 {list} -- [initial parameter values]
+
+    Keyword Arguments:
+        step_size {float} -- [sigma for normal noise] (default: {1.0})
+
+    Returns:
+        population {list} -- [N chromosomes with normal noise]
+    """
+
     population = list()
-
     for _ in range(N):
-        # randomly select parameters to drop off
-        drop_add = np.ranom.choice([0, 1], size=len(add_x0), p=[drop_rate, 1-drop_rate])
-        drop_mul = np.random.choice([0, 1], size=len(mul_x0), p=[drop_rate, 1-drop_rate])
+        chrom = list()
 
-        add_chrom = list()
-        for n, a in enumerate(drop_add):
-            if a == 0:
-                add_chrom.append(0)
-            else:
-                add_chrom.append(add_x0[n] + np.random.normal(scale=step_size))
+        # add normal noise
+        for x0 in X0:
+            chrom.append(np.random.normal(loc=x0, scale=step_size))
 
-        mul_chrom = list()
-        for m in enumerate(drop_mul):
-            if m == 0:
-                mul_chrom.append(1)
-            else:
-                mul_chrom.append(mul_x0[n] + np.random.normal(scale=step_size))
-        
-        population.append(add_chrom + mul_chrom)
+        population.append(chrom)        
     
     return population
 
 
-def eval_fn(Y_hat, Y0, chroms):
-    if len(X) != len(Y):
-        EnvironmentError('lengths of X and Y are not matching')
-    
+def fitness(y, idx, chroms):
+    """evalueate chromosomes with SSE
+
+    Arguments:
+        y {numpy array} -- [experimental values]
+        idx {int} -- index
+        chroms {list} -- chromosomes, each chromosome represents a parameter set
+
+    Returns:
+        fits {list} -- evaluation values
+    """
     fits = list()
     for i in range(len(chroms)):
-        fit_i = list()
-
-        for j in range(len(X)):
-            fit = (Y[j] - boltzmann(X[j], chroms[i][0], chroms[i][1]))**2
-            fit_i.append(fit)
-
-        fits.append(sum(fit_i))
+        X = matlab.double(chroms[i])
+        outputs = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X, nargout=4)
+        A = np.array(outputs[2]._data).reshape(outputs[2].size[::-1]).T
+        y_hat = np.max(A[:, idx])
+        
+        sse = np.sum((y-y_hat)**2)            
+        fits.append(sse)
 
     return fits
 
 
-def evolve(chroms, fits, N1, N2):
-    next_gens = list()
-    
-    # find superior chromosomes
-    super_idx = np.argpartition(fits, N1)[:N1]
-    super_chroms = [chroms[idx] for idx in super_idx]
-    
-    # mutation
-    for chrom in super_chroms:
-        # clone of parent
-        next_gens.append(chrom)
+def elite_idx(fits, num_elites):
+    return np.argpartition(fits, -num_elites)[-num_elites:]
+
+
+def cross_over(cross_over_num, chroms, fits, rate=0.5):
+    # number of parameters 
+    num_vars = len(chroms[0])
+
+    # selection probabilities
+    probs = fits/np.nansum(fits)
+    probs = np.nan_to_num(probs)
+
+    new_gen = list()
+    for _ in range(cross_over_num):
+        # select parents
+        parents_idx = np.random.choice(len(chroms), size=2, replace=False, p=probs)
+        parents = np.take(chroms, parents_idx, axis=0)
         
-        # mutated children
-        for _ in range(N2):
-            mutant = chrom + np.random.normal(size=2)
-            next_gens.append(mutant)
+        # set cross-over points
+        cross_over_pts = [u >= rate for u in np.random.uniform(0, 1, num_vars)]
+
+        # cross over
+        chrom1 = list()
+        chrom2 = list()
+        for i in range(len(cross_over_pts)):
+            if cross_over_pts[i] == True:
+                chrom1.append(parents[1][i])
+                chrom2.append(parents[0][i])
+            else:
+                chrom1.append(parents[0][i])
+                chrom2.append(parents[1][i])
+
+        new_gen.append(chrom1)
+        new_gen.append(chrom2)
+
+    return new_gen
+
+
+def mutate(chroms, rate, step_size=1):
+    mutate_idx = np.random.choice([True, False], size=np.shape(chroms), p=[rate, 1-rate])
+    mutant = chroms
     
-    return next_gens
+    if True in mutate_idx:
+        chrom_idx, var_idx = np.where(mutate_idx)
+        for i in range(len(chrom_idx)):
+            mutant[chrom_idx[i]][var_idx[i]] += np.random.normal(scale=step_size)
+    else:
+        pass
 
-
-## import data -----
-holding_p = -70
-holding_t = 4.5 
-P1 = 50
-P1_t = 29.5 
-P2 = 50
-P2_t = 29.5 
-X0 = matlab.double([0.00000481333, 26.5, 26.5, 0.0000953333, 26.5])
-
-eng = matlab.engine.start_matlab()
-outputs = eng.IKslow2(holding_p, holding_t, P1, P1_t, P2, P2_t, X0, nargout=4)
-t = np.array(outputs[0]._data)
-A = np.array(outputs[2]._data).reshape(outputs[2].size[::-1]).T
-IKslow20 = A[:,63]
+    return mutant
 
 
 ## main function -----
-# hyper parameters
-iters = 10000
-N0 = 100
-N1= 10
-N2 = 9
-chroms = [None] * (iters+1)
-errs = [None] * (iters+1)
-
 # initialization
-chroms0 = init_pop(N0)
-chroms[0] = chroms0
+data = pd.read_excel('./potassium-KO.xlsx')
+y = np.array(data['A2 FF'])
+X0 = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000]
+idx = 64  # IKslow1
+burnin = 30
+iters = 70
+pop_size = 100
+cross_over_num = int((pop_size-2)/2)
+errs = list()
 
+chroms = init_pop(pop_size, X0, step_size=1.0)
 # run GA
 for i in range(iters):
-    fits = eval_fn(voltages, ssa, chroms[i])
-    errs[i] = min(fits)
-    next_gen = evolve(chroms[i], fits, N1, N2)
-    chroms[i+1] = next_gen
+    begin_time = time.time()
+
+    fits = fitness(y, idx, chroms)
+    errs.append(np.min(fits))
     
-    print('### run %d' % i)
+    elites = np.take(chroms, elite_idx(fits, num_elites=2), axis=0)
+    cross_over_gen = cross_over(cross_over_num, chroms, fits)
+    mutate_gen = mutate(cross_over_gen, 0.01, step_size=1)
+    chroms = np.vstack((elites, mutate_gen)).tolist()
+    
+    end_time = time.time()
+    print(f"### Iter {i+1}/{iters} | Running time {end_time-begin_time}")
 
-fits = eval_fn(voltages, ssa, chroms[iters])
-errs[iters] = min(fits)
+fits = fitness(y, idx, chroms)
 
-last = chroms[iters][np.argmin(fits)]
-fitted_ssa = [boltzmann(v, last[0], last[1]) for v in range(-100, -20, 1)]
 
-plt.figure(0)
-plt.plot(range(iters+1), errs)
-plt.xlabel('Iterations')
-plt.ylabel('Sum of squres error')
+outputs3 = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, matlab.double(chroms[0]), nargout=4)
+A3 = np.array(outputs3[2]._data).reshape(outputs3[2].size[::-1]).T
 
-plt.figure(1)
-plt.plot(range(-100, -20, 1), fitted_ssa)
-plt.plot(voltages, ssa, 'bo')
-plt.xlabel('mV')
-plt.ylabel('S-S Activation')
+testX = chroms[53]
+testX[5] = -testX[5]
+testX[6] = -testX[6]
+testX[6] = 1
+outputs4 = eng.IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, matlab.double(testX), nargout=4)
+A4 = np.array(outputs4[2]._data).reshape(outputs4[2].size[::-1]).T
+plt.plot(A4[:,idx])
+
+
+
