@@ -30,7 +30,7 @@ k_ko_traces <- vector('list', length = length(k_ko_trace_paths))
 k_wt_traces <- vector('list', length = length(k_wt_trace_paths))
 
 # 35 files for each KO and WT
-for (i in 1:seq_along(k_ko_trace_paths)) {
+for (i in seq_along(k_ko_trace_paths)) {
   k_ko_traces[[i]] <- read_excel(k_ko_trace_paths[i])
   k_wt_traces[[i]] <- read_excel(k_wt_trace_paths[i])
 }
@@ -77,4 +77,5 @@ Iss_wt <- agg_k$Iss[2] * agg_k$capa[2]
 # Ito trace
 Ito_trace <- k_trace %>% 
   mutate(KO = KO - IKslow1_ko - IKslow2_ko - Iss_ko, WT = WT - IKslow1_wt - IKslow2_wt - Iss_wt)
-write_csv(Ito_trace, './Ito_trace.csv')
+
+# write_csv(Ito_trace, './Ito_trace.csv')
