@@ -26,6 +26,7 @@ k <- bind_rows(mutate(k_ko, group = 'KO'), mutate(k_wt, group = 'WT'))
 
 # results of GA
 read_names <- dir('./results/', '.*xlsx', full.names = TRUE)
+IKslow1_names <- dir('./results/IKslow1_20200424/', '*xlsx', full.names = TRUE)
 
 ga_Iss_paths <- read_names[str_detect(read_names, 'Iss')]
 ga_Ito_paths <- read_names[str_detect(read_names, 'Ito')]
@@ -38,8 +39,8 @@ ga_Ito_ko <- data_processor(ga_Ito_paths[1], 6)
 ga_Ito_wt <- data_processor(ga_Ito_paths[2], 6)
 ga_Ikslow1_2_ko <- data_processor(ga_Ikslow1_paths[1], 8)
 ga_Ikslow1_2_wt <- data_processor(ga_Ikslow1_paths[2], 8)
-ga_Ikslow1_ko <- data_processor(ga_Ikslow1_paths[3], 8)
-ga_Ikslow1_wt <- data_processor(ga_Ikslow1_paths[4], 8)
+ga_Ikslow1_ko <- data_processor(IKslow1_names[1], 7)
+ga_Ikslow1_wt <- data_processor(IKslow1_names[2], 7)
 ga_Ikslow2_ko <- data_processor(ga_Ikslow2_paths[1], 5)
 ga_Ikslow2_wt <- data_processor(ga_Ikslow2_paths[2], 5)
 
@@ -169,7 +170,7 @@ p2 <- bind_rows(select(k_4barplot, mean_Ito, sem_Ito, group, clf), ga_Ito_4barpl
                 position = position_dodge(0.9)) +
   xlab('') +
   ylab('Density (pA/pF)')
-p3 <- bind_rows(select(k_4barplot, mean_Ikslow1, sem_Ikslow1, group, clf), ga_Ikslow1_2_4barplot) %>% 
+p3 <- bind_rows(select(k_4barplot, mean_Ikslow1, sem_Ikslow1, group, clf), ga_Ikslow1_4barplot) %>% 
   ggplot(aes(x = clf, y = mean_Ikslow1, fill = group)) +
   geom_bar(stat = 'identity', color = 'black', position = position_dodge()) +
   geom_errorbar(aes(ymin = mean_Ikslow1 - sem_Ikslow1, ymax = mean_Ikslow1 + sem_Ikslow1), width = 0.2,
