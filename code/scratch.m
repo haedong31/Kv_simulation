@@ -158,12 +158,12 @@ load('./results/GA_Ito_wt_10.mat')
 ga_ito_wt = mean(rst, 1);
 
 holding_p = -70; %mV
-holding_t = 4.5; %ms
+holding_t = 4.5*100; %ms
 P1 = 50; %mV
-P1_t = 29.5; % msec
+P1_t = 29.5*100; % msec
 P2 = -70; % mV
 P2_t = P1_t; % msec
-[t, ~, A, ~] = Rasmusson(holding_p, holding_t, P1, P1_t, P2, P2_t);
+[t, ~, A, ~] = RasmussonUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t);
 [t1, ~, A1, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_ko(1:4));
 [t2, ~, A2, ~] = Iss(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_iss_wt(1:4));
 [t3, ~, A3, ~] = Ito(holding_p, holding_t, P1, P1_t, P2, P2_t, ga_ito_ko(1:6));
@@ -178,3 +178,30 @@ plot(Itotrace.time, Itotrace.KO, 'LineWidth', 2)
 plot(Itotrace.time, Itotrace.WT, 'LineWidth', 2)
 hold off
 legend('KO', 'WT', 'Ito KO', 'Ito WT')
+
+
+%% sampling
+IKsum = A(:,61) + A(:,62) + A(:,63) + A(:,64) + A(:,65) + A(:,66) + A(:,67);
+plot(t, IKsum)
+
+sub_ktrace = downsample(ktrace, 3);
+plot(sub_ktrace.time, sub_ktrace.KO)
+
+
+X = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000];
+X2 = -5:1:5;
+X2 = transpose(X2);
+X1 = X(1)*ones(length(X2), 1);
+X3 = X(3)*ones(length(X2), 1);
+X4 = X(4)*ones(length(X2), 1);
+X5 = X(5)*ones(length(X2), 1);
+X6 = X(6)*ones(length(X2), 1);
+X7 = X(7)*ones(length(X2), 1);
+newX = [X1, X2, X3, X4, X5, X6, X7];
+
+y = zeros(length(X2), 1);
+for i=1:length(X2)
+    fprintf('### Iter %i \n', i)
+    [~,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,newX(i,:));
+    y(i) = max(A(:,65));
+end
