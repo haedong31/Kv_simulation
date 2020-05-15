@@ -85,6 +85,7 @@ deltas = [];
 k = 1;
 while 1
     tic
+    
     fprintf('###Iter %i \n', k);
 
     % evaluate the proposed parameters with the Rasmusson
@@ -94,15 +95,8 @@ while 1
         IKslow1_hat(i) = max(A(:,65));
     end
 
-    delta = abs(IKslow1_ko - IKslow1_hat);
-    min_delta = min(delta);
-    fprintf('Min delta: %6.4f \n', min_delta)
-    deltas = [deltas; min_delta];    
-    if min_delta <= tol
-        break
-    end
-    
     % fit random forest
+    delta = abs(IKslow1_ko - IKslow1_hat);
     new_data = [params, delta];
     new_data = array2table(new_data);
     mdl = fitrensemble(new_data, 'new_data8', 'Method','Bag', 'NumLearningCycles',num_trees, 'Learners',tree_tem);
@@ -116,8 +110,8 @@ while 1
     end
 
     % variable selection
-    delta = table2array(new_data(:,8));
     [imp_params, imp_params_idx] = maxk(impOOB, num_imp_vars);
+    delta = table2array(new_data(:,8));
     [imp_rows, imp_rows_idx] = mink(delta, num_top_rows);
     nonimp_params_idx = 1:1:num_params;
     nonimp_params_idx = setdiff(nonimp_params_idx, imp_params_idx);
@@ -126,33 +120,21 @@ while 1
     sampled_data = new_data(imp_rows_idx, imp_params_idx);
     mu = mean(table2array(sampled_data));
     sigma = cov(table2array(sampled_data));
-
-    % evaluate a sample with the random forest regressor
-    params = [];
-    num_sampled = 0;
-    cnt = 0;
-    while 1
-        cnt = cnt + 1;
-        param = zeros(1, num_params);
-        param(imp_params_idx) = mvnrnd(mu, sigma, 1);    
-        for i=1:length(nonimp_params_idx)
-            idx = nonimp_params_idx(i);
-            unif = makedist('Uniform', 'lower',lower_bd(idx), 'upper',upper_bd(idx));
-            param(idx) = random(unif, 1);
-        end
-
-        delta_hat = predict(mdl, param);
-        if delta_hat <= 0.8*min_delta
-            params = [params; param]
-            num_sampled = num_sampled + 1;
-        end
-
-        % break the loop
-        if num_sampled == 100 | cnt == 100
-            break
-        end
+    
+    params(:,imp_params_idx) = mvnrnd(mu, sigma, sample_size);
+    for i=1:length(nonimp_params_idx)
+        idx = nonimp_params_idx(i);
+        unif = makedist('Uniform', 'lower',lower_bd(idx), 'upper',upper_bd(idx));
+        params(:,idx) = random(unif, sample_size, 1);
     end
-        
+    
+    min_delta = min(delta);
+    fprintf('Min delta: %6.4f \n', min_delta)
+    deltas = [deltas; min_delta];
     k = k+1;
+
     toc
+    if min_delta <= tol
+        break
+    end
 end
