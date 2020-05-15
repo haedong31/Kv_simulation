@@ -5,8 +5,10 @@ warning('off')
 
 
 %% data and modeling parameters
-K_ko = readtable('./potassium-KO.xlsx');
-IKslow1_ko = mean(K_ko.A2FF);
+% K_ko = readtable('./potassium-KO.xlsx');
+% IKslow1_ko = mean(K_ko.A2FF);
+K_wt = readtable('./potassium-WT.xlsx');
+IKslow1_ko = mean(K_wt.A2);
 
 % voltage clamp protocol parameters
 holding_p = -70; % mV

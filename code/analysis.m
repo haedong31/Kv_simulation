@@ -86,3 +86,12 @@ hold on
 plot(t2, S2(:,1))
 hold off
 legend('KO', 'WT')
+
+
+%% simple_RF analysis
+plot(deltas)
+xlabel('Iteration')
+ylabel('Model Discrepancy')
+
+[d, d_idx] = min(delta);
+p = params(d_idx,:);
