@@ -85,6 +85,7 @@ end
 err_idx = [];
 deltas = [];
 k = 1;
+tic
 while 1
     tic
     
@@ -101,9 +102,17 @@ while 1
     delta = abs(IKslow1_ko - IKslow1_hat);
     new_data = [params, delta];
     new_data = array2table(new_data);
-    mdl = fitrensemble(new_data, 'new_data8', 'Method','Bag', 'NumLearningCycles',num_trees, 'Learners',tree_tem);
+
+    min_delta = min(delta);
+    fprintf('Min delta: %6.4f \n', min_delta)
+    deltas = [deltas; min_delta];
     
+    if min_delta <= tol
+        break
+    end
+
     % OOB permuted variable importance
+    mdl = fitrensemble(new_data, 'new_data8', 'Method','Bag', 'NumLearningCycles',num_trees, 'Learners',tree_tem);
     try
         impOOB = oobPermutedPredictorImportance(mdl);
     catch ME
@@ -129,14 +138,8 @@ while 1
         unif = makedist('Uniform', 'lower',lower_bd(idx), 'upper',upper_bd(idx));
         params(:,idx) = random(unif, sample_size, 1);
     end
-    
-    min_delta = min(delta);
-    fprintf('Min delta: %6.4f \n', min_delta)
-    deltas = [deltas; min_delta];
     k = k+1;
 
     toc
-    if min_delta <= tol
-        break
-    end
 end
+toc
