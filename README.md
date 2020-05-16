@@ -1,3 +1,3 @@
-# Heart Cell Modeling 
+# Cardiac Myocyte Modeling 
 
-It is a research project of mathematical models for cardiac cells to investigate glycosylation disorder and heart failures. For more information: https://news.psu.edu/story/583286/2019/08/12/research/professor-receives-nsf-grant-model-cell-disorder-heart
+Modeling mathematical models of dynamics of ion channels in cardiac myocytes. [Click here](https://news.psu.edu/story/583286/2019/08/12/research/professor-receives-nsf-grant-model-cell-disorder-heart) for more information.
