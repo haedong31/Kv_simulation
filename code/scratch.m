@@ -205,3 +205,6 @@ for i=1:length(X2)
     [~,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,newX(i,:));
     y(i) = max(A(:,65));
 end
+
+
+%%

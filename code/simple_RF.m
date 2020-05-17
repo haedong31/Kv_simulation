@@ -12,11 +12,11 @@ IKslow1_ko = mean(K_wt.A2);
 
 % voltage clamp protocol parameters
 holding_p = -70; % mV
-holding_t = 4.5; % sec
+holding_t = 4.5; 
 P1 = 50; % mV
-P1_t = 29.5; % sec
+P1_t = 200;
 P2 = 50; % mV
-P2_t = 29.5; % sec
+P2_t = P1_t;
 
 % original values in the Rasmusson
 X = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000];
@@ -50,6 +50,7 @@ end
 % evaluation
 IKslow1_hat = zeros(init_size, 1);
 for i=1:init_size
+    fprintf('%i \n', i)
     [~,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,init_params(i,:));
     IKslow1_hat(i) = max(A(:,65));
 end
@@ -83,7 +84,7 @@ end
 
 %% run learning
 err_idx = [];
-deltas = [];
+min_deltas = [];
 k = 1;
 tic
 while 1
@@ -105,7 +106,7 @@ while 1
 
     min_delta = min(delta);
     fprintf('Min delta: %6.4f \n', min_delta)
-    deltas = [deltas; min_delta];
+    min_deltas = [min_deltas; min_delta];
     
     if min_delta <= tol
         break

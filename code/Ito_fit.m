@@ -12,15 +12,15 @@ Ito_ko = K_ko.A3FF;
 holding_p = -70; %mV
 holding_t = 4.5; %msec
 P1 = 50; %mV
-P1_t = 29.5; % msec
+P1_t = 200; % msec
 P2 = 50; % mV
-P2_t = 29.5; % msec
+P2_t = P1_t; % msec
 
 % GA parameters
 % X = [30,30,13.5,33.5,33.5,33.5];
 num_vars = 6;
-lower_bd = [0,0,0,0,0,0];
-upper_bd = [60,60,60,60,60,60];
+% lower_bd = [0,0,0,0,0,0];
+% upper_bd = [60,60,60,60,60,60];
 fit_fn = @(X) Ito_fitness(X,Ito_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
 
 % run GA
@@ -29,7 +29,7 @@ for i=1:10
     tic
     fprintf('### Iter %i / 10', i)
     
-    [X,fval] = ga(fit_fn,num_vars,[],[],[],[],lower_bd,upper_bd);
+    [X,fval] = ga(fit_fn,num_vars);
     
     % run the Rasmusson with the fitted parameters
     [~,~,A,~] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,X);
@@ -54,14 +54,14 @@ Ito_wt = K_wt.A3;
 holding_p = -70; %mV
 holding_t = 4.5; %msec
 P1 = 50; %mV
-P1_t = 29.5; % msec
+P1_t = 200; % msec
 P2 = 50; % mV
-P2_t = 29.5; % msec
+P2_t = P1_t; % msec
 
 % GA parameters
 num_vars = 6;
-lower_bd = [0,0,0,0,0,0];
-upper_bd = [60,60,60,60,60,60];
+% lower_bd = [0,0,0,0,0,0];
+% upper_bd = [60,60,60,60,60,60];
 fit_fn = @(X) Ito_fitness(X,Ito_wt,holding_p,holding_t,P1,P1_t,P2,P2_t);
 
 % run GA
@@ -70,7 +70,7 @@ for i=1:10
     tic
     fprintf('### Iter %i / 10', i)
     
-    [X,fval] = ga(fit_fn,num_vars,[],[],[],[],lower_bd,upper_bd);
+    [X,fval] = ga(fit_fn,num_vars);
     
     % run the Rasmusson with the fitted parameters
     [~,~,A,~] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,X);
