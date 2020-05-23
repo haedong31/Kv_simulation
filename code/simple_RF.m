@@ -6,9 +6,9 @@ warning('off')
 
 %% data and modeling parameters
 % K_ko = readtable('./potassium-KO.xlsx');
-% IKslow1_ko = mean(K_ko.A2FF);
+% IKslow1 = mean(K_ko.A2FF);
 K_wt = readtable('./potassium-WT.xlsx');
-IKslow1_ko = mean(K_wt.A2);
+IKslow1 = mean(K_wt.A2);
 
 % voltage clamp protocol parameters
 holding_p = -70; % mV
@@ -55,7 +55,7 @@ for i=1:init_size
     IKslow1_hat(i) = max(A(:,65));
 end
 
-delta = abs(IKslow1_ko - IKslow1_hat);
+delta = abs(IKslow1 - IKslow1_hat);
 init_data = [init_params, delta];
 init_data = array2table(init_data);
 
@@ -100,7 +100,7 @@ while 1
     end
 
     % fit random forest
-    delta = abs(IKslow1_ko - IKslow1_hat);
+    delta = abs(IKslow1 - IKslow1_hat);
     new_data = [params, delta];
     new_data = array2table(new_data);
 

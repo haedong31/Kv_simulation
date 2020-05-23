@@ -79,3 +79,8 @@ Ito_trace <- k_trace %>%
   mutate(KO = KO - IKslow1_ko - IKslow2_ko - Iss_ko, WT = WT - IKslow1_wt - IKslow2_wt - Iss_wt)
 
 # write_csv(Ito_trace, './Ito_trace.csv')
+
+Ktrace <- read_csv('./k_trace.csv')
+time <- Ktrace$time
+which(time == 470)
+which(time == 25*1000)
