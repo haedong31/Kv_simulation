@@ -1,13 +1,45 @@
-%% manipulate the average raw trace
 clc
 close all
 clear variables
 
-Ktrace = readtable('k_trace.csv');
-Ktrace_sub = Ktrace(9861:500001,:);
-Ktrace_sub.time = Ktrace_sub.time - 493;
 
-% plot(Ktrace_sub.time, Ktrace_sub.KO)
+%% manipulate the average raw trace
+Ktrace = readtable('k_trace.csv');
+Ktrace_ko = Ktrace(:, [1,2]);
+Ktrace_wt = Ktrace(:, [1,3]);
+
+plot(Ktrace_ko.time, Ktrace_ko.KO, 'LineWidth',2)
+hold on
+plot(Ktrace_wt.time, Ktrace_wt.WT, 'LineWidth',2)
+hold off
+
+
+%% downsample the raw trace
+% cut off the raw traces
+sub_Ktrace_ko = Ktrace_ko(1:500001,:);
+sub_Ktrace_wt = Ktrace_wt(1:500001,:);
+
+figure(1)
+plot(sub_Ktrace_ko.time, sub_Ktrace_ko.KO, 'LineWidth',2)
+hold on
+plot(sub_Ktrace_wt.time, sub_Ktrace_wt.WT, 'LineWidth',2)
+hold off
+
+[peak_ko, peak_ko_idx] = max(sub_Ktrace_ko.KO);
+[peak_wt, peak_wt_idx] = max(sub_Ktrace_wt.WT);
+
+ds_Ktrace_ko = downsample(sub_Ktrace_ko, 98);
+ds_Ktrace_wt = downsample(sub_Ktrace_wt, 98);
+
+ds_Ktrace_ko.KO(ds_Ktrace_ko.KO < 0) = 0;
+ds_Ktrace_wt.WT(ds_Ktrace_wt.WT < 0) = 0;
+
+figure(2)
+plot(ds_Ktrace_ko.time, ds_Ktrace_ko.KO, 'LineWidth',2)
+hold on
+plot(ds_Ktrace_wt.time, ds_Ktrace_wt.WT, 'LineWidth',2)
+hold off
+axis tight
 
 
 %% amplutes and taus for IKslow1 and 2
@@ -84,9 +116,55 @@ hold off
 legend('KO', 'WT')
 
 
-%%
-plot(t, Ito_ko_trace, 'LineWidth', 2)
+%% investigated fitted parameters - GA IKslow1
+% import GA_IKslow1
+holding_p = -70; %mV
+holding_t = 45; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+P2 = -70; % mV
+P2_t = P1_t; % ms
+
+ga_IKslow1_ko = readtable('./results/IKslow1_20200424/IKslow1_KO.csv');
+ga_IKslow1_wt = readtable('./results/IKslow1_20200424/IKslow1_WT.csv');
+ga_Ito_wt = readtable('./results/GA_Ito_wt_10.xlsx');
+
+for i=1:10
+    params = table2array(ga_IKslow1_wt(i, 1:7));
+    [t,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,params);
+    hold on
+    plot(t, A(:,65))
+    hold off
+end
+legend('1','2','3','4','5','6','7','8','9','10')
+
+
+%% compare traces
+IKslow1_ko = mean(table2array(ga_IKslow1_ko(:, 1:7)));
+IKslow1_wt = mean(table2array(ga_IKslow1_wt(:, 1:7)));
+IKslow2_wt = mean(rst(:, 1:7));
+Ito_wt = mean(table2array(ga_Ito_wt(:, 1:6)));
+
+[t1,~,A1,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,IKslow1_wt);
+[t2,~,A2,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,IKslow2_wt);
+[t3,~,A4,~] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,Ito_wt);
+
+tic
+[t,~,A,~] = RasmussonUnparam(holding_p,holding_t,P1,P1_t,P2,P2_t);
+toc
+
+figure(1)
+plot(t, A(:,65))
 hold on
-plot(t, Ito_wt_trace, 'LineWidth', 2)
+plot(t1, A1(:,65))
+plot(t2, A2(:,65))
 hold off
-legend('KO', 'WT')
+legend('Rasmusson', 'KO', 'WT')
+
+[peak, peak_idx] = max(A(:,65));
+tau_i = peak*exp(-1);
+i_after_peak = A(peak_idx+1:end, 65);
+[tau_i_hat, tau_hat] = min(abs(tau_i - i_after_peak));
+
+
+%% IKsum

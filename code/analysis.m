@@ -7,7 +7,7 @@ clear variables
 holding_p = -70; %mV
 holding_t = 4.5*10; %ms
 P1 = 50; %mV
-P1_t = 29.5*10; % ms
+P1_t = 500; % ms
 P2 = -70; % mV
 P2_t = P1_t; % ms
 
@@ -71,18 +71,35 @@ ga_iss_wt = mean(rst, 1);
 
 
 %% visualization
-% import ga_ikslow1_ko
-% import ga_ikslow1_wt
+% import IKslow1_ko_ofWhatYouWant
+% import IKslow1_wt_ofWhatYouWant
+ga_ko = mean(table2array(IKslow1KO));
+ga_wt = mean(table2array(IKslow1WT));
+rt_ko = [-68.0570165036410	2.58308797860332	50.8876752241103	1434.81281801083	18.0013636837798	0.849759529744222	35.2985494078469];
+rt_wt = [-45.4668111833352	5.66962515497214	94.0192673328295	-180.129531987330	18.0619040526542	-0.256041915755219	456.849512275044];
 
-X_ko = mean(IKslow1KO);
-X_wt = mean(IKslow1WT);
+[t1, ~, A1, ~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,ga_ko);
+[t2, ~, A2, ~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,ga_wt);
+[t3, ~, A3, ~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,rt_ko);
+[t4, ~, A4, ~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,rt_wt);
 
-[t, S, A, ~] = Rasmusson_AP(1000);
-[t1, S1, A1, ~] = IKslow1_AP(1000, X_ko(1:7));
-[t2, S2, A2, ~] = IKslow1_AP(1000, IKslow1WT(2,1:7));
-
-plot(t1, S1(:,1))
+plot(t1, A1(:,65))
 hold on
-plot(t2, S2(:,1))
+plot(t2, A2(:,65))
+plot(t3, A3(:,65))
+plot(t4, A4(:,65))
 hold off
-legend('KO', 'WT')
+legend('GA KO', 'GA WT', 'RT KO', 'RT WT')
+
+
+%% simple_RF analysis
+plot(min_deltas)
+xlabel('Iteration')
+ylabel('Model Discrepancy')
+title('IKslow1 WT')
+
+[d, d_idx] = min(delta);
+p = params(d_idx,:);
+
+[t,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,p);
+plot(t, A(:,65))

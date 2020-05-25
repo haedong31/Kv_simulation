@@ -5,16 +5,18 @@ warning('off')
 
 
 %% data and modeling parameters
-K_ko = readtable('./potassium-KO.xlsx');
-IKslow1_ko = mean(K_ko.A2FF);
+% K_ko = readtable('./potassium-KO.xlsx');
+% IKslow1 = mean(K_ko.A2FF);
+K_wt = readtable('./potassium-WT.xlsx');
+IKslow1 = mean(K_wt.A2);
 
 % voltage clamp protocol parameters
 holding_p = -70; % mV
-holding_t = 4.5; % sec
+holding_t = 4.5; 
 P1 = 50; % mV
-P1_t = 29.5; % sec
+P1_t = 200;
 P2 = 50; % mV
-P2_t = 29.5; % sec
+P2_t = P1_t;
 
 % original values in the Rasmusson
 X = [22.5000, 2.05800, 45.2000, 1200.00, 45.2000, 0.493000, 170.000];
@@ -48,11 +50,12 @@ end
 % evaluation
 IKslow1_hat = zeros(init_size, 1);
 for i=1:init_size
+    fprintf('%i \n', i)
     [~,~,A,~] = IKslow1(holding_p,holding_t,P1,P1_t,P2,P2_t,init_params(i,:));
     IKslow1_hat(i) = max(A(:,65));
 end
 
-delta = abs(IKslow1_ko - IKslow1_hat);
+delta = abs(IKslow1 - IKslow1_hat);
 init_data = [init_params, delta];
 init_data = array2table(init_data);
 
@@ -81,8 +84,9 @@ end
 
 %% run learning
 err_idx = [];
-deltas = [];
+min_deltas = [];
 k = 1;
+tic
 while 1
     tic
     
@@ -96,12 +100,20 @@ while 1
     end
 
     % fit random forest
-    delta = abs(IKslow1_ko - IKslow1_hat);
+    delta = abs(IKslow1 - IKslow1_hat);
     new_data = [params, delta];
     new_data = array2table(new_data);
-    mdl = fitrensemble(new_data, 'new_data8', 'Method','Bag', 'NumLearningCycles',num_trees, 'Learners',tree_tem);
+
+    min_delta = min(delta);
+    fprintf('Min delta: %6.4f \n', min_delta)
+    min_deltas = [min_deltas; min_delta];
     
+    if min_delta <= tol
+        break
+    end
+
     % OOB permuted variable importance
+    mdl = fitrensemble(new_data, 'new_data8', 'Method','Bag', 'NumLearningCycles',num_trees, 'Learners',tree_tem);
     try
         impOOB = oobPermutedPredictorImportance(mdl);
     catch ME
@@ -127,14 +139,8 @@ while 1
         unif = makedist('Uniform', 'lower',lower_bd(idx), 'upper',upper_bd(idx));
         params(:,idx) = random(unif, sample_size, 1);
     end
-    
-    min_delta = min(delta);
-    fprintf('Min delta: %6.4f \n', min_delta)
-    deltas = [deltas; min_delta];
     k = k+1;
 
     toc
-    if min_delta <= tol
-        break
-    end
 end
+toc

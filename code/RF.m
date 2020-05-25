@@ -143,7 +143,7 @@ while 1
 
         delta_hat = predict(mdl, param);
         if delta_hat <= 0.8*min_delta
-            params = [params; param]
+            params = [params; param];
             num_sampled = num_sampled + 1;
         end
 
