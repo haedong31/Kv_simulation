@@ -1,5 +1,13 @@
 function e = IKslow1_fitness(X, Y, holding_p, holding_t, P1, P1_t, P2, P2_t)
-    [~,~,A,~] = IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X);
-    IKslow1_hat = A(:,65);
-    e = sum((Y-max(IKslow1_hat)).^2);
+    [t,~,A,~] = IKslow1(holding_p, holding_t, P1, P1_t, P2, P2_t, X);
+    IKslow1_trc = A(:,5);
+
+    IKslow1_hat = max(IKslow1_trc);
+    amp_slow1 = nansum((Y.AMP - IKslow1_hat).^2);
+
+    [~, tau1_idx] = min(abs(IKslow1_hat*exp(-1) - IKslow1_trc));
+    tau_slow1 = nansum((Y.TAU - t(tau1_idx)).^2);
+    
+    disp(amp_slow1 + tau_slow1);
+    e = amp_slow1 + tau_slow1;
 end
