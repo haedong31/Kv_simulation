@@ -16,17 +16,14 @@ Y_wt.Properties.VariableNames = {'AMP', 'TAU'};
 % X = [22.5, 7.7, 45.2, 5.7, 45.2, 5.7];
 
 % voltage clamp protocol parameters
-holding_p = -70; % mV
-holding_t = 450; % ms
-P1 = 50; % mV
-P1_t = 25 * 1000; % ms
-P2 = 50; % mV
-P2_t = P1_t; % ms
+t = 0:1:25*1000;
+V = zeros(1, length(t));
+V(1:450) = -70;
+V(452:end) = 50;
 
-% run GA
-num_vars = 6;
-fit_fn_ko = @(X) IKslow1_fitness(X,Y_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
-[params_ko, fval] = ga(fit_fn_ko,num_vars);
-
-fit_fn_wt = @(X) IKslow1_fitness(X,Y_wt,IKslow1_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
-[params_wt, fval] = ga(fit_fn_wt,num_vars);
+options = optimoptions('fminunc', 'Algorithm','quasi-newton', 'Display','iter');
+problem.options = options;
+problem.x0 = [33.5, 7.0, 22.5, 7.0, 45.2, 5.7, 1050.0, 45.2, 2.058];
+problem.objective = @(X)IKslow1_fitness(X, Y_ko, t, V);
+problem.solver = 'fminunc';
+est_x = fminunc(problem);
