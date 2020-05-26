@@ -8,11 +8,11 @@ function IKsum = Kv_anal(t, V, X)
     
     % Ito
     ato_ss = 1./(1+exp(-(V-X(1))./X(2)));
-    ito_ss = 1./(1+exp(-(V-X(3))./X(4)));
+    ito_ss = 1./(1+exp((V-X(3))./X(4)));
     alpha_ato = 0.180640.*exp(0.0357700.*(V+30.0));
     beta_ato = 0.395600.*exp(-0.0623700.*(V+30.0));
     alpha_ito = (0.000152000.*exp((-V+13.5)./7.0))./(0.00670830.*exp((-V+33.5./7.0))+1.0);
-    beta_ito = (0.000950000.*exp(-(V+X(5))./X(6)))./(0.0513350.*exp((V+X(5))./X(6))+1.0);
+    beta_ito = (0.000950000.*exp((V+X(5))./X(6)))./(0.0513350.*exp((V+X(5))./X(6))+1.0);
     tau_ato = 1./(alpha_ato + beta_ato);
     tau_ito = 1./(alpha_ito + beta_ito);
     ato = (ato0 - ato_ss) .* exp(-t./tau_ato) + ato_ss;

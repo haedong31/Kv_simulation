@@ -27,6 +27,7 @@ problem.solver = 'fminunc';
 est_x = fminunc(problem);
 
 [~, peak_idx] = max(ds_Ktrace.I);
+t = ds_Ktrace
 Iksum = Kv_anal(ds_Ktrace.time(peak_idx:end), 50, est_x);
 plot(ds_Ktrace.time, ds_Ktrace.I)
 hold on
