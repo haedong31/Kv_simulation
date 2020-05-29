@@ -1,6 +1,7 @@
 library(tidyverse)
 library(readxl)
 library(ggpubr)
+library(FrF2)
 
 
 ## custom function -----
@@ -192,3 +193,12 @@ p5 <- bind_rows(select(k_4barplot, mean_Ikslow2, sem_Ikslow2, group, clf), ga_Ik
   xlab('') +
   ylab('Density (pA/pF)')
 ggarrange(p1, p2, p3, p4, p5, labels = c("Iss", "Ito", 'Ikslow1', 'Ikslow1_2', 'Ikslow2'), nrow = 3, ncol = 2)
+
+
+## design of experiment -----
+# maximum resolution minimum abberation design
+fnames <- seq(1, 44) %>% as.character()
+dgn <- FrF2(nfactors = 44, resolution = 5, factor.names = fnames)
+dgn_info_tbl <- design.info(dgn)
+run_order <- run.order(dgn)
+readr::write_csv(dgn, "./FrF2_dgn_matrix.csv")
