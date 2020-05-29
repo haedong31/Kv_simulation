@@ -214,17 +214,23 @@ close all
 clear variables
 
 holding_p = -70; %mV
-holding_t = 50; %ms
+holding_t = 450; %ms
 P1 = 50; %mV
-P1_t = 25*100; % msec
+P1_t = 25*1000; % msec
 P2 = -70; % mV
 P2_t = P1_t; % msec
 
-[t5, ~, A5, ~] = Kv(holding_p, holding_t, P1, P1_t, P2, P2_t);
+[t, ~, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t);
+
+V = zeros(length(t), 1);
+V(t<= 450) = -70;
+V(t>450) = 50;
+X = [7.40, 14.00, -36.20, -4.90, 121.43, 39.87, -7.80, 9.60, -83.73, -7.86, -32.64, -6.36, 828.67, -5.09, 2.060];
+[Ito, IKslow1, IKsum] = Kv_anal(t, V, X);
 
 figure(1)
-plot(t5, A5(:,9))
+plot(t, A(:,15))
 hold on
-plot(t5, A5(:,10))
+plot(t, Ito)
 hold off
-legend('Ito', 'IKslow')
+legend('Sim', 'Analytical Solution')
