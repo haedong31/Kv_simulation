@@ -10,7 +10,7 @@ ds_Ktrace = ds_Ktrace_ko;
 % ds_Ktrace = ds_Ktrace_wt;
 ds_Ktrace.Properties.VariableNames = {'time', 'I'};
 
-K_data = readtable('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-KO.xlsx');
+K_data = readtable('./potassium-KO.xlsx');
 % K_data = readtable('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-WT.xlsx');
 
 Iss = K_data.IssFF;
@@ -49,4 +49,11 @@ ds_Ktrace.I = ds_Ktrace.I ./ cap;
 
 num_vars = 22;
 fit_fn = @(X) Ktrace_fitness(X, ds_Ktrace, Iss, Ito, IKslow1, IKslow2, tau_to, tau1, tau2);
-[param,fval] = ga(fit_fn,num_vars);
+options = optimoptions('ga','PlotFcn', @gaplotbestf, 'FitnessLimit',1500);
+[param,fval] = ga(fit_fn,num_vars,options);
+
+plot(ds_Ktrace.time, ds_Ktrace.I, 'LineWidth',2);
+hold on
+plot(t, IKsum, 'LineWidth',2);
+hold off
+legend('Raw Trace', 'Simulated')

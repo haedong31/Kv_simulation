@@ -6,7 +6,7 @@ function z = Ktrace_fitness(X, ds_Ktrace, Iss, Ito, IKslow1, IKslow2, tau_to, ta
     P1_t = 25*1000; % ms
     P2 = -70; % mV
     P2_t = P1_t; % ms
-
+    
     [t, ~, A, ~] = Kv(X, holding_p, holding_t, P1, P1_t, P2, P2_t);
 
     % IKsum without Iss
@@ -31,22 +31,24 @@ function z = Ktrace_fitness(X, ds_Ktrace, Iss, Ito, IKslow1, IKslow2, tau_to, ta
 %     end
 
     trace_sim = dtw(IKsum, ds_Ktrace.I);
+    disp(trace_sim);
+    
+%     Ito_hat = max(Ito_trc);
+%     IKslow1_hat = max(IKslow1_trc);
+%     IKslow2_hat = max(IKslow2_trc);
+% 
+%     amp_to = abs(Ito - max(Ito_trc));
+%     amp_slow1 = abs(IKslow1 - max(IKslow1_trc));
+%     amp_slow2 = abs(IKslow2 - max(IKslow2_trc));
+% 
+%     [~, tau_to_idx] = min(abs(Ito_hat*exp(-1) - Ito_trc));
+%     [~, tau1_idx] = min(abs(IKslow1_hat*exp(-1) - IKslow1_trc));
+%     [~, tau2_idx] = min(abs(IKslow2_hat*exp(-1) - IKslow2_trc));
+% 
+%     tau_to = abs(tau_to - t(tau_to_idx));
+%     tau_slow1 = abs(tau1 - t(tau1_idx));
+%     tau_slow2 = abs(tau2 - t(tau2_idx));
 
-    Ito_hat = max(Ito_trc);
-    IKslow1_hat = max(IKslow1_trc);
-    IKslow2_hat = max(IKslow2_trc);
-
-    amp_to = abs(Ito - max(Ito_trc));
-    amp_slow1 = abs(IKslow1 - max(IKslow1_trc));
-    amp_slow2 = abs(IKslow2 - max(IKslow2_trc));
-
-    [~, tau_to_idx] = min(abs(Ito_hat*exp(-1) - Ito_trc));
-    [~, tau1_idx] = min(abs(IKslow1_hat*exp(-1) - IKslow1_trc));
-    [~, tau2_idx] = min(abs(IKslow2_hat*exp(-1) - IKslow2_trc));
-
-    tau_to = abs(tau_to - t(tau_to_idx));
-    tau_slow1 = abs(tau1 - t(tau1_idx));
-    tau_slow2 = abs(tau2 - t(tau2_idx));
-
-    z = trace_sim + amp_to + amp_slow1 + amp_slow2 + tau_to + tau_slow1 + tau_slow2;
+%     z = trace_sim + amp_to + amp_slow1 + amp_slow2 + tau_to + tau_slow1 + tau_slow2;
+    z = trace_sim;
 end    
