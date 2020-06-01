@@ -1,5 +1,5 @@
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = Kv(holding_p, holding_t, P1, P1_t, P2, P2_t)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = KvUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
    [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
 end
@@ -63,9 +63,9 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A79; i_ss
     ALGEBRAIC(:,4) = 1.00000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
     % A90; tau_aur
-    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,19))+2.05800;
+    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,19)) + 2.058;
     % A91; tau_iur
-    ALGEBRAIC(:,8) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
+    ALGEBRAIC(:,8) = 170.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
     % A88; aur
     RATES(:,3) = (ALGEBRAIC(:,3) - STATES(:,3))./ALGEBRAIC(:,7);
     % A89; iur
@@ -112,9 +112,9 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,2) = ( 0.000152000.*exp( - (ALGEBRAIC(:,19)+13.5000)./7.00000))./( 0.00670830.*exp( - (ALGEBRAIC(:,19)+33.5000)./7.00000)+1.00000);
     ALGEBRAIC(:,6) = ( 0.000950000.*exp((ALGEBRAIC(:,19)+33.5000)./7.00000))./( 0.0513350.*exp((ALGEBRAIC(:,19)+33.5000)./7.00000)+1.00000);
     ALGEBRAIC(:,3) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,19)+22.5000)./7.70000));
-    ALGEBRAIC(:,4) = 1.00000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
-    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,19))+2.05800;
-    ALGEBRAIC(:,8) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
+    ALGEBRAIC(:,4) = 1.00000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./15.70000));
+    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,19)) + 2.058;
+    ALGEBRAIC(:,8) = 170.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
     ALGEBRAIC(:,9) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,19)+22.5000)./7.70000));
     ALGEBRAIC(:,10) = 1.00000./(1.00000+exp((ALGEBRAIC(:,19)+45.2000)./5.70000));
     ALGEBRAIC(:,11) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,19))+2.05800;

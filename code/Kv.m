@@ -41,51 +41,51 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % externally applied voltage (voltage clamp)
     ALGEBRAIC(:,16) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
     
-    % Ito; 10 control variables
+    % Ito; 7 control variables [1, 7]
     % A71; alpha_a
     ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,16)+X(1)));
     % A72; beta_a
-    ALGEBRAIC(:,5) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,16)+X(2)));
+    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,16)+X(2)));
     % A73; alpha_i
-    ALGEBRAIC(:,2) = ( 0.000152000.*exp( - (ALGEBRAIC(:,16)+X(3))./X(4)))./( 0.00670830.*exp( - (ALGEBRAIC(:,16)+X(5))./X(6))+1.00000);
+    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,16)+X(3))./X(4)))./( 0.00670830.*exp( - (ALGEBRAIC(:,16)+X(5))./X(4))+1.00000);
     % A74; beta_i
-    ALGEBRAIC(:,6) = ( 0.000950000.*exp((ALGEBRAIC(:,16)+X(7))./X(8)))./( 0.0513350.*exp((ALGEBRAIC(:,16)+X(9))./X(10))+1.00000);
+    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,16)+X(6))./X(7)))./( 0.0513350.*exp((ALGEBRAIC(:,16)+X(6))./X(7))+1.00000);
     % A69; ato_f
-    RATES(:,1) =  ALGEBRAIC(:,1).*(1.00000 - STATES(:,1)) -  ALGEBRAIC(:,5).*STATES(:,1);
+    RATES(:,1) =  ALGEBRAIC(:,1).*(1.00000 - STATES(:,1)) -  ALGEBRAIC(:,2).*STATES(:,1);
     % A70; ito_f
-    RATES(:,2) =  ALGEBRAIC(:,2).*(1.00000 - STATES(:,2)) -  ALGEBRAIC(:,6).*STATES(:,2);
+    RATES(:,2) =  ALGEBRAIC(:,3).*(1.00000 - STATES(:,2)) -  ALGEBRAIC(:,4).*STATES(:,2);
     % A67; I_Kto,f
-    ALGEBRAIC(:,13) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,16) + 82.8);
+    ALGEBRAIC(:,5) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,16) + 82.8);
 
-    % IKslow1; 6 control variables
+    % IKslow1; 8 control variables [8, 15]
     % A78; a_ss
-    ALGEBRAIC(:,3) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(11))./X(12)));
+    ALGEBRAIC(:,6) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(8))./X(9)));
     % A79; i_ss
-    ALGEBRAIC(:,4) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(13))./X(14)));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(10))./X(11)));
     % A90; tau_aur
-    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+2.05800;
+    ALGEBRAIC(:,8) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+X(12);
     % A91; tau_iur
-    ALGEBRAIC(:,8) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(15))./X(16)));
+    ALGEBRAIC(:,9) = X(13) - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(14))./X(15))); % X(13) should be > 170
     % A88; aur
-    RATES(:,3) = (ALGEBRAIC(:,3) - STATES(:,3))./ALGEBRAIC(:,7);
+    RATES(:,3) = (ALGEBRAIC(:,6) - STATES(:,3))./ALGEBRAIC(:,8);
     % A89; iur
-    RATES(:,4) = (ALGEBRAIC(:,4) - STATES(:,4))./ALGEBRAIC(:,8);
+    RATES(:,4) = (ALGEBRAIC(:,7) - STATES(:,4))./ALGEBRAIC(:,9);
     % A87; I_kUR
-    ALGEBRAIC(:,14) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,16) + 82.8);
-    
-    % IKslow2; 6 control variables
+    ALGEBRAIC(:,10) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,16) + 82.8);
+     
+    % IKslow2; 8 control variables [16, 23]
     % A78; a_ss
-    ALGEBRAIC(:,9) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(17))./X(18)));
+    ALGEBRAIC(:,11) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(16))./X(17)));
     % A79; i_ss
-    ALGEBRAIC(:,10) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(19))./X(20)));
+    ALGEBRAIC(:,12) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(18))./X(19)));
     % A90; tau_aur
-    ALGEBRAIC(:,11) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+2.05800;
+    ALGEBRAIC(:,13) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+X(20);
     % A91; tau_iur
-    ALGEBRAIC(:,12) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(21))./X(22)));
+    ALGEBRAIC(:,14) = X(21) - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(22))./X(23))); % X(21) should be > 170
     % A88; aur
-    RATES(:,5) = (ALGEBRAIC(:,9) - STATES(:,5))./ALGEBRAIC(:,11);
+    RATES(:,5) = (ALGEBRAIC(:,11) - STATES(:,5))./ALGEBRAIC(:,13);
     % A89; iur
-    RATES(:,6) = (ALGEBRAIC(:,10) - STATES(:,6))./ALGEBRAIC(:,12);
+    RATES(:,6) = (ALGEBRAIC(:,12) - STATES(:,6))./ALGEBRAIC(:,14);
     % A87; I_kUR
     ALGEBRAIC(:,15) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,16) + 82.8);
 
@@ -96,22 +96,19 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,16) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
 
     ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,16)+X(1)));
-    ALGEBRAIC(:,5) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,16)+X(2)));
-    ALGEBRAIC(:,2) = ( 0.000152000.*exp( - (ALGEBRAIC(:,16)+X(3))./X(4)))./( 0.00670830.*exp( - (ALGEBRAIC(:,16)+X(5))./X(6))+1.00000);
-    ALGEBRAIC(:,6) = ( 0.000950000.*exp((ALGEBRAIC(:,16)+X(7))./X(8)))./( 0.0513350.*exp((ALGEBRAIC(:,16)+X(9))./X(10))+1.00000);
-    ALGEBRAIC(:,3) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(11))./X(12)));
-    ALGEBRAIC(:,4) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(13))./X(14)));
-    ALGEBRAIC(:,7) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+2.05800;
-    ALGEBRAIC(:,8) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(15))./X(16)));
-    ALGEBRAIC(:,9) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(17))./X(18)));
-    ALGEBRAIC(:,10) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(19))./X(20)));
-    ALGEBRAIC(:,11) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+2.05800;
-    ALGEBRAIC(:,12) = 1200.00 - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(21))./X(22)));
-    % Ito
-    ALGEBRAIC(:,13) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,16) + 82.8);
-    % IKslow1
-    ALGEBRAIC(:,14) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,16) + 82.8);
-    % IKslow2
+    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,16)+X(2)));
+    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,16)+X(3))./X(4)))./( 0.00670830.*exp( - (ALGEBRAIC(:,16)+X(5))./X(4))+1.00000);
+    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,16)+X(6))./X(7)))./( 0.0513350.*exp((ALGEBRAIC(:,16)+X(6))./X(7))+1.00000);
+    ALGEBRAIC(:,5) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,16) + 82.8);
+    ALGEBRAIC(:,6) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(8))./X(9)));
+    ALGEBRAIC(:,7) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(10))./X(11)));
+    ALGEBRAIC(:,8) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+X(12);
+    ALGEBRAIC(:,9) = X(13) - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(14))./X(15))); % X(13) should be > 170
+    ALGEBRAIC(:,10) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,16) + 82.8);
+    ALGEBRAIC(:,11) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,16)+X(16))./X(17)));
+    ALGEBRAIC(:,12) = 1.00000./(1.00000+exp((ALGEBRAIC(:,16)+X(18))./X(19)));
+    ALGEBRAIC(:,13) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,16))+X(20);
+    ALGEBRAIC(:,14) = X(21) - 170.000./(1.00000+exp((ALGEBRAIC(:,16)+X(22))./X(23))); % X(21) should be > 170
     ALGEBRAIC(:,15) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,16) + 82.8);
 end
 

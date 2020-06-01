@@ -12,9 +12,8 @@ load('ds_Ktrace_ko.mat')
 ds_Ktrace = ds_Ktrace_ko;
 ds_Ktrace.Properties.VariableNames = {'time', 'I'};
 
-
 % real experiment data
-K_data = readtable('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-KO.xlsx');
+K_data = readtable('./potassium-KO.xlsx');
 
 Iss = K_data.IssFF;
 Iss = nanmean(Iss);
@@ -27,25 +26,29 @@ ds_Ktrace.I = ds_Ktrace.I ./ cap;
 
 
 %% DoE
-X0 = [-22.5, 7.7, -45.2, 5.7, 0.18064, 0.03577, 30.0, 0.3956, -0.06237, 30.0, ...
-    0.000152, 13.5, 7.0, 0.067083, 33.5, 7.0, 0.00095, 33.5, 7.0, 0.051335, ...
-    22.5, 7.7, 26.5, 7.7, 45.2, 5.7, 0.493, -0.0629, 2.058, -170.0, 45.2, 5.7, ...
-    22.5, 7.7, 26.5, 7.7, 45.2, 5.7, 0.493, -0.0629, 2.058, -170.0, 45.2, 5.7];
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+P2 = -70; % mV
+P2_t = P1_t; % ms
 
-IKsum = Kv_anal(t, 50, X0);
-plot(t, IKsum)
+X0 = [30.0, 30.0, 13.5, 7.0, 33.5, 33.5, 7.0, ...
+      22.5, 7.7, 45.2, 5.7, 2.058, 1200.0, 45.2, 5.7, ...
+      22.5, 7.7, 45.2, 5.7, 2.058, 1200.0, 45.2, 5.7];
+low = [0.0, 0.0, 0.0, 2.0, 0.0, 20.0, 2.0, ...
+       0.0, 2.0, 0.0, 2.0, 0.0, 170.0, 0.0, 2.0, ...
+       0.0, 2.0, 0.0, 2.0, 0.0, 170.0, 0.0, 2.0];
+high = [70.0, 70.0, 70.0, 50.0, 70.0, 70.0, 50.0, ...
+        35.0, 14.0, 80.0, 24.0, 5.0, 5000.0, 70.0, 30.0, ...
+        35.0, 14.0, 80.0, 24.0, 5.0, 5000.0, 70.0, 30.0,];
+
 num_vars = length(X0);
-low = zeros(1, num_vars);
-high = zeros(1, num_vars);
-for i=1:length(X0)
-    low(i) = X0(i) - 3*abs(X0(i));
-    high(i) = X0(i) + 3*abs(X0(i));
-end
-
 num_runs = size(doe_mx);
 num_runs = num_runs(1);
 res = zeros(num_runs, 1); 
 for i=1:num_runs
+    fprintf("Exp %i/%i \n", i, num_runs)
     treat = table2array(doe_mx(i, :));
     param = zeros(1, num_vars);
     for j=1:num_vars
@@ -56,16 +59,11 @@ for i=1:num_runs
         end
     end
     
-    t = ds_Ktrace.time;
-    IKsum = Kv_anal(t, 50, param);
-    
-    [peak, peak_idx] = max(abs(IKsum));
-    if peak ==  Inf
-        IKsum(peak_idx:end) = IKsum(peak_idx-1);
-    else
-        IKsum(peak_idx:end) = IKsum(peak_idx:end) + Iss;
-    end
+    [t, ~, A, ~] = Kv(param, holding_p, holding_t, P1, P1_t, P2, P2_t);
+    IKsum = A(:,5) + A(:,10) + A(:,15);
     
     trace_sim = dtw(IKsum, ds_Ktrace.I);
     res(i) = trace_sim;
 end
+
+save('./doe_res.mat', 'res')
