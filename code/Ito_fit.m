@@ -3,85 +3,45 @@ close all
 clear variables
 
 
-%% Ito - KO
-% import data
-K_ko = readtable("./potassium-KO.xlsx");
-Ito_ko = K_ko.A3FF;
+K_data = readtable('./potassium-KO.xlsx');
+% K_data = readtable('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-WT.xlsx');
 
-% voltage clamp protocol parameters
-holding_p = -70; %mV
-holding_t = 4.5; %msec
-P1 = 50; %mV
-P1_t = 200; % msec
-P2 = 50; % mV
-P2_t = P1_t; % msec
+Iss = K_data.IssFF;
+% Iss = K_data.Iss;
+Iss = nanmean(Iss);
 
-% GA parameters
-% X = [30,30,13.5,33.5,33.5,33.5];
-num_vars = 6;
-% lower_bd = [0,0,0,0,0,0];
-% upper_bd = [60,60,60,60,60,60];
-fit_fn = @(X) Ito_fitness(X,Ito_ko,holding_p,holding_t,P1,P1_t,P2,P2_t);
+Ito = K_data.A3FF;
+% Ito = K_data.A3;
+Ito = nanmean(Ito);
 
-% run GA
-rst = zeros(10, 8);
-for i=1:10
-    tic
-    fprintf('### Iter %i / 10', i)
-    
-    [X,fval] = ga(fit_fn,num_vars);
-    
-    % run the Rasmusson with the fitted parameters
-    [~,~,A,~] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,X);
-    
-    % fitted value (steady-state current)
-    fitted_Ito = A(:,61);
-    
-    % save the results
-    file_path = sprintf('./GA_Ito_ko_%i.mat', i);
-    rst(i,:) = [X, fval, max(fitted_Ito)];
-    save(file_path, 'rst');
-    disp(rst)
-    toc
-end
+tau_to = K_data.Tau3FF;
+% tau_to = K_data.Tau3;
+tau_to = nanmean(tau_to);
 
+IKslow1 = K_data.A2FF;
+% IKslow1 = K_data.A2;
+IKslow1 = nanmean(IKslow1);
 
-%% Ito - WT
-K_wt = readtable("./potassium-WT.xlsx");
-Ito_wt = K_wt.A3;
+tau1 = K_data.Tau2FF;
+% tau1 = K_data.Tau2;
+tau1 = nanmean(tau1);
 
-% voltage clamp protocol parameters
-holding_p = -70; %mV
-holding_t = 4.5; %msec
-P1 = 50; %mV
-P1_t = 200; % msec
-P2 = 50; % mV
-P2_t = P1_t; % msec
+IKslow2 = K_data.A1FF;
+% IKslow2 = K_data.A1;
+IKslow2 = nanmean(IKslow2);
 
-% GA parameters
-num_vars = 6;
-% lower_bd = [0,0,0,0,0,0];
-% upper_bd = [60,60,60,60,60,60];
-fit_fn = @(X) Ito_fitness(X,Ito_wt,holding_p,holding_t,P1,P1_t,P2,P2_t);
+tau2 = K_data.Tau1FF;
+% tau2 = K_data.Tau1;
+tau2 = nanmean(tau2);
 
-% run GA
-rst = zeros(10, 8);
-for i=1:10
-    tic
-    fprintf('### Iter %i / 10', i)
-    
-    [X,fval] = ga(fit_fn,num_vars);
-    
-    % run the Rasmusson with the fitted parameters
-    [~,~,A,~] = Ito(holding_p,holding_t,P1,P1_t,P2,P2_t,X);
-    
-    % fitted value (steady-state current)
-    fitted_Ito = A(:,61);
-    
-    % save the results
-    file_path = sprintf('./GA_Ito_wt_%i.mat', i);
-    rst(i,:) = [X, fval, max(fitted_Ito)];
-    save(file_path, 'rst');
-    disp(rst)
-    toc
-end
+cap = K_data.CapFF;
+% cap = K_data.Cap;
+cap = nanmean(cap);
+
+X0 = [30.0, 30.0, 13.5, 33.5, 7.0];
+low_bd = [0.0, 0.0, 0.0, 20.0, 2.0];
+
+num_vars = 5;
+fit_fn = @(X) Ito_fitness(X, Ito, tau_to);
+opts = optimoptions('ga', 'PlotFcn','gaplotbestf', 'PopulationSize',40, 'MaxTime',18000);
+[param,fval] = ga(fit_fn,num_vars,[],[],[],[],low_bd,[],[],opts);

@@ -214,17 +214,75 @@ close all
 clear variables
 
 holding_p = -70; %mV
-holding_t = 50; %ms
+holding_t = 450; %ms
 P1 = 50; %mV
-P1_t = 25*100; % msec
+P1_t = 25*1000; % msec
 P2 = -70; % mV
 P2_t = P1_t; % msec
 
-[t5, ~, A5, ~] = Kv(holding_p, holding_t, P1, P1_t, P2, P2_t);
+[t, ~, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t);
+
+V = zeros(length(t), 1);
+V(t<= 450) = -70;
+V(t>450) = 50;
+X = [7.40, 14.00, -36.20, -4.90, 121.43, 39.87, -7.80, 9.60, -83.73, -7.86, -32.64, -6.36, 828.67, -5.09, 2.060];
+[Ito, IKslow1, IKsum] = Kv_anal(t, V, X);
 
 figure(1)
-plot(t5, A5(:,9))
+plot(t, A(:,15))
 hold on
-plot(t5, A5(:,10))
+plot(t, Ito)
 hold off
-legend('Ito', 'IKslow')
+legend('Sim', 'Analytical Solution')
+
+
+%% investigate tau and steady-state activation and inactivation rates (IKslow)
+clc
+close all
+clear variables
+
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+
+
+[t, S, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t);
+
+figure(1)
+plot(t, A(:,3), 'LineWidth',2)
+hold on
+plot(t, A(:,4), 'LineWidth',2)
+plot(t, A(:,7), 'LineWidth',2)
+plot(t, A(:,8), 'LineWidth',2)
+hold off
+legend('ass','iss','tau_aur','tau_iur')
+
+figure(2)
+plot(t, S(:,3), 'LineWidth',2)
+hold on
+plot(t, S(:,4), 'LineWidth',2)
+hold off
+legend('aur','iur')
+
+figure(3)
+plot(t, S(:,1), 'LineWidth',2)
+hold on
+plot(t, S(:,2), 'LineWidth',2)
+hold off
+legend('atof', 'itof')
+
+figure(4)
+[t, S, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t, -80.3);
+plot(t, A(:,16), 'LineWidth',2)
+hold on
+plot(t, A(:,17), 'LineWidth',2)
+hold off
+legend('IKslow1', 'IKslow2')
+
+
+%% solving equations
+syms x;
+eqn = x - 170.000./(1.00000+exp((-70+45.2000)./5.70000)) > 0;
+sol = solve(eqn, x);
+170 - 170.000./(1.00000+exp((50+45.2000)./5.70000))
