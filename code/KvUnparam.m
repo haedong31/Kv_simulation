@@ -1,10 +1,10 @@
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = KvUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = KvUnparam(holding_p, holding_t, P1, P1_t, Ek)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t);
+   [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, Ek);
 end
 
-function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, P2, P2_t)
+function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, Ek)
     % Create ALGEBRAIC of correct size
     global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
     
@@ -12,20 +12,20 @@ function [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1
     [INIT_STATES, CONSTANTS] = initConsts();
 
     % Set timespan to solve over 
-    tspan = [0, P2_t];
+    tspan = [0, P1_t];
 
     % Set numerical accuracy options for ODE solver
     options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
 
     % Solve model with ODE solver
-    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2), tspan, INIT_STATES, options);
+    [t, STATES] = ode15s(@(t, STATES)computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, Ek), tspan, INIT_STATES, options);
 
     % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2);
-    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2);
+    [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, Ek);
+    ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, Ek);
 end
 
-function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, P2)
+function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, holding_t, P1, P1_t, Ek)
     global algebraicVariableCount;
     statesSize = size(STATES);
     statesColumnCount = statesSize(2);
@@ -39,7 +39,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     end
     
     % externally applied voltage (voltage clamp)
-    ALGEBRAIC(:,19) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
+    ALGEBRAIC(:,19) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
     
     % Ito
     % A71; alpha_a
@@ -55,7 +55,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A70; ito_f
     RATES(:,2) =  ALGEBRAIC(:,2).*(1.00000 - STATES(:,2)) -  ALGEBRAIC(:,6).*STATES(:,2);
     % A67; I_Kto,f
-    ALGEBRAIC(:,15) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,15) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,19) - Ek);
 
     % IKslow1
     % A78; a_ss
@@ -71,7 +71,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A89; iur
     RATES(:,4) = (ALGEBRAIC(:,4) - STATES(:,4))./ALGEBRAIC(:,8);
     % A87; I_kUR
-    ALGEBRAIC(:,16) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,16) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,19) - Ek);
     
     % IKslow2
     % A78; a_ss
@@ -87,7 +87,7 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A89; iur
     RATES(:,6) = (ALGEBRAIC(:,10) - STATES(:,6))./ALGEBRAIC(:,12);
     % A87; I_kUR
-    ALGEBRAIC(:,17) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,17) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,19) - Ek);
 
     % Iss
     % A78; a_ss
@@ -99,13 +99,13 @@ function [RATES, ALGEBRAIC] = computeRates(t, STATES, CONSTANTS, holding_p, hold
     % A94; iKss 
     RATES(:,8) = 0;
     % A92; IKss
-    ALGEBRAIC(:,18) =  CONSTANTS(:,3).*STATES(:,7).*STATES(:,8).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,18) =  CONSTANTS(:,3).*STATES(:,7).*STATES(:,8).*(ALGEBRAIC(:,19) - Ek);
     
     RATES = RATES';
 end
 
-function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, P2)
-    ALGEBRAIC(:,19) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t, P2), t);
+function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p, holding_t, P1, P1_t, Ek)
+    ALGEBRAIC(:,19) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
 
     ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,19)+30.0000));
     ALGEBRAIC(:,5) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,19)+30.0000));
@@ -125,22 +125,20 @@ function ALGEBRAIC = computeAlgebraic(ALGEBRAIC, CONSTANTS, STATES, t, holding_p
     ALGEBRAIC(:,14) =  39.3000.*exp(  - 0.0862000.*ALGEBRAIC(:,19))+13.1700;
     
     % Ito
-    ALGEBRAIC(:,15) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,15) =  CONSTANTS(:,1).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,19) - Ek);
     % IKslow1
-    ALGEBRAIC(:,16) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,16) =  CONSTANTS(:,2).*STATES(:,3).*STATES(:,4).*(ALGEBRAIC(:,19) - Ek);
     % IKslow2
-    ALGEBRAIC(:,17) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,17) =  CONSTANTS(:,2).*STATES(:,5).*STATES(:,6).*(ALGEBRAIC(:,19) - Ek);
     % Iss
-    ALGEBRAIC(:,18) =  CONSTANTS(:,3).*STATES(:,7).*STATES(:,8).*(ALGEBRAIC(:,19) + 82.8);
+    ALGEBRAIC(:,18) =  CONSTANTS(:,3).*STATES(:,7).*STATES(:,8).*(ALGEBRAIC(:,19) - Ek);
 end
 
-function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t, P2)
+function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t)
     if t < holding_t
         VC = holding_p;
     elseif (t >= holding_t) && (t <= P1_t) 
         VC = P1;
-    else
-        VC = P2;
     end
 end
 

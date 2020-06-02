@@ -2,11 +2,11 @@ library(tidyverse)
 
 V <- seq(-70, 50, by = 1)
 
-ass_fn <- function(V) {return(1/(1+exp(-(V+22.5)/7.7)))}
+ass_fn <- function(V) {return(1/(1+exp(-(V+100)/7.7)))}
 ass <- ass_fn(V)
 qplot(V, ass)
 
-iss_fn <- function(V) {return(1/(1+exp((V+45.2)/5.7)))}
+iss_fn <- function(V) {return(1/(1+exp((V+0.2)/5.7)))}
 iss <- iss_fn(V)
 qplot(V, iss)
 

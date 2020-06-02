@@ -234,3 +234,55 @@ hold on
 plot(t, Ito)
 hold off
 legend('Sim', 'Analytical Solution')
+
+
+%% investigate tau and steady-state activation and inactivation rates (IKslow)
+clc
+close all
+clear variables
+
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+
+
+[t, S, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t);
+
+figure(1)
+plot(t, A(:,3), 'LineWidth',2)
+hold on
+plot(t, A(:,4), 'LineWidth',2)
+plot(t, A(:,7), 'LineWidth',2)
+plot(t, A(:,8), 'LineWidth',2)
+hold off
+legend('ass','iss','tau_aur','tau_iur')
+
+figure(2)
+plot(t, S(:,3), 'LineWidth',2)
+hold on
+plot(t, S(:,4), 'LineWidth',2)
+hold off
+legend('aur','iur')
+
+figure(3)
+plot(t, S(:,1), 'LineWidth',2)
+hold on
+plot(t, S(:,2), 'LineWidth',2)
+hold off
+legend('atof', 'itof')
+
+figure(4)
+[t, S, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t, -80.3);
+plot(t, A(:,16), 'LineWidth',2)
+hold on
+plot(t, A(:,17), 'LineWidth',2)
+hold off
+legend('IKslow1', 'IKslow2')
+
+
+%% solving equations
+syms x;
+eqn = x - 170.000./(1.00000+exp((-70+45.2000)./5.70000)) > 0;
+sol = solve(eqn, x);
+170 - 170.000./(1.00000+exp((50+45.2000)./5.70000))
