@@ -47,6 +47,17 @@ cap = nanmean(cap);
 
 ds_Ktrace.I = ds_Ktrace.I ./ cap;
 
-num_vars = 22;
-fit_fn = @(X) Ktrace_fitness(X, ds_Ktrace, Iss, Ito, IKslow1, IKslow2, tau_to, tau1, tau2);
-[param,fval] = ga(fit_fn,num_vars);
+% X0 = [30.0, 7.0, 33.5, 7.0, ...
+%       22.5, 7.7, 45.2, 2.058, 1200.0, ...
+%       5.7, 2.058];
+low_bd = [0.0, 2.0, 0.0, 2.0, ...
+          0.0, 2.0, 0.0, 0.0, 170.0, ...
+          2.0, 0.0];
+upper_bd = [70.0, 50.0, 70.0, 50.0, ...
+        35.0, 14.0, 80.0, 5.0, 5000.0, ...
+        24.0, 5.0];
+num_vars = 11;
+fit_fn = @(X) Ktrace_fitness(X, ds_Ktrace, Iss);
+options = optimoptions('ga','PlotFcn', @gaplotbestf, 'FitnessLimit',1000);
+[param,fval] = ga(fit_fn,num_vars,[],[],[],[],low_bd,upper_bd,[],options);
+
