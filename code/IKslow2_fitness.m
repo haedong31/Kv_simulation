@@ -1,4 +1,4 @@
-function z = Ktrace_fitness(X, IKslow2, tau2)
+function e = IKslow2_fitness(X, amp, tau2)
     holding_p = -70; %mV
     holding_t = 450; %ms
     P1 = 50; %mV
@@ -12,8 +12,8 @@ function z = Ktrace_fitness(X, IKslow2, tau2)
     [~, tau_idx] = min(abs(peak*exp(-1) - IKslow2_trc));
     tau = t(tau_idx);
     
-    amp_delta = (peak - IKslow2).^2;
+    amp_delta = (peak - amp).^2;
     tau_delta = (tau - tau2).^2;
-    e = amp_delta + tau_delta
-    fprintf('Amp: %f Tau: %f SSE: %f \n', amp_delta, tau_delta, e)
+    e = amp_delta + tau_delta;
+    % fprintf('Amp: %f Tau: %f SSE: %f \n', amp_delta, tau_delta, e)
 end   
