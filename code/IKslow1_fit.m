@@ -41,7 +41,5 @@ cap = nanmean(cap);
 X0 = [7.7, 45.2, 5.7, 1200.0, 45.2];
 low_bd = [2.0, 10.0, 2.0, 200.0, 0.0];
 
-num_vars = 5;
-fit_fn = @(X) IKslow1_fitness(X, IKslow1, tau1);
-opts = optimoptions('ga', 'PlotFcn',@gaplotbestf, 'PopulationSize',40, 'MaxTime',18000);
-[param,fval] = ga(fit_fn,num_vars,[],[],[],[],low_bd,[],[],opts);
+y = [IKslow1_amp, tau1];
+[best_fits, best_chroms] = custom_GA_IKslow1(5, y, 30, 6, 4);
