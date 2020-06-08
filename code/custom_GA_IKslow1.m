@@ -3,8 +3,8 @@ function [bamp, btau, best_chroms] = custom_GA_IKslow1(nv, y, N0, N1, N2)
     num_var = nv;
     
     % X0 = [22.5, 7.7, 45.2, 5.7, 2.058, 1200.0, 45.2, 5.7]
-    low = [2.0, 10.0, 2.0, 200.0, 0.0];
-    high = [14.0, 80.0, 24.0, 5000.0, 70.0];
+    low = [-60.0, 2.0, -20.0, 2.0, 200.0];
+    high = [80.0, 14.0, 80.0, 24.0, 5000.0];
     init_gen = init_pop(low, high, N0);
 
     best_fits = [];
@@ -73,9 +73,10 @@ function new_gen = evolve(chrom, fits, N0, N1, N2)
     sigs = std(elites);
     for i=1:N1
         elite = elites(i,:);
-        
         for j=1:N2
             offspring = elite + normrnd(0,sigs);
+            offspring(2) = abs(offspring(2));
+            offspring(4) = abs(offspring(4));
             new_gen((N1+cnt),:) = offspring;
             cnt = cnt + 1;
         end
@@ -87,7 +88,7 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
     holding_t = 450; %ms
     P1 = 50; %mV
     P1_t = 25*1000; % ms
-    Ek = -80.3;
+    Ek = -91.1;
     
     fits = zeros(1, N0);
     amp_dels = zeros(1, N0);
@@ -99,13 +100,16 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
             trc = A(:,5);
             
             wrong_shape_iden = any(trc < 0);
-            if wrong_shape_iden == 1
+            [peak, peak_idx] = max(trc);
+            if (wrong_shape_iden == 1) || (t(peak_idx) < holding_t)
+                fprintf('Wrong shape at %i \n', i);
+                disp(chrom(i,:));
+
                 wrn_idx = [wrn_idx, i];
                 amp_dels(i) = 15000;
                 tau_dels(i) = 15000;
                 fits(i) = amp_dels(i) + tau_dels(i);
             else
-                [peak, peak_idx] = max(trc);
                 amp_dels(i) = abs(peak - y(1));
 
                 [~, tau_idx] = min(abs(peak*exp(-1) - trc(peak_idx:end)));
@@ -116,7 +120,9 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
         catch
             % lastwarn
             % lasterr
-            fprintf('Error or warning at %i', i);
+            fprintf('Error or warning at %i \n', i);
+            disp(chrom(i,:));
+            
             wrn_idx = [wrn_idx, i];
             amp_dels(i) = 15000;
             tau_dels(i) = 15000;

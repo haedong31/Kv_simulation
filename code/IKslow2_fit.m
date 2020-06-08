@@ -42,4 +42,4 @@ X0 = [7.7, 45.2, 5.7, 1200.0, 45.2];
 low_bd = [2.0, 10.0, 2.0, 200.0, 0.0];
 
 y = [IKslow2_amp, tau2];
-[best_fits, best_chroms] = custom_GA_IKslow2(5, y, 30, 6, 4);
+[best_amp, best_tau, best_chrom] = custom_GA_IKslow2(5, y, 30, 6, 4);

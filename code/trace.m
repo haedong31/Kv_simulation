@@ -167,4 +167,52 @@ i_after_peak = A(peak_idx+1:end, 65);
 [tau_i_hat, tau_hat] = min(abs(tau_i - i_after_peak));
 
 
-%% IKsum
+%% sensitivity analysis
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+Ek = -91.1;
+
+Xslow = [-0.0613    0.0097    0.2070    0.0128    1.1628];
+Xslow = Xslow*1000;
+Xto = [-13.5655  128.4098  321.7877  127.2189   58.4796];
+
+[t, S, A, ~] = KvUnparam(holding_p, holding_t, P1, P1_t, Ek);
+[t1, S1, A1, ~] = Ito(Xto, holding_p, holding_t, P1, P1_t, Ek);
+[t2, S2, A2, ~] = IKslow(Xslow, holding_p, holding_t, P1, P1_t, Ek);
+
+to_trc = A1(:,5);
+[to_peak, to_peak_idx] = max(to_trc);
+[~, to_tau_idx] = min(abs(to_peak*exp(-1) - to_trc(to_peak_idx:end)));
+ato = S1(:,1);
+ito = S1(:,2);
+ato(to_peak_idx)
+ito(to_peak_idx)
+
+slow_trc = A2(:,5);
+[slow_peak, slow_peak_idx] = max(slow_trc);
+[~, slow_tau_idx] = min(abs(slow_peak*exp(-1) - slow_trc(slow_peak_idx:end)));
+aur = S2(:,1);
+iur = S2(:,2);
+slow_peak
+t2(slow_tau_idx)
+aur(slow_peak_idx)
+iur(slow_peak_idx)
+
+% with original values
+to_trc = A(:,15);
+[to_peak, to_peak_idx] = max(to_trc);
+[~, to_tau_idx] = min(abs(to_peak*exp(-1) - to_trc(to_peak_idx:end)));
+ato = S1(:,1);
+ito = S1(:,2);
+ato(to_peak_idx)
+ito(to_peak_idx)
+
+slow_trc = A(:,17);
+[slow_peak, slow_peak_idx] = max(slow_trc);
+[~, slow_tau_idx] = min(abs(slow_peak*exp(-1) - slow_trc(slow_peak_idx:end)));
+aur = S2(:,1);
+iur = S2(:,2);
+aur(slow_peak_idx)
+iur(slow_peak_idx)

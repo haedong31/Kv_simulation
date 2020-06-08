@@ -1,4 +1,3 @@
-
 function [t, STATES, ALGEBRAIC, CONSTANTS] = IKslow(X, holding_p, holding_t, P1, P1_t, Ek)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
    [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek);
@@ -43,13 +42,13 @@ function [RATES, ALGEBRAIC] = computeRates(X, t, STATES, CONSTANTS, holding_p, h
     
     % IKslow
     % A78; a_ss
-    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+22.5)./X(1)));
+    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+X(1))./X(2)));
     % A79; i_ss
-    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(2))./X(3)));
+    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(3))./X(4)));
     % A90; tau_aur
     ALGEBRAIC(:,3) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,6)) + 2.058;
     % A91; tau_iur
-    ALGEBRAIC(:,4) = X(4) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+X(5))./5.7));
+    ALGEBRAIC(:,4) = X(5) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+45.2)./5.7));
     % A88; aur
     RATES(:,1) = (ALGEBRAIC(:,1) - STATES(:,1))./ALGEBRAIC(:,3);
     % A89; iur
@@ -64,13 +63,13 @@ function ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, CONSTANTS, STATES, t, holdin
     ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
 
     % A78; a_ss
-    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+22.5)./X(1)));
+    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+X(1))./X(2)));
     % A79; i_ss
-    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(2))./X(3)));
+    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(3))./X(4)));
     % A90; tau_aur
     ALGEBRAIC(:,3) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,6)) + 2.058;
     % A91; tau_iur
-    ALGEBRAIC(:,4) = X(4) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+X(5))./5.7));
+    ALGEBRAIC(:,4) = X(5) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+45.2)./5.7));
     % A87; I_kUR
     ALGEBRAIC(:,5) =  CONSTANTS(:,1).*STATES(:,1).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
 end

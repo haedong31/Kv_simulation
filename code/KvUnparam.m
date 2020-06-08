@@ -1,4 +1,3 @@
-
 function [t, STATES, ALGEBRAIC, CONSTANTS] = KvUnparam(holding_p, holding_t, P1, P1_t, Ek)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
    [t, STATES, ALGEBRAIC, CONSTANTS] = solveModel(holding_p, holding_t, P1, P1_t, Ek);
