@@ -1,6 +1,7 @@
 clc
 close all
 clear variables
+format long
 
 
 K_data = readtable('./potassium-KO.xlsx');

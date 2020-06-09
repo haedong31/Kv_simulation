@@ -1,4 +1,4 @@
-function [best_fits, best_chroms] = custom_GA(nv, y, N0, N1, N2)
+function [bamp, btau, best_chroms] = custom_GA_Ito(nv, y, N0, N1, N2)
     global num_var;
     num_var = nv;
 
@@ -7,15 +7,15 @@ function [best_fits, best_chroms] = custom_GA(nv, y, N0, N1, N2)
     init_gen = init_pop(low, high, N0);
 
     best_fits = [];
-    best_chroms = [];
     
     cnt = 1;
     [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
     [bf, bf_idx] = min(fits);
     
-    fprintf('Initial best fit: %f|Amp: %f|Tai: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
+    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
+    disp(init_gen(bf_idx,:))
+
     best_fits = [best_fits, bf];
-    best_chroms = [best_chroms; init_gen(bf_idx,:)];
     best_cnt = 1;
     
     new_gen = evolve(init_gen, fits, N0, N1, N2);
@@ -26,20 +26,24 @@ function [best_fits, best_chroms] = custom_GA(nv, y, N0, N1, N2)
         cnt = cnt + 1;
         [fits, amp_dels, tau_dels] = eval_fn(new_gen, y, N0);
         [bf, bf_idx] = min(fits);
+        bamp = amp_dels(bf_idx);
+        btau = tau_dels(bf_idx);
+        
+        % stopping tolerance
+        if (bamp <= 1.7) && (btau <= 2.7)
+            fprintf('Termination: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
+            best_chroms = new_gen(bf_idx,:);
+            disp(best_chroms)
+            break
+        end
         
         if (bf < best_fits(best_cnt))
-            fprintf('Best fit is updated: %f|Amp: %f|Tai: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
-            disp(new_gen(bf_idx,:))
+            fprintf('Best fit is updated: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
             best_fits = [best_fits, bf];
-            best_chroms = [best_chroms; new_gen(bf_idx,:)];
+            best_chroms = new_gen(bf_idx,:);
+            disp(best_chroms)
+
             best_cnt = best_cnt + 1;
-            
-            best_amp_del = amp_dels(bf_idx);
-            best_tau_del = tau_dels(bf_idx);
-            % stopping tolerance
-            if (best_amp_del <= 1.7) && (best_tau_del <= 2.7)
-                break
-            end
         end 
         
         new_gen = evolve(new_gen, fits, N0, N1, N2);    
@@ -70,7 +74,6 @@ function new_gen = evolve(chrom, fits, N0, N1, N2)
     sigs = std(elites);
     for i=1:N1
         elite = elites(i,:);
-        
         for j=1:N2
             offspring = elite + normrnd(0,sigs);
             new_gen((N1+cnt),:) = offspring;
@@ -84,7 +87,7 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
     holding_t = 450; %ms
     P1 = 50; %mV
     P1_t = 25*1000; % ms
-    Ek = -80.3;
+    Ek = -91.1;
     
     fits = zeros(1, N0);
     amp_dels = zeros(1, N0);
@@ -96,13 +99,16 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
             trc = A(:,5);
             
             wrong_shape_iden = any(trc < 0);
-            if wrong_shape_iden == 1
+            [peak, peak_idx] = max(trc);
+            if (wrong_shape_iden == 1) || (t(peak_idx) < holding_t)
+                fprintf('Wrong shape at %i \n', i);
+                disp(chrom(i,:));
+
                 wrn_idx = [wrn_idx, i];
                 amp_dels(i) = 15000;
                 tau_dels(i) = 15000;
                 fits(i) = amp_dels(i) + tau_dels(i);
             else
-                [peak, peak_idx] = max(trc);
                 amp_dels(i) = abs(peak - y(1));
 
                 [~, tau_idx] = min(abs(peak*exp(-1) - trc(peak_idx:end)));
@@ -113,7 +119,9 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
         catch
             % lastwarn
             % lasterr
-            fprintf('Error or warning at %i', i);
+            fprintf('Error or warning at %i \n', i);
+            disp(chrom(i,:));
+
             wrn_idx = [wrn_idx, i];
             amp_dels(i) = 15000;
             tau_dels(i) = 15000;

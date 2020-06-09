@@ -2,33 +2,5 @@ clc
 close all
 clear variables
 
-
-% K_data = readtable('./potassium-KO.xlsx');
-K_data = readtable('./potassium-WT.xlsx');
-
-Iss_amp = K_data.Iss;
-Iss_amp = nanmean(Iss_amp);
-
-Ito_amp = K_data.A3;
-Ito_amp = nanmean(Ito_amp);
-
-tau_to = K_data.Tau3;
-tau_to = nanmean(tau_to);
-
-IKslow1_amp = K_data.A2;
-IKslow1_amp = nanmean(IKslow1_amp);
-
-tau1 = K_data.Tau2;
-tau1 = nanmean(tau1);
-
-IKslow2_amp = K_data.A1;
-IKslow2_amp = nanmean(IKslow2_amp);
-
-tau2 = K_data.Tau1;
-tau2 = nanmean(tau2);
-
-cap = K_data.Cap;
-cap = nanmean(cap);
-
-y = [Ito_amp, tau_to];
-[best_fits, best_chroms] = custom_GA(5, y, 30, 6, 4);
+y = [24.8, 105.2];
+[bamp, btau, best_chroms] = custom_GA_Ito(5, y, 30, 6, 4);

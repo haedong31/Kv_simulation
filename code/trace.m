@@ -216,3 +216,26 @@ aur = S2(:,1);
 iur = S2(:,2);
 aur(slow_peak_idx)
 iur(slow_peak_idx)
+
+
+%% darw traces by changing voltage steps
+holding_p = -80; %mV
+holding_t = 50; %ms
+P1 = -70:10:50; %mV
+P1_t = 5*1000; % ms
+Ek = -91.1;
+
+init_to = [-13.5655  128.4098  321.7877  127.2189   58.4796];
+init_Kslow1 = [-0.0613    0.0097    0.2070    0.0128    1.1628];
+init_Kslow1 = init_Kslow1*1000;
+init_Kslow2 = [-0.0717    0.0123    0.0245    0.0399    8.6985];
+init_Kslow2 = init_Kslow2*1000;
+init_param = [init_to init_Kslow1 init_Kslow2];
+
+hold on
+for i=1:length(P1)
+    [t, ~, A, ~] = IKsum(init_param, holding_p, holding_t, P1(i), P1_t, Ek);
+    IKsum_sim = A(:,5) + A(:,10) + A(:,15);
+    plot(t, IKsum_sim)
+end
+hold off

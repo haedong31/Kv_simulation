@@ -14,6 +14,8 @@ function [bamp, btau, best_chroms] = custom_GA_IKslow2(nv, y, N0, N1, N2)
     [bf, bf_idx] = min(fits);
     
     fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
+    disp(init_gen(bf_idx,:))
+
     best_fits = [best_fits, bf];
     best_cnt = 1;
     
@@ -104,7 +106,7 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
             if (wrong_shape_iden == 1) || (t(peak_idx) < holding_t)
                 fprintf('Wrong shape at %i \n', i);
                 disp(chrom(i,:));
-
+                    
                 wrn_idx = [wrn_idx, i];
                 amp_dels(i) = 15000;
                 tau_dels(i) = 15000;
