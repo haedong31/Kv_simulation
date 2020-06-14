@@ -1,22 +1,31 @@
-function [bamp, btau, best_chroms] = custom_GA_Ito(nv, y, N0, N1, N2)
+function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1, N2)
     global num_var;
     num_var = nv;
 
-    low = [0.0, 0.0, 0.0, 20.0, 2.0];
-    high = [70.0, 70.0, 70.0, 70.0, 50.0];
+    best_amps = [];
+    best_taus = [];
+    best_gens = [];
+    best_chroms = [];
+
+    low = [0.0, 0.0, 0.0, 20.0, 2.0, 0.2];
+    high = [70.0, 70.0, 70.0, 70.0, 50.0, 0.6];
     init_gen = init_pop(low, high, N0);
 
-    best_fits = [];
-    
     cnt = 1;
     [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
     [bf, bf_idx] = min(fits);
-    
-    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
-    disp(init_gen(bf_idx,:))
+    bamp = amp_dels(bf_idx);
+    btau = tau_dels(bf_idx);
+    bchrom = init_gen(bf_idx,:);
 
-    best_fits = [best_fits, bf];
+    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
+    disp(bchrom)
+
     best_cnt = 1;
+    best_gens = [best_gens, 1];
+    best_amps = [best_amps, bamp];
+    best_taus = [best_taus, btau];
+    best_chroms = [best_chroms; bchrom];
     
     new_gen = evolve(init_gen, fits, N0, N1, N2);
     
@@ -24,26 +33,36 @@ function [bamp, btau, best_chroms] = custom_GA_Ito(nv, y, N0, N1, N2)
         tic
         fprintf('\n Generation %i \n', cnt)
         cnt = cnt + 1;
-        [fits, amp_dels, tau_dels] = eval_fn(new_gen, y, N0);
+        [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
         [bf, bf_idx] = min(fits);
         bamp = amp_dels(bf_idx);
         btau = tau_dels(bf_idx);
+        bchrom = new_gen(bf_idx,:);
         
         % stopping tolerance
         if (bamp <= 1.7) && (btau <= 2.7)
             fprintf('Termination: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
-            best_chroms = new_gen(bf_idx,:);
-            disp(best_chroms)
+            disp(bchrom)
+
+            best_gens = [best_gens, cnt];
+            best_amps = [best_amps, bamp];
+            best_taus = [best_taus, btau];
+            best_gens = [best_gens, 1];
+            best_chroms = [best_chroms; bchrom];
+        
             break
         end
         
         if (bf < best_fits(best_cnt))
             fprintf('Best fit is updated: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
-            best_fits = [best_fits, bf];
-            best_chroms = new_gen(bf_idx,:);
-            disp(best_chroms)
+            disp(bchrom)
 
             best_cnt = best_cnt + 1;
+            best_gens = [best_gens, cnt];
+            best_amps = [best_amps, bamp];
+            best_taus = [best_taus, btau];
+            best_gens = [best_gens, 1];
+            best_chroms = [best_chroms; bchrom];        
         end 
         
         new_gen = evolve(new_gen, fits, N0, N1, N2);    

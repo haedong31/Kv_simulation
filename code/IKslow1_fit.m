@@ -39,8 +39,16 @@ cap = K_data.CapFF;
 % cap = K_data.Cap;
 cap = nanmean(cap);
 
-X0 = [7.7, 45.2, 5.7, 1200.0, 45.2];
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+Ek = -91.1;
+X0 = [7.7, 45.2, 5.7, 1200.0, 45.2, 0.16];
 low_bd = [2.0, 10.0, 2.0, 200.0, 0.0];
+
+[t, ~, A] = IKslow(X0, holding_p, holding_t, P1, P1_t, Ek);
+plot(t, A(:,5))
 
 y = [IKslow1_amp, tau1];
 [best_amp, best_tau, best_chrom] = IKslow1_AGA(5, y, 30, 6, 4);
