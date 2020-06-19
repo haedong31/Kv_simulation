@@ -1,21 +1,34 @@
-function [bamp, btau, best_chroms] = custom_GA_IKslow1(nv, y, N0, N1, N2)
+function [best_amps, best_taus, best_gens, best_chroms] = IKslow1_AGA(nv, y, N0, N1, N2)
     global num_var;
     num_var = nv;
     
-    % X0 = [22.5, 7.7, 45.2, 5.7, 2.058, 1200.0, 45.2, 5.7]
-    low = [-60.0, 2.0, -20.0, 2.0, 200.0];
-    high = [80.0, 14.0, 80.0, 24.0, 5000.0];
-    init_gen = init_pop(low, high, N0);
-
     best_fits = [];
+    best_amps = [];
+    best_taus = [];
+    best_gens = [];
+    best_chroms = [];
+
+    % X0 = [22.5, 7.7, 45.2, 5.7, 2.058, 1200.0, 45.2, 5.7]
+    low = [-60.0, 2.0, -20.0, 2.0, 200.0, 0.05];
+    high = [80.0, 14.0, 80.0, 24.0, 5000.0, 0.3];
+    init_gen = init_pop(low, high, N0);
 
     cnt = 1;
     [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
     [bf, bf_idx] = min(fits);
+    bamp = amp_dels(bf_idx);
+    btau = tau_dels(bf_idx);
+    bchrom = init_gen(bf_idx,:);
     
-    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, amp_dels(bf_idx), tau_dels(bf_idx));
-    best_fits = [best_fits, bf];
+    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
+    disp(bchrom)
+
     best_cnt = 1;
+    best_fits = [best_fits, bf];
+    best_amps = [best_amps, bamp];
+    best_taus = [best_taus, btau];
+    best_gens = [best_gens, 1];
+    best_chroms = [best_chroms; bchrom];
     
     new_gen = evolve(init_gen, fits, N0, N1, N2);
     
@@ -27,22 +40,32 @@ function [bamp, btau, best_chroms] = custom_GA_IKslow1(nv, y, N0, N1, N2)
         [bf, bf_idx] = min(fits);
         bamp = amp_dels(bf_idx);
         btau = tau_dels(bf_idx);
+        bchrom = new_gen(bf_idx,:);
         
         % stopping tolerance
-        if (bamp <= 0.4) && (btau <= 83.3)
+        if (bamp <= 0.5) && (btau <= 0.5)
             fprintf('Termination: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
-            best_chroms = new_gen(bf_idx,:);
-            disp(best_chroms)
+            disp(bchrom)
+
+            best_fits = [best_fits, bf];
+            best_amps = [best_amps, bamp];
+            best_taus = [best_taus, btau];
+            best_gens = [best_gens, cnt];
+            best_chroms = [best_chroms; bchrom];
+        
             break
         end
         
         if (bf < best_fits(best_cnt))
             fprintf('Best fit is updated: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
-            best_fits = [best_fits, bf];
-            best_chroms = new_gen(bf_idx,:);
-            disp(best_chroms)
+            disp(bchrom)
 
             best_cnt = best_cnt + 1;
+            best_fits = [best_fits, bf];
+            best_amps = [best_amps, bamp];
+            best_taus = [best_taus, btau];
+            best_gens = [best_gens, cnt];
+            best_chroms = [best_chroms; bchrom];        
         end 
         
         new_gen = evolve(new_gen, fits, N0, N1, N2);    
@@ -96,7 +119,7 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
     wrn_idx = [];
     for i=1:N0
         try
-            [t, ~, A, ~] = IKslow(chrom(i,:), holding_p, holding_t, P1, P1_t, Ek);
+            [t, ~, A] = IKslow(chrom(i,:), holding_p, holding_t, P1, P1_t, Ek);
             trc = A(:,5);
             
             wrong_shape_iden = any(trc < 0);

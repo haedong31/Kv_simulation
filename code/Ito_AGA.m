@@ -2,6 +2,7 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
     global num_var;
     num_var = nv;
 
+    best_fits = [];
     best_amps = [];
     best_taus = [];
     best_gens = [];
@@ -22,9 +23,10 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
     disp(bchrom)
 
     best_cnt = 1;
-    best_gens = [best_gens, 1];
+    best_fits = [best_fits, bf];
     best_amps = [best_amps, bamp];
     best_taus = [best_taus, btau];
+    best_gens = [best_gens, 1];
     best_chroms = [best_chroms; bchrom];
     
     new_gen = evolve(init_gen, fits, N0, N1, N2);
@@ -33,21 +35,21 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
         tic
         fprintf('\n Generation %i \n', cnt)
         cnt = cnt + 1;
-        [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
+        [fits, amp_dels, tau_dels] = eval_fn(new_gen, y, N0);
         [bf, bf_idx] = min(fits);
         bamp = amp_dels(bf_idx);
         btau = tau_dels(bf_idx);
         bchrom = new_gen(bf_idx,:);
         
         % stopping tolerance
-        if (bamp <= 1.7) && (btau <= 2.7)
+        if (bamp <= 0.1) && (btau <= 0.1)
             fprintf('Termination: %f|Amp: %f|Tau: %f \n', bf, bamp, btau);
             disp(bchrom)
 
-            best_gens = [best_gens, cnt];
+            best_fits = [best_fits, bf];
             best_amps = [best_amps, bamp];
             best_taus = [best_taus, btau];
-            best_gens = [best_gens, 1];
+            best_gens = [best_gens, cnt];
             best_chroms = [best_chroms; bchrom];
         
             break
@@ -58,10 +60,10 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
             disp(bchrom)
 
             best_cnt = best_cnt + 1;
-            best_gens = [best_gens, cnt];
+            best_fits = [best_fits, bf];
             best_amps = [best_amps, bamp];
             best_taus = [best_taus, btau];
-            best_gens = [best_gens, 1];
+            best_gens = [best_gens, cnt];
             best_chroms = [best_chroms; bchrom];        
         end 
         
@@ -114,7 +116,7 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
     wrn_idx = [];
     for i=1:N0
         try
-            [t, ~, A, ~] = Ito(chrom(i,:), holding_p, holding_t, P1, P1_t, Ek);
+            [t, ~, A] = Ito(chrom(i,:), holding_p, holding_t, P1, P1_t, Ek);
             trc = A(:,5);
             
             wrong_shape_iden = any(trc < 0);
