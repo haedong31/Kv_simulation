@@ -43,19 +43,19 @@ function [RATES, ALGEBRAIC] = computeRates(X, t, STATES, holding_p, holding_t, P
     
     % Ito
     % A71; alpha_a
-    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+X(1)));
+    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+30.0));
     % A72; beta_a
-    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(2)));
+    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(1)));
     % A73; alpha_i
-    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(3))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
+    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(2))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
     % A74; beta_i
-    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(4))./X(5)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(4))./X(5))+1.00000);
+    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(3))./X(4)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(3))./X(4))+1.00000);
     % A69; ato_f
     RATES(:,1) =  ALGEBRAIC(:,1).*(1.00000 - STATES(:,1)) -  ALGEBRAIC(:,2).*STATES(:,1);
     % A70; ito_f
     RATES(:,2) =  ALGEBRAIC(:,3).*(1.00000 - STATES(:,2)) -  ALGEBRAIC(:,4).*STATES(:,2);
     % A67; I_Kto,f
-    ALGEBRAIC(:,5) =  X(6).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
+    ALGEBRAIC(:,5) =  X(5).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
     
     RATES = RATES';
 end
@@ -64,15 +64,15 @@ function ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, STATES, t, holding_p, holdin
     ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
 
     % A71; alpha_a
-    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+X(1)));
+    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+30.0));
     % A72; beta_a
-    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(2)));
+    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(1)));
     % A73; alpha_i
-    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(3))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
+    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(2))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
     % A74; beta_i
-    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(4))./X(5)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(4))./X(5))+1.00000);
+    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(3))./X(4)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(3))./X(4))+1.00000);
     % A67; I_Kto,f
-    ALGEBRAIC(:,5) =  X(6).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
+    ALGEBRAIC(:,5) =  X(5).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
 end
 
 function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t)
@@ -87,7 +87,7 @@ function [algebraicVariableCount] = getAlgebraicVariableCount()
     % Used later when setting a global variable with the number of algebraic variables.
     % There are a total of 41 entries in each of the rate and state variable arrays.
     % There are a total of 73 entries in the constant variable array.
-    algebraicVariableCount = 6;
+    algebraicVariableCount = 5;
 end
 
 function [STATES] = initConsts()

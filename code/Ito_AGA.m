@@ -8,8 +8,8 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
     best_gens = [];
     best_chroms = [];
 
-    low = [0.0, 0.0, 0.0, 20.0, 2.0, 0.2];
-    high = [70.0, 70.0, 70.0, 70.0, 50.0, 0.6];
+    low = [0.0, 0.0, 20.0, 2.0, 0.2];
+    high = [70.0, 70.0, 70.0, 50.0, 0.6];
     init_gen = init_pop(low, high, N0);
 
     cnt = 1;
@@ -122,8 +122,8 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
             wrong_shape_iden = any(trc < 0);
             [peak, peak_idx] = max(trc);
             if (wrong_shape_iden == 1) || (t(peak_idx) < holding_t)
-                fprintf('Wrong shape at %i \n', i);
-                disp(chrom(i,:));
+                % fprintf('Wrong shape at %i \n', i);
+                % disp(chrom(i,:));
 
                 wrn_idx = [wrn_idx, i];
                 amp_dels(i) = 15000;
@@ -140,8 +140,8 @@ function [fits, amp_dels, tau_dels] = eval_fn(chrom, y, N0)
         catch
             % lastwarn
             % lasterr
-            fprintf('Error or warning at %i \n', i);
-            disp(chrom(i,:));
+            % fprintf('Error or warning at %i \n', i);
+            % disp(chrom(i,:));
 
             wrn_idx = [wrn_idx, i];
             amp_dels(i) = 15000;
