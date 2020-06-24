@@ -1,4 +1,4 @@
-function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1, N2)
+function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, init_param, N0, N1, N2)
     global num_var;
     num_var = nv;
 
@@ -8,9 +8,12 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
     best_gens = [];
     best_chroms = [];
 
-    low = [0.0, 0.0, 0.0, 20.0, 2.0, 0.2];
-    high = [70.0, 70.0, 70.0, 70.0, 50.0, 0.6];
-    init_gen = init_pop(low, high, N0);
+    % initial population
+    init_gen = zeros(N0, num_var);
+    init_gen(1,:) = init_param;
+    for i=1:num_var
+        init_gen(2:end,i) = init_param(i) + normrnd(0,1,[N0-1,1]);
+    end
 
     cnt = 1;
     [fits, amp_dels, tau_dels] = eval_fn(init_gen, y, N0);
@@ -69,16 +72,6 @@ function [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(nv, y, N0, N1,
         
         new_gen = evolve(new_gen, fits, N0, N1, N2);    
         toc
-    end
-end
-
-function init_gen = init_pop(low, high, N0)
-    global num_var;
-
-    init_gen = zeros(N0, num_var);
-    for j=1:num_var
-        unif = makedist('Uniform', 'lower',low(j), 'upper',high(j));
-        init_gen(:,j) = random(unif, N0, 1);
     end
 end
 

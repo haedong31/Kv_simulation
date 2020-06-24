@@ -15,22 +15,27 @@ format long
 
 df = readtable("./potassium-KO.xlsx");
 num_obs = 34;
-amp = df.A2;
-tau = df.Tau2;
+amp = rmmissing(df.A2);
+tau = rmmissing(df.Tau2);
 
 best_amp_container = zeros(1, num_obs);
 best_tau_container = zeros(1, num_obs);
 num_iters_container = zeros(1, num_obs);
 best_chrom_container = zeros(num_obs, 5);
-for i=1:num_obs
-    if i == 33
-        continue
-    end
 
+fprintf('### Iter 1/%i \n', num_obs)
+y = [amp(1), tau(1)];
+[best_amps, best_taus, best_gens, best_chroms] = IKslow_AGA(6, y, 30, 6, 4);
+best_amp_container(1) = best_amps(end);
+best_tau_container(1) = best_taus(end);
+num_iters_container(1) = best_gens(end);
+best_chrom_container(1,:) = best_chroms(end,:);
+
+for i=2:num_obs
     fprintf('### Iter %i/%i \n', i, num_obs)
-    
+
     y = [amp(i), tau(i)];
-    [best_amps, best_taus, best_gens, best_chroms] = IKslow1_AGA(5, y, 30, 6, 4);
+    [best_amps, best_taus, best_gens, best_chroms] = IKslow_AGA_seq(6, y, best_chrom_container(i-1,:), 30, 6, 4);
     best_amp_container(i) = best_amps(end);
     best_tau_container(i) = best_taus(end);
     num_iters_container(i) = best_gens(end);
