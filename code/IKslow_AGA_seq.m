@@ -90,6 +90,8 @@ function new_gen = evolve(chrom, fits, N0, N1, N2)
         elite = elites(i,:);
         for j=1:N2
             offspring = elite + normrnd(0,sigs);
+            offspring(2) = abs(offspring(2));
+            offspring(4) = abs(offspring(4));
             new_gen((N1+cnt),:) = offspring;
             cnt = cnt + 1;
         end

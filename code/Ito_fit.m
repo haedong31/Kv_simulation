@@ -15,17 +15,18 @@ clear variables
 
 df = readtable("./potassium-KO.xlsx");
 num_obs = 35;
+num_var = 6;
 amp = df.A3;
 tau = df.Tau3;
 
 best_amp_container = zeros(1, num_obs);
 best_tau_container = zeros(1, num_obs);
 num_iters_container = zeros(1, num_obs);
-best_chrom_container = zeros(num_obs, 5);
+best_chrom_container = zeros(num_obs, num_var);
 
 fprintf('### Iter 1/%i \n', num_obs)
 y = [amp(1), tau(1)];
-[best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(6, y, 30, 6, 4);
+[best_amps, best_taus, best_gens, best_chroms] = Ito_AGA(num_var, y, 30, 6, 4);
 best_amp_container(1) = best_amps(end);
 best_tau_container(1) = best_taus(end);
 num_iters_container(1) = best_gens(end);
@@ -35,9 +36,11 @@ for i=2:num_obs
     fprintf('### Iter %i/%i \n', i, num_obs)
 
     y = [amp(i), tau(i)];
-    [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA_seq(6, y, best_chrom_container(i-1,:), 30, 6, 4);
+    [best_amps, best_taus, best_gens, best_chroms] = Ito_AGA_seq(num_var, y, best_chrom_container(i-1,:), 30, 6, 4);
     best_amp_container(i) = best_amps(end);
     best_tau_container(i) = best_taus(end);
     num_iters_container(i) = best_gens(end);
     best_chrom_container(i,:) = best_chroms(end,:);
+
+    save('Ito_fit')
 end
