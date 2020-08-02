@@ -1,4 +1,4 @@
-function [best_fits, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
+function [best_fits, best_gens, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
     global num_var;
     global N0;
     global N1;
@@ -10,7 +10,7 @@ function [best_fits, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
     N2 = n2;
     sig_ctl = [];
     best_fits = [];
-    best_gens = [best_gens, 1];
+    best_gens = [];
     best_chroms = [];
     
     % initialization
@@ -35,20 +35,19 @@ function [best_fits, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
     
     best_cnt = 1;
     best_fits = [best_fits, bf];
+    best_gens = [best_gens, 1];
     best_chroms = [best_chroms, bchrom];
     
-    new_gen = breed(init_gen, trc);
+    new_gen = breed(init_gen, fits);
     
     while 1
-        tic
-        fprintf('\n Generation %i \n', cnt)
         cnt = cnt + 1;
         fits = eval(new_gen, trc);
         [bf, bf_idx] = min(fits);
         bchrom = init_gen(bf_idx,:);
         
         % stopping
-        if cnt == 2000
+        if (bf <= 1) || (cnt == 10000)
             fprintf('Termination: %f \n', bf);
             disp(bchrom)
             
@@ -62,7 +61,9 @@ function [best_fits, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
         
         % update the best
         if (bf < best_fits(best_cnt))
-            fprintf('Best fit is updated: %f \n', bf)
+%             fprintf('\n Generation %i \n', cnt)
+%             fprintf('Best fit is updated: %f \n', bf)
+%             disp(bchrom)
             
             best_cnt = best_cnt + 1;
             best_fits = [best_fits, bf];
@@ -70,8 +71,7 @@ function [best_fits, best_chroms] = tri_exp(nv, trc, n0, n1, n2)
             best_chroms = [best_chroms; bchrom];
         end
         
-        new_gen = evolve(new_gen, fits);
-        toc
+        new_gen = breed(new_gen, fits);
     end
 end
 
@@ -83,7 +83,7 @@ function new_gen = breed(chrom, fits)
     global N2;
     global sig_ctl;
 
-    [super_fits, super_idx] = mink(fits, N1);
+    [~, super_idx] = mink(fits, N1);
     elites = chrom(super_idx, :);
     
     mean_elite = mean(elites, 1);
@@ -93,9 +93,9 @@ function new_gen = breed(chrom, fits)
     sig_ctl = [sig_ctl; sigs];
     pooled_sigs = mean(sig_ctl, 1);
     
-    disp(super_fits)
-    disp(sigs)
-    disp(pooled_sigs)
+%     disp(super_fits)
+%     disp(sigs)
+%     disp(pooled_sigs)
     
     cnt = 1;
     new_gen = zeros(N0, num_var);
