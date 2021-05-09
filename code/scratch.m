@@ -2,6 +2,48 @@ clc
 close all
 clear variables
 
+load("ds_Ktrace_wt.mat")
+load("ds_Ktrace_ko.mat")
+
+ds_Ktrace_wt.Properties.VariableNames = ["time", "current"];
+ds_Ktrace_ko.Properties.VariableNames = ["time", "current"];
+
+cap_wt = 207.821428571429;
+cap_ko = 257.9375;
+
+ds_Ktrace_wt.current = ds_Ktrace_wt.current./cap_wt;
+ds_Ktrace_ko.current = ds_Ktrace_ko.current./cap_ko;
+
+writetable(ds_Ktrace_wt, "./25s-50mv-avg-wt.csv");
+writetable(ds_Ktrace_ko, "./25s-50mv-avg-ko.csv");
+
+%% Bondarenko
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % msec
+P2 = -70; % mV
+P2_t = P1_t; % msec
+[tR, ~, AR, ~] = RasmussonUnparam(holding_p, holding_t, P1, P1_t, P2, P2_t);
+plot(tR, AR(:,64))
+
+%% Bondarenko multiple
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = -70:10:50; %mV
+P1_t = 25*1000; % msec
+P2 = -80; % mV
+P2_t = P1_t; % msec
+
+for i=1:length(P1)
+    [tR, ~, AR, ~] = RasmussonUnparam(holding_p, holding_t, P1(i), P1_t, P2, P2_t);
+    
+    hold on
+    plot(tR, AR(:,64))
+    xlabel('V (mV)')
+    ylabel('I_{Ks}')
+    hold off
+end
 
 %% Main
 % parameters for voltage clamp
