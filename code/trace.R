@@ -1,12 +1,38 @@
 library(tidyverse)
 library(readxl)
 
-
-## custom functions -----
 exp_fn = function(t, i, tau) {
   return(i * exp(-t/tau))
 }
 
+## average 4.5-sec current traces -----
+avg_current_trace <- function(xlsx_paths) {
+  num_files <- length(xlsx_paths)
+
+  df <- read_excel(xlsx_paths[1])
+  t <- df[1]
+  c <- df[-1]
+  
+  for (i in 2:num_files) {
+    df <- read_excel(xlsx_paths[i])
+    c <- c + df[-1]
+  }
+  c <- c/num_files
+  
+  avg_trc <- bind_cols(t, c)
+  return(avg_trc)
+}
+
+wt_paths <- dir('./data/Final MGAT1KO Data for Hui/JMCC paper/K Currents 14 Weeks/WT-4.5s-traces', 
+                full.names = TRUE)
+ko_paths <- dir('./data/Final MGAT1KO Data for Hui/JMCC paper/K Currents 14 Weeks/Mgat1KO-4.5s-traces',
+                full.names = TRUE)
+
+wt_avg <- avg_current_trace(wt_paths)
+ko_paths <- avg_current_trace(ko_paths)
+
+write_csv(wt_avg, './data/Final MGAT1KO Data for Hui/JMCC paper/K Currents 14 Weeks/4.5s-avg-wt.csv')
+write_csv(ko_avg, './data/Final MGAT1KO Data for Hui/JMCC paper/K Currents 14 Weeks/4.5s-avg-ko.csv')
 
 ## data handling -----
 # K+ table data
