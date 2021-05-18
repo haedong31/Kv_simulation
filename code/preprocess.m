@@ -1,9 +1,8 @@
+%% downsample the 25-sec average trace
 clc
 close all
 clear variables
 
-
-%% manipulate the average raw trace
 Ktrace = readtable('k_trace.csv');
 Ktrace_ko = Ktrace(:, [1,2]);
 Ktrace_wt = Ktrace(:, [1,3]);
@@ -13,8 +12,6 @@ hold on
 plot(Ktrace_wt.time, Ktrace_wt.WT, 'LineWidth',2)
 hold off
 
-
-%% downsample the raw trace
 % cut off the raw traces
 sub_Ktrace_ko = Ktrace_ko(1:500001,:);
 sub_Ktrace_wt = Ktrace_wt(1:500001,:);
@@ -41,6 +38,56 @@ plot(ds_Ktrace_wt.time, ds_Ktrace_wt.WT, 'LineWidth',2)
 hold off
 axis tight
 
+%% downsample the 4.5-sec average trace
+clc
+close all
+clear variables
+
+ds = readtable('./data/Final MGAT1KO Data for Hui/JMCC paper/K Currents 14 Weeks/4.5s-avg-wt.csv');
+col_names = ds.Properties.VariableNames;
+
+ds = table2array(ds);
+
+% normalize
+cap_wt = 207.821428571429;
+ds(:,2:end) = ds(:,2:end)./cap_wt;
+
+% visualize original dataset
+t = ds(:,1);
+traces = ds(:,2:end);
+[~, num_trcs] = size(traces);
+
+figure(1)
+plot(t, traces(:,1));
+hold on
+for i=2:num_trcs
+    plot(t, traces(:,i))
+end
+hold off
+axis tight
+title('Origianl')
+xlabel('Time(ms)')
+ylabel('Current(pA/pF)')
+
+% downsampling & visualization
+down_ds = downsample(ds, 20);
+t = down_ds(:,1);
+traces = down_ds(:,2:end);
+
+figure(2)
+plot(t, traces(:,1));
+hold on
+for i=2:num_trcs
+    plot(t, traces(:,i))
+end
+hold off
+axis tight
+title('Downsampled')
+xlabel('Time(ms)')
+ylabel('Current(pA/pF)')
+
+down_ds = array2table(down_ds, 'VariableNames',col_names);
+writetable(down_ds, './4.5s-avg-wt.csv')
 
 %% amplutes and taus for IKslow1 and 2
 Kko = readtable('./MGAT1_Data_tidy/JMCC/K Currents 14 Weeks/potassium-KO.xlsx');
