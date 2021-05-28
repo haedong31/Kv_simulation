@@ -6,27 +6,13 @@
 /code/debug/
 /code/model_investigation/
 /code/results/
-/code/archive/
 /code/SBGA_multiple/
 
 # files
+*.csv
+*.xlsx
 *.zip
 **.DS_Store
-
-/code/25s-50mv-avg-ko.csv
-/code/25s-50mv-avg-wt.csv
-
-/code/potassium-WT.xlsx
-/code/potassium-KO.xlsx
-
-/code/Nav_WT_iimax.csv
-/code/Nav_WT_ggmax.csv
-
-/code/Ito_trace.csv
-/code/IKslow1_ko.csv
-/code/IKslow2_ko.csv
-
-/code/DoE2/k_trace.csv
 
 # History files
 /code/.Rhistory
