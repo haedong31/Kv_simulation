@@ -7,7 +7,7 @@ holding_p = -70; %mV
 holding_t = 0.125*1000; %ms
 P1_t = 4.5*1000; % ms
 Ek = -91.1;
-V = -60:10:50;
+V = -50:10:50;
 numv = length(V);
 
 % load model fitting results - Ito WT
@@ -22,7 +22,7 @@ else
     [~, best_toWt_idx] = min(best_amps+best_taus);
 end
 
-% load model fitting results - Ito WT
+% load model fitting results - Ito KO
 load('Ito_KO.mat')
 to_param_ko = best_chroms;
 
@@ -34,7 +34,7 @@ else
     [~, best_toKo_idx] = min(best_amps+best_taus);
 end
 
-% load model fitting results - Ito WT
+% load model fitting results - IKslow WT
 load('IKslow_WT.mat')
 kslow_param_wt = best_chroms;
 
@@ -46,7 +46,7 @@ else
     [~, best_KslowWt_idx] = min(best_amps+best_taus);
 end
 
-% load model fitting results - Ito WT
+% load model fitting results - IKslow KO
 load('IKslow_KO.mat')
 kslow_param_ko = best_chroms;
 
@@ -484,14 +484,35 @@ xticklabels({'\tau_{to}','\tau_{Kslow}'})
 ylabel('Time Constant (ms)')
 
 %% fitted parameters mean and SEM
-mean(to_param_wt)
-std(to_param_wt)/sqrt(length(to_param_wt))
+disp(mean(to_param_wt))
+disp(std(to_param_wt)/sqrt(length(to_param_wt)))
 
-mean(to_param_ko)
-std(to_param_ko)/sqrt(length(to_param_ko))
+disp(mean(to_param_ko))
+disp(std(to_param_ko)/sqrt(length(to_param_ko)))
 
-mean(kslow_param_wt)
-std(kslow_param_wt)/sqrt(length(kslow_param_wt))
+disp(mean(kslow_param_wt))
+disp(std(kslow_param_wt)/sqrt(length(kslow_param_wt)))
 
-mean(kslow_param_ko)
-std(kslow_param_ko)/sqrt(length(kslow_param_ko))
+disp(mean(kslow_param_ko))
+disp(std(kslow_param_ko)/sqrt(length(kslow_param_ko)))
+
+%% prediction: peaks at different voltages
+exp_ksum = table2array(readtable('./4.5s-avg-wt.csv'));
+exp_t = exp_ksum(:,1);
+exp_yksum = exp_ksum(:,7:end);
+
+volts = 0:10:50;
+exp_peaks = zeros(length(volts), 1);
+sim_peaks = zeros(length(volts), num_iters);
+for i = 1:length(volts)
+    exp_peaks(i) = max(exp_yksum(:, i));
+    for j = 1:num_iters
+       [t_to, ~, A1] = Ito(to_param_wt(j, :), holding_p, holding_t, volts(i), P1_t, Ek);
+       [t_kslow, ~, A2] = IKslow(kslow_param_ko(j, :), holding_p, holding_t, volts(i), P1_t, Ek);
+       
+       peak_to = max(A1(:, 5));
+       peak_kslow = max(A2(:, 5));
+       
+       sim_peaks(i, j) = peak_to + peak_kslow;
+    end
+end
