@@ -1,4 +1,4 @@
-function [amp, tau] = bi_exp_fit(t, yksum, hold_idx)
+function [amp, tau] = bi_exp_fit(t, yksum)
     % cut early increasing phase
     [peak, peak_idx] = max(yksum);
     t_trunc = t(peak_idx:end);
@@ -34,7 +34,8 @@ function [amp, tau] = bi_exp_fit(t, yksum, hold_idx)
     ub = [ones(3,1)*peak; ones(2,1)*t_trunc(end)];
 
     % run optimization
-    [sol, min_avl] = fmincon(obj, x0, A, b, Aeq, beq, lb, ub, nonlcon);
+    options = optimoptions('fmincon', 'Display','off');
+    [sol, min_avl] = fmincon(obj, x0, A, b, Aeq, beq, lb, ub, nonlcon, options);
 
     amp = sol(1:3);
     tau = sol(4:5);
