@@ -1,5 +1,5 @@
 
-function [t, STATES, ALGEBRAIC] = IKslow(X, holding_p, holding_t, P1, P1_t, Ek)
+function [t, STATES, ALGEBRAIC] = ikslow(X, holding_p, holding_t, P1, P1_t, Ek)
     % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
    [t, STATES, ALGEBRAIC] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek);
 end

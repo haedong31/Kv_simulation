@@ -1,4 +1,4 @@
-function [par] = ito_calibration(amp, tau, tol, N0, N1, N2)
+function [par] = ito_calibration(t, yksum, tol, N0, N1, N2)
     % calibration arguments
     global num_var;
     global low;
@@ -20,9 +20,19 @@ function [par] = ito_calibration(amp, tau, tol, N0, N1, N2)
 
     hold_volt = -70;
     hold_t = 0.125*1000;
-    volts = -50:10:50;
+    volts = 0:10:50;
     pulse_t = 4.5*1000;
     Ek = -91.1;
+
+    num_volts = length(volts);
+    amp = zeros(3, num_volts);
+    tau = zeros(2, num_volts);
+
+    for i = 1:num_volts
+        [amp_running, tau_running] = bi_exp_fit(t, yksum(:, i));
+        amp(:, i) = amp_running;
+        tau(:, i) = tau_running;
+    end
 
     % run calibration
     best_chroms = ito_sbga(amp, tau, tol, N0, N1, N2);
@@ -37,6 +47,7 @@ function [best_chroms] = ito_sbga(amp, tau, tol, N0, N1, N2)
     global window_size;
 
     sig_list = zeros(window_size, num_var);
+
 end
 
 function [chroms] = init_gen(N0)
@@ -82,7 +93,7 @@ function [new_chroms] = evolve(chroms, evals, sig_list, N0, N1, N2)
     end
 end
 
-function [amp_diff, tau_diff] = evaluation(chroms, amp, tau, N0)
+function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
     global hold_volt;
     global hold_t;
     global volts;
@@ -90,7 +101,6 @@ function [amp_diff, tau_diff] = evaluation(chroms, amp, tau, N0)
     global Ek;
 
     num_volts = length(volts);
-
     amp_diff = zeros(N0, num_volts);
     tau_diff = zeros(N0, num_volts);
     
