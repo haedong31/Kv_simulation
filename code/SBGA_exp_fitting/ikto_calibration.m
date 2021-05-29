@@ -1,4 +1,4 @@
-function [par] = ito_calibration(t, yksum, tol, N0, N1, N2)
+function [par] = ikto_calibration(amp, tau, tol, N0, N1, N2)
     % calibration arguments
     global num_var;
     global low;
@@ -24,30 +24,76 @@ function [par] = ito_calibration(t, yksum, tol, N0, N1, N2)
     pulse_t = 4.5*1000;
     Ek = -91.1;
 
-    num_volts = length(volts);
-    amp = zeros(3, num_volts);
-    tau = zeros(2, num_volts);
-
-    for i = 1:num_volts
-        [amp_running, tau_running] = bi_exp_fit(t, yksum(:, i));
-        amp(:, i) = amp_running;
-        tau(:, i) = tau_running;
-    end
-
     % run calibration
-    best_chroms = ito_sbga(amp, tau, tol, N0, N1, N2);
-    par = best_chroms(end, :);
+    par = kto_sbga(amp, tau, tol, N0, N1, N2);
 end
 
-function [best_chroms] = ito_sbga(amp, tau, tol, N0, N1, N2)
+function [best_chroms] = kto_sbga(amp, tau, tol, N0, N1, N2)
     global num_var;
-    global low;
-    global high;
     global max_iter;
     global window_size;
 
+    % initial run
+    iter = 1;
+    chroms = init_gen(N0);
     sig_list = zeros(window_size, num_var);
+    eval_list = zeros(max_iter, 1);
 
+    % evaluation
+    [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
+    total_diff = amp_diff + tau_diff;
+    [min_diff, min_diff_idx] = min(total_diff);
+    eval_list(iter) = min_diff;
+    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', min_diff, amp_diff(min_diff_idx), tau_diff(min_diff_idx));
+
+    % evolution
+    [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
+
+    % repeat; tolerance or max_iter
+    while true
+        if iter > max_iter
+            iter = 1;
+            chroms = init_gen(N0);
+            sig_list = zeros(window_size, num_var);
+            eval_list = zeros(max_iter, 1);
+        
+            % evaluation
+            [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
+            total_diff = amp_diff + tau_diff;
+            [min_diff, min_diff_idx] = min(total_diff);
+            eval_list(iter) = min_diff;
+            fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', min_diff, amp_diff(min_diff_idx), tau_diff(min_diff_idx));
+        
+            % evolution
+            [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
+        end
+
+        iter = iter + 1;
+        fprintf('Generation %i \n', iter)
+
+        % evaluation
+        [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
+        total_diff = amp_diff + tau_diff;
+        [min_diff, min_diff_idx] = min(total_diff);
+        eval_list(iter) = min_diff;        
+
+        % check stopping tolerance
+        min_amp_diff = amp_diff(min_diff_idx);
+        min_tau_diff = tau_diff(min_diff_idx);
+        if ((min_amp_diff <= tol(1)) && (min_tau_diff <= tol(2)))
+            fprintf('Termination: %f|Amp: %f|Tau: %f \n', min_diff, min_amp_diff, min_tau_diff);
+            best_chroms = chroms(min_diff_idx, :);
+            break
+        end
+
+        % check solution has been improved
+        if (min_diff < eval_list(iter-1))
+            fprintf('Updated best fit: %f|Amp: %f|Tau: %f \n', min_diff, min_amp_diff, min_tau_diff);
+        end
+
+        % evolution
+        [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
+    end
 end
 
 function [chroms] = init_gen(N0)
@@ -57,21 +103,27 @@ function [chroms] = init_gen(N0)
 
     chroms = zeros(N0, num_var);
     for j = 1:num_var
-        unif_dist = makedist('Uniform', 'lower',low(j) 'upper');
+        unif_dist = makedist('Uniform', 'lower',low(j), 'upper',high(j));
         chroms(:, j) = random(unif_dist, N0, 1);
     end
 end
 
-function [new_chroms] = evolve(chroms, evals, sig_list, N0, N1, N2)
+function [new_chroms, new_sig_list] = next_gen(chroms, evals, sig_list, N0, N1, N2)
     global num_var;
+    global window_size
 
     % superior chromosomes 
     [~, sup_chrom_idx] = mink(evals, N1);
     sup_chroms = chroms(sup_chrom_idx, :);
 
-    % pooled sigma
+    % renew sigma list
+    new_sig_list = sig_list; % copy
     sig = std(sup_chroms);
-    pooled_sig = mean(sig_list);
+    new_sig_list(1:(window_size-1), :) = new_sig_list(2:window_size, :);
+    new_sig_list(window_size, :) = sig;
+
+    % pooled sigma
+    pooled_sig = mean(new_sig_list);
 
     % mean chromosome of superiors
     mean_elite = mean(sup_chroms, 1);
@@ -108,7 +160,7 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
         for j = 1:num_volts
             volt = volts(j);
             try
-                [t, ~, A] = Ito(chroms(i, :), hold_volt, hold_t, volt, pulse_t, Ek);
+                [t, ~, A] = ikto(chroms(i, :), hold_volt, hold_t, volt, pulse_t, Ek);
                 current_trace = A(:, 5);
                 
                 % check validity of trace shape
@@ -124,9 +176,16 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
                     amp_diff(i, j) = 1e+4;
                     tau_diff(i, j) = 1e+4;
                 else
+                    current_trace_trunc = current_trace(peak_idx:end);
+                    t_trunc = t(peak_idx:end);
+                    t_trunc = t_trunc - t_trunc(1);
+
+                    [~, tau_idx] = min(abs(peak*exp(-1) - current_trace_trunc));
+                    tau_hat = t_trunc(tau_idx);
+
                     % calculate discrepancies
-                    amp_diff(i, j) = abs(peak - )
-                    tau_diff(i, j) = 
+                    amp_diff(i, j) = abs(peak - amp(j));
+                    tau_diff(i, j) = abs(tau_hat - tau(j));
                 end
             catch
                 % large discrepancy for invalid trace shape
@@ -135,4 +194,6 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
             end
         end
     end
+    amp_diff = mean(amp_diff, 2);
+    tau_diff = mean(tau_diff, 2);
 end
