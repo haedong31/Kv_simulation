@@ -7,21 +7,21 @@ function [par] = ikto_calibration(amp, tau, tol, N0, N1, N2)
     global window_size;
 
     global hold_volt;
-    global hold_t;
+    global hold_len;
     global volts;
-    global pulse_t;
+    global end_len;
     global Ek;
 
-    num_var = 6;
-    low = [0.0, 0.0, 0.0, 20.0, 2.0, 0.2];
-    high = [70.0, 70.0, 70.0, 70.0, 50.0, 0.6];
-    max_iter = 100;
+    num_var = 5;
+    low = [-40, 0, -40, 1, 0];
+    high = [60, 50, 60, 15, 0.5];
+    max_iter = 1000;
     window_size = N1; % N1 as pooling window size
 
     hold_volt = -70;
-    hold_t = 0.125*1000;
+    hold_len = 0.125*1000;
     volts = 0:10:50;
-    pulse_t = 4.5*1000;
+    end_len = 4.5*1000;
     Ek = -91.1;
 
     % run calibration
@@ -51,7 +51,7 @@ function [best_chroms] = kto_sbga(amp, tau, tol, N0, N1, N2)
 
     % repeat; tolerance or max_iter
     while true
-        if iter > max_iter
+        if iter >= max_iter
             iter = 1;
             chroms = init_gen(N0);
             sig_list = zeros(window_size, num_var);
@@ -67,9 +67,9 @@ function [best_chroms] = kto_sbga(amp, tau, tol, N0, N1, N2)
             % evolution
             [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
         end
-
+        
+        % increase interation
         iter = iter + 1;
-        fprintf('Generation %i \n', iter)
 
         % evaluation
         [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
@@ -147,10 +147,20 @@ end
 
 function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
     global hold_volt;
-    global hold_t;
+    global hold_len;
     global volts;
-    global pulse_t;
+    global end_len;
     global Ek;
+
+    hold_t = 0:hold_len;
+    pulse_t = (hold_len + 1):end_len;
+    pulse_t_adj = pulse_t - pulse_t(1);
+    t = [hold_t, pulse_t];
+    
+    time_space = cell(1,3);
+    time_space{1} = t;
+    time_space{2} = hold_t;
+    time_space{3} = pulse_t_adj;
 
     num_volts = length(volts);
     amp_diff = zeros(N0, num_volts);
@@ -160,12 +170,11 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
         for j = 1:num_volts
             volt = volts(j);
             try
-                [t, ~, A] = ikto(chroms(i, :), hold_volt, hold_t, volt, pulse_t, Ek);
-                current_trace = A(:, 5);
+                current_trace = ikto(chroms(i, :), hold_volt, volt, time_space, Ek);
                 
                 % check validity of trace shape
                 [peak, peak_idx] = max(current_trace);
-                [~, hold_idx] = min(abs(t - hold_t));
+                [~, hold_idx] = min(abs(t - hold_len));
 
                 check_pt1 = any(isnan(current_trace));
                 check_pt2 = any(current_trace < 0); 

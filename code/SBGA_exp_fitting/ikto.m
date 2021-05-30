@@ -1,101 +1,60 @@
+function [current_trc] = ikto(x, hold_volt, volt, time_space, Ek)
+    % default parameters
+    p = [30.0, 20.0, 33.5, 7.0, 0.18064, 0.03577, 0.3956, 0.06237, 0.000152, 0.067083, 0.00095, 0.051335, 0.4067];
 
-function [t, STATES, ALGEBRAIC] = ikto(X, holding_p, holding_t, P1, P1_t, Ek)
-    % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
-   [t, STATES, ALGEBRAIC] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek);
-end
+    % input x for selected variables
+    p(1) = x(1);
+    p(2) = x(2);
+    p(3) = x(3);
+    p(4) = x(4);
+    p(13) = x(5);
 
-function [t, STATES, ALGEBRAIC] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek)
-    % Create ALGEBRAIC of correct size
-    global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
+    % initial values of state variables
+    act0 = 0.265563e-2; % ato_f; Gating variable for transient outward K+ current
+    inact0 = 0.999977; % ito_f; Gating variable for transient outward K+ current
     
-    % Initialise constants and state variables
-    INIT_STATES = initConsts();
+    % max conductance
+    gmax = p(13);
 
-    % Set timespan to solve over 
-    tspan = [0, P1_t];
+    % time space information
+    t = time_space{1};
+    hold_t = time_space{2};
+    pulse_t = time_space{3};
+    hold_idx = length(hold_t);
 
-    % Set numerical accuracy options for ODE solver
-    options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
+    current_trc = zeros(length(t), 1);
 
-    % Solve model with ODE solver
-    [t, STATES] = ode15s(@(t, STATES)computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek), tspan, INIT_STATES, options);
+    % at holding potential
+    gv_hold = gating_variables(p, hold_volt);
+    act_hold = hh_model(hold_t, act0, gv_hold(1), gv_hold(2));
+    inact_hold = hh_model(hold_t, inact0, gv_hold(3), gv_hold(4));
+    current_trc(1:hold_idx) = gmax.*(act_hold.^3).*(inact_hold).*(hold_volt - Ek);
+
+    % at pulse voltage
+    gv_pulse = gating_variables(p, volt);
+    act_pulse = hh_model(pulse_t, act0, gv_pulse(1), gv_pulse(2));
+    inact_pulse = hh_model(pulse_t, inact0, gv_pulse(3), gv_pulse(4));
+    current_trc((hold_idx + 1):end) = gmax.*(act_pulse.^3).*(inact_pulse).*(volt - Ek);
+end
+
+function [gv] = gating_variables(p, V)
+    % gv(1): steady-state activation
+    % gv(2): time constant of activation
+    % gv(3): steady-state inactivation
+    % gv(4): time constant of inactivation
     
-    % Compute algebraic variables
-    [RATES, ALGEBRAIC] = computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek);
-    ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, STATES, t, holding_p, holding_t, P1, P1_t, Ek);
+    gv = zeros(4, 1);
+    alphaA = p(5).*exp(p(6).*(V+p(1)));
+    betaA = p(7).*exp(-p(8).*(V+p(1)));
+    alphaI = (p(9).*exp(-(V+p(3)-p(2))./p(4))) ./ (p(10).*exp(-(V+p(3))./p(4)) + 1);
+    betaI = (p(11).*exp((V+p(3))./p(4))) ./ (p(12).*exp((V+p(3))./p(4)) + 1);
+
+    gv(1) = alphaA/(alphaA+betaA);
+    gv(2) = 1/(alphaA+betaA);
+    gv(3) = alphaI/(alphaI+betaI);
+    gv(4) = 1/(alphaI+betaI);
 end
 
-function [RATES, ALGEBRAIC] = computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek)
-    global algebraicVariableCount;
-    statesSize = size(STATES);
-    statesColumnCount = statesSize(2);
-    if ( statesColumnCount == 1)
-        STATES = STATES';
-        ALGEBRAIC = zeros(1, algebraicVariableCount);
-    else
-        statesRowCount = statesSize(1);
-        ALGEBRAIC = zeros(statesRowCount, algebraicVariableCount);
-        RATES = zeros(statesRowCount, statesColumnCount);
-    end
-    
-    % externally applied voltage (voltage clamp)
-    ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
-    
-    % Ito
-    % A71; alpha_a
-    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+X(1)));
-    % A72; beta_a
-    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(2)));
-    % A73; alpha_i
-    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(3))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
-    % A74; beta_i
-    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(4))./X(5)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(4))./X(5))+1.00000);
-    % A69; ato_f
-    RATES(:,1) =  ALGEBRAIC(:,1).*(1.00000 - STATES(:,1)) -  ALGEBRAIC(:,2).*STATES(:,1);
-    % A70; ito_f
-    RATES(:,2) =  ALGEBRAIC(:,3).*(1.00000 - STATES(:,2)) -  ALGEBRAIC(:,4).*STATES(:,2);
-    % A67; I_Kto,f
-    ALGEBRAIC(:,5) =  X(6).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
-    
-    RATES = RATES';
-end
-
-function ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, STATES, t, holding_p, holding_t, P1, P1_t, Ek)
-    ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
-
-    % A71; alpha_a
-    ALGEBRAIC(:,1) =  0.180640.*exp( 0.0357700.*(ALGEBRAIC(:,6)+X(1)));
-    % A72; beta_a
-    ALGEBRAIC(:,2) =  0.395600.*exp(  - 0.0623700.*(ALGEBRAIC(:,6)+X(2)));
-    % A73; alpha_i
-    ALGEBRAIC(:,3) = ( 0.000152000.*exp( - (ALGEBRAIC(:,6)+X(3))./7.0))./( 0.00670830.*exp( - (ALGEBRAIC(:,6)+33.5)./7.0)+1.00000);
-    % A74; beta_i
-    ALGEBRAIC(:,4) = ( 0.000950000.*exp((ALGEBRAIC(:,6)+X(4))./X(5)))./( 0.0513350.*exp((ALGEBRAIC(:,6)+X(4))./X(5))+1.00000);
-    % A67; I_Kto,f
-    ALGEBRAIC(:,5) =  X(6).*power(STATES(:,1), 3.00000).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
-end
-
-function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t)
-    if t < holding_t
-        VC = holding_p;
-    elseif (t >= holding_t) && (t <= P1_t) 
-        VC = P1;
-    end
-end
-
-function [algebraicVariableCount] = getAlgebraicVariableCount() 
-    % Used later when setting a global variable with the number of algebraic variables.
-    % There are a total of 41 entries in each of the rate and state variable arrays.
-    % There are a total of 73 entries in the constant variable array.
-    algebraicVariableCount = 6;
-end
-
-function [STATES] = initConsts()
-    STATES = [];
-
-    STATES(:,1) = 0.265563e-2;  % ato_f; Gating variable for transient outward K+ current
-    STATES(:,2) = 0.999977;  % ito_f; Gating variable for transient outward K+ current
-    % CONSTANTS(:,1) = 0.4067;  % GKtof; Maximum transient outward K+ current conductance(apex):mS/uF
-
-    if (isempty(STATES)), warning('Initial values for states not set'); end
+function [y] = hh_model(t, ss0, ss, tau)
+    y = ss - (ss - ss0).*exp(-t./tau);
 end

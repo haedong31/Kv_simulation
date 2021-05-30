@@ -47,7 +47,35 @@ for i = 1:num_volts
 end
 
 tol = [0.1, 1];
-N0 = 30;
-N1 = 6;
-N2 = 4;
-par = ikto_calibration(amp_kto, tau_kto, tol, N0, N1, N2);
+N0 = 100;
+N1 = 10;
+N2 = 9;
+
+% run calibration
+tic
+par = ikto_calibration(amp_kto, tau_kto, volts, N0, N1, N2);
+toc
+
+% visualize results
+end_len = 4.5*1000;
+hold_len = 0.125*1000;
+
+hold_t = 0:hold_len;
+pulse_t = (hold_len + 1):end_len;
+pulse_t_adj = pulse_t - pulse_t(1);
+sim_t = [hold_t, pulse_t];
+
+time_space = cell(1,3);
+time_space{1} = sim_t;
+time_space{2} = hold_t;
+time_space{3} = pulse_t_adj;
+
+y = ikto(par, -70, volts(1), time_space, Ek);
+plot(sim_t, y)
+
+hold on
+for i = 2:length(volts)
+    y = ikto(par, -70, volts(i), time_space, Ek);
+    plot(sim_t, y)
+end
+hold off
