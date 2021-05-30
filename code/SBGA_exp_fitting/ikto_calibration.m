@@ -1,9 +1,10 @@
-function [par] = ikto_calibration(amp, tau, tol, N0, N1, N2)
+function [par] = ikto_calibration(amp, tau, volts_input, N1, N2, verbose)
     % calibration arguments
     global num_var;
     global low;
     global high;
     global max_iter;
+    global log_interval;
     global window_size;
 
     global hold_volt;
@@ -15,85 +16,109 @@ function [par] = ikto_calibration(amp, tau, tol, N0, N1, N2)
     num_var = 5;
     low = [-40, 0, -40, 1, 0];
     high = [60, 50, 60, 15, 0.5];
-    max_iter = 1000;
+    max_iter = 500;
+    log_interval = 50;
     window_size = N1; % N1 as pooling window size
 
     hold_volt = -70;
     hold_len = 0.125*1000;
-    volts = 0:10:50;
+    volts = volts_input;
     end_len = 4.5*1000;
     Ek = -91.1;
 
     % run calibration
-    par = kto_sbga(amp, tau, tol, N0, N1, N2);
+    N0 = N1 + N1*N2;
+    par = kto_sbga(amp, tau, N0, N1, N2, verbose);
 end
 
-function [best_chroms] = kto_sbga(amp, tau, tol, N0, N1, N2)
+function [best_chrom] = kto_sbga(amp, tau, N0, N1, N2, verbose)
     global num_var;
     global max_iter;
     global window_size;
+    global log_interval;
 
     % initial run
     iter = 1;
     chroms = init_gen(N0);
     sig_list = zeros(window_size, num_var);
-    eval_list = zeros(max_iter, 1);
 
+    total_diff_list = [];
+    amp_diff_list = [];
+    tau_diff_list  = [];
+    
     % evaluation
     [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
     total_diff = amp_diff + tau_diff;
     [min_diff, min_diff_idx] = min(total_diff);
-    eval_list(iter) = min_diff;
-    fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', min_diff, amp_diff(min_diff_idx), tau_diff(min_diff_idx));
+    min_amp_diff = amp_diff(min_diff_idx);
+    min_tau_diff = tau_diff(min_diff_idx);   
+
+    % print evaluation results
+    total_diff_list = [total_diff_list; min_diff];
+    amp_diff_list = [amp_diff_list; min_amp_diff];
+    tau_diff_list = [tau_diff_list; min_tau_diff];
+    fprintf('Initial fit: %f|Amp: %f|Tau: %f \n', min_diff, min_amp_diff, min_tau_diff);
+
+    % draw figure and linkdata
+    if verbose == true
+        figure(1)
+        plot(total_diff_list);
+        title('Total')
+        
+        figure(2)
+        plot(amp_diff_list);
+        title('Amp')
+        
+        figure(3)
+        plot(tau_diff_list);
+        title('Tau')
+        
+        linkdata on
+    end
 
     % evolution
     [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
 
     % repeat; tolerance or max_iter
-    while true
-        if iter >= max_iter
-            iter = 1;
-            chroms = init_gen(N0);
-            sig_list = zeros(window_size, num_var);
-            eval_list = zeros(max_iter, 1);
-        
-            % evaluation
-            [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
-            total_diff = amp_diff + tau_diff;
-            [min_diff, min_diff_idx] = min(total_diff);
-            eval_list(iter) = min_diff;
-            fprintf('Initial best fit: %f|Amp: %f|Tau: %f \n', min_diff, amp_diff(min_diff_idx), tau_diff(min_diff_idx));
-        
-            % evolution
-            [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
-        end
-        
+    while iter <= max_iter
         % increase interation
         iter = iter + 1;
 
         % evaluation
         [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
         total_diff = amp_diff + tau_diff;
-        [min_diff, min_diff_idx] = min(total_diff);
-        eval_list(iter) = min_diff;        
+        
+        % check point; print discrepancies
+        if (mod(iter, log_interval) == 0)
+            [min_diff, min_diff_idx] = min(total_diff);
+            min_amp_diff = amp_diff(min_diff_idx);
+            min_tau_diff = tau_diff(min_diff_idx);    
 
-        % check stopping tolerance
-        min_amp_diff = amp_diff(min_diff_idx);
-        min_tau_diff = tau_diff(min_diff_idx);
-        if ((min_amp_diff <= tol(1)) && (min_tau_diff <= tol(2)))
-            fprintf('Termination: %f|Amp: %f|Tau: %f \n', min_diff, min_amp_diff, min_tau_diff);
-            best_chroms = chroms(min_diff_idx, :);
-            break
+            total_diff_list = [total_diff_list; min_diff];
+            amp_diff_list = [amp_diff_list; min_amp_diff];
+            tau_diff_list = [tau_diff_list; min_tau_diff];
+            fprintf('[%i/%i] %f|Amp: %f|Tau: %f \n', iter, max_iter, min_diff, min_amp_diff, min_tau_diff);
+
+            if verbose == true
+                figure(1)
+                plot(total_diff_list);
+                title('Total')
+            
+                figure(2)
+                plot(amp_diff_list);
+                title('Amp')
+            
+                figure(3)
+                plot(tau_diff_list);
+                title('Tau')
+            end
         end
-
-        % check solution has been improved
-        if (min_diff < eval_list(iter-1))
-            fprintf('Updated best fit: %f|Amp: %f|Tau: %f \n', min_diff, min_amp_diff, min_tau_diff);
-        end
-
+        
         % evolution
         [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
     end
+    
+    best_chrom = chroms(min_diff_idx, :);
 end
 
 function [chroms] = init_gen(N0)
