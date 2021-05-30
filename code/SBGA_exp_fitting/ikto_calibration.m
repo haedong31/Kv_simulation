@@ -1,4 +1,4 @@
-function [par] = ikto_calibration(amp, tau, volts_input, N1, N2, verbose)
+function [par, amp_diff, tau_diff] = ikto_calibration(amp, tau, volts_input, N1, N2, verbose)
     % calibration arguments
     global num_var;
     global low;
@@ -16,7 +16,7 @@ function [par] = ikto_calibration(amp, tau, volts_input, N1, N2, verbose)
     num_var = 5;
     low = [-40, 0, -40, 1, 0];
     high = [60, 50, 60, 15, 0.5];
-    max_iter = 500;
+    max_iter = 300;
     log_interval = 50;
     window_size = N1; % N1 as pooling window size
 
@@ -28,10 +28,10 @@ function [par] = ikto_calibration(amp, tau, volts_input, N1, N2, verbose)
 
     % run calibration
     N0 = N1 + N1*N2;
-    par = kto_sbga(amp, tau, N0, N1, N2, verbose);
+    [par, amp_diff, tau_diff] = kto_sbga(amp, tau, N0, N1, N2, verbose);
 end
 
-function [best_chrom] = kto_sbga(amp, tau, N0, N1, N2, verbose)
+function [last_chrom, last_amp_diff, last_tau_diff] = kto_sbga(amp, tau, N0, N1, N2, verbose)
     global num_var;
     global max_iter;
     global window_size;
@@ -118,7 +118,13 @@ function [best_chrom] = kto_sbga(amp, tau, N0, N1, N2, verbose)
         [chroms, sig_list] = next_gen(chroms, total_diff, sig_list, N0, N1, N2);
     end
     
-    best_chrom = chroms(min_diff_idx, :);
+    [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0);
+    total_diff = amp_diff + tau_diff;
+    [~, min_diff_idx] = min(total_diff);
+            
+    last_chrom = chroms(min_diff_idx, :);
+    last_amp_diff = amp_diff(min_diff_idx);
+    last_tau_diff = tau_diff(min_diff_idx); 
 end
 
 function [chroms] = init_gen(N0)
@@ -228,6 +234,6 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
             end
         end
     end
-    amp_diff = mean(amp_diff, 2);
-    tau_diff = mean(tau_diff, 2);
+    amp_diff = sum(amp_diff, 2);
+    tau_diff = sum(tau_diff, 2);
 end
