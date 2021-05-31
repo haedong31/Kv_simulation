@@ -46,36 +46,33 @@ for i = 1:num_volts
     end
 end
 
-tol = [0.1, 1];
-N0 = 100;
+%% calibration
+% IKto
+num_iters = 30;
 N1 = 10;
 N2 = 9;
 
 % run calibration
-tic
-par = ikto_calibration(amp_kto, tau_kto, volts, N0, N1, N2);
-toc
+to_param_wt = zeros(num_iters, 5);
+to_amps_wt = zeros(num_iters, 1);
+to_taus_wt = zeros(num_iters, 1);
 
-% visualize results
-end_len = 4.5*1000;
-hold_len = 0.125*1000;
+kslow_param_wt = zeros(num_iters, 6);
+kslow_amps_wt = zeros(num_iters, 1);
+kslow_taus_wt = zeros(num_iters, 1);
 
-hold_t = 0:hold_len;
-pulse_t = (hold_len + 1):end_len;
-pulse_t_adj = pulse_t - pulse_t(1);
-sim_t = [hold_t, pulse_t];
+for i = 1:num_iters
+    fprintf('[%i/%i] \n', i, num_iters)
 
-time_space = cell(1,3);
-time_space{1} = sim_t;
-time_space{2} = hold_t;
-time_space{3} = pulse_t_adj;
+    [par, amp_diff, tau_diff] = ikto_calibration(amp_kto, tau_kto, volts, N1, N2, false);
+    to_param_wt(i, :) = par;
+    to_amps_wt(i) = amp_diff;
+    to_taus_wt(i) = tau_diff;
 
-y = ikto(par, -70, volts(1), time_space, Ek);
-plot(sim_t, y)
-
-hold on
-for i = 2:length(volts)
-    y = ikto(par, -70, volts(i), time_space, Ek);
-    plot(sim_t, y)
+    [par, amp_diff, tau_diff] = ikslow_calibration(amp_kslow, tau_kslow, volts, N1, N2, false);
+    kslow_param_wt(i, :) = par;
+    kslow_amps_wt(i) = amp_diff;
+    kslow_taus_wt(i) = tau_diff;
 end
-hold off
+
+save('calib_result_wt.mat', 'to_param_wt', 'to_amps_wt', 'to_taus_wt', 'kslow_param_wt', 'kslow_amps_wt', 'kslow_taus_wt')
