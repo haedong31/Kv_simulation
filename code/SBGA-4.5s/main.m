@@ -50,12 +50,12 @@ kslow_taus_wt = zeros(num_iters, 1);
 for i = 1:num_iters
     fprintf('[%i/%i] \n', i, num_iters)
 
-    [par, amp_diff, tau_diff] = ikto_calibration(amp_kto, tau_kto, input_volt, N1, N2);
+    [par, amp_diff, tau_diff] = ikto_calibration(amp_kto, tau_kto, t, input_volt, N1, N2);
     to_param_wt(i, :) = par;
     to_amps_wt(i) = amp_diff;
     to_taus_wt(i) = tau_diff;
 
-    [par, amp_diff, tau_diff] = ikslow_calibration(amp_kslow, tau_kslow, input_volt, N1, N2);
+    [par, amp_diff, tau_diff] = ikslow_calibration(amp_kslow, tau_kslow, t, input_volt, N1, N2);
     kslow_param_wt(i, :) = par;
     kslow_amps_wt(i) = amp_diff;
     kslow_taus_wt(i) = tau_diff;
@@ -117,12 +117,12 @@ kslow_taus_ko = zeros(num_iters, 1);
 for i = 1:num_iters
     fprintf('[%i/%i] \n', i, num_iters)
 
-    [par, amp_diff, tau_diff] = ikto_calibration(amp_kto, tau_kto, input_volt, N1, N2);
+    [par, amp_diff, tau_diff] = ikto_calibration(amp_kto, tau_kto, t, input_volt, N1, N2);
     to_param_ko(i, :) = par;
     to_amps_ko(i) = amp_diff;
     to_taus_ko(i) = tau_diff;
 
-    [par, amp_diff, tau_diff] = ikslow_calibration(amp_kslow, tau_kslow, input_volt, N1, N2);
+    [par, amp_diff, tau_diff] = ikslow_calibration(amp_kslow, tau_kslow, t, input_volt, N1, N2);
     kslow_param_ko(i, :) = par;
     kslow_amps_ko(i) = amp_diff;
     kslow_taus_ko(i) = tau_diff;

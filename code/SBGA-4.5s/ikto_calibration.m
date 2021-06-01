@@ -27,7 +27,7 @@ function [par, amp_diff, tau_diff] = ikto_calibration(amp, tau, input_t, input_v
 
     % estimate index of holding time
     ideal_hold_time = 0.125*1000;
-    hold_idx = min(abs(t - ideal_hold_time));    
+    [~, hold_idx] = min(abs(t - ideal_hold_time));    
 
     % run calibration
     N0 = N1 + N1*N2;
@@ -145,10 +145,9 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
     global volt;
     global Ek;
 
-    hold_t = 0:hold_len;
-    pulse_t = (hold_len + 1):end_len;
+    hold_t = t(1:hold_idx);
+    pulse_t = t((hold_idx+1):end);
     pulse_t_adj = pulse_t - pulse_t(1);
-    t = [hold_t, pulse_t];
     
     time_space = cell(1,3);
     time_space{1} = t;
@@ -164,11 +163,10 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
             
             % check validity of trace shape
             [peak, peak_idx] = max(current_trace);
-            [~, hold_idx] = min(abs(t - hold_len));
 
             check_pt1 = any(isnan(current_trace));
             check_pt2 = any(current_trace < 0); 
-            check_pt3 = var(current_trace(1:hold_idx)) > 1; % not stable at hold_volt
+            check_pt3 = var(current_trace(1:hold_idx)) > 0.1; % not stable at hold_volt
             check_pt4 = peak_idx < hold_idx; % not stable at hold_volt of too flat at pulse
 
             if (check_pt1 || check_pt2 || check_pt3 || check_pt4)
