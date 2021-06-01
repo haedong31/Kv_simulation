@@ -14,7 +14,7 @@ function [par, amp_diff, tau_diff] = ikto_calibration(amp, tau, input_t, input_v
     global Ek;
 
     num_var = 5;
-    low = [-40, 0, -40, 1, 0];
+    low = [0, 0, 0, 1, 0];
     high = [60, 50, 60, 15, 0.5];
     max_iter = 300;
     log_interval = 50;
@@ -166,7 +166,7 @@ function [amp_diff, tau_diff] = evaluation(amp, tau, chroms, N0)
 
             check_pt1 = any(isnan(current_trace));
             check_pt2 = any(current_trace < 0); 
-            check_pt3 = var(current_trace(1:hold_idx)) > 0.1; % not stable at hold_volt
+            check_pt3 = var(current_trace(1:hold_idx)) > 0.01; % not stable at hold_volt
             check_pt4 = peak_idx < hold_idx; % not stable at hold_volt of too flat at pulse
 
             if (check_pt1 || check_pt2 || check_pt3 || check_pt4)
