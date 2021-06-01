@@ -6,7 +6,8 @@ num_iters = 30;
 
 % load model fitting results and select best one
 load('calib_result_wt.mat')
-load('calib_result_wt.mat')
+
+load('calib_result_ko.mat')
 
 % ikto wt
 [~, best_amps_idx] = min(to_amps_wt);
@@ -48,34 +49,104 @@ end
 clear best_amps_idx best_tau_idx 
 
 %% compare with experimental data
-trace_data = table2array(readtable('4.5s-avg-wt.csv'));
+volts = 0:10:50;
+num_volts = length(volts);
 
+trace_data_wt = table2array(readtable('4.5s-avg-wt.csv'));
+trace_data_ko = table2array(readtable('4.5s-avg-ko.csv'));
 
-% protocol
-end_len = 4.5*1000;
-hold_len = 0.125*1000;
+t_wt = trace_data_wt(:, 1);
+t_ko = trace_data_ko(:, 1);
 
-hold_t = 0:hold_len;
-pulse_t = (hold_len + 1):end_len;
-pulse_t_adj = pulse_t - pulse_t(1);
-sim_t = [hold_t, pulse_t];
+yksum_wt = trace_data_wt(:, 7:end);
+yksum_ko = trace_data_ko(:, 7:end);
 
-time_space = cell(1,3);
-time_space{1} = sim_t;
-time_space{2} = hold_t;
-time_space{3} = pulse_t_adj;
+% estimate holding time
+[~, ideal_hold_idx_wt] = min(abs(t_wt-120));
+[~, ideal_hold_idx_ko] = min(abs(t_ko-120));
 
+init_stable_val_wt = sqrt(var(yksum_wt(ideal_hold_idx_wt,:)));
+init_stable_val_ko = sqrt(var(yksum_wt(ideal_hold_idx_ko,:)));
+
+hold_idx_wt = zeros(num_volts, 1);
+hold_idx_ko = zeros(num_volts, 1);
+
+for i = 1:num_volts
+    current_trace_wt = yksum_wt(:, i);
+
+    counter = 1;
+    statbility_est = abs(current_trace_wt(ideal_hold_idx_wt+counter) - current_trace_wt(ideal_hold_idx_wt-counter));
+    
+    if statbility_est > 10*init_stable_val_wt
+        hold_idx_wt(i) = ideal_hold_idx_wt;
+        continue
+    end
+
+    while true
+        % update counter and stable value
+        counter = counter + 1;
+        stable_val = statbility_est;
+        
+        % check stability
+        statbility_est = abs(current_trace_wt(ideal_hold_idx_wt+counter) - current_trace_wt(ideal_hold_idx_wt-counter));
+        if statbility_est > 10*stable_val
+            hold_idx_wt(i) = ideal_hold_idx_wt + (counter-1);
+            break
+        end
+    end
+end
+
+for i = 1:num_volts
+    current_trace_ko = yksum_ko(:, i);
+
+    counter = 1;
+    statbility_est = abs(current_trace_ko(ideal_hold_idx_ko+counter) - current_trace_ko(ideal_hold_idx_ko-counter));
+    
+    if statbility_est > 10*init_stable_val_ko
+        hold_idx_ko(i) = ideal_hold_idx_ko;
+        continue
+    end
+
+    while true
+        % update counter and stable value
+        counter = counter + 1;
+        stable_val = statbility_est;
+        
+        % check stability
+        statbility_est = abs(current_trace_ko(ideal_hold_idx_ko+counter) - current_trace_ko(ideal_hold_idx_ko-counter));
+        if statbility_est > 10*stable_val
+            hold_idx_ko(i) = ideal_hold_idx_ko + (counter-1);
+            break
+        end
+    end
+end
+
+%% visual inspection
 Ek = -91.1;
 
+par_kto = to_param_wt(best_toWt_idx, :);
+par_kslow = kslow_param_wt(best_KslowWt_idx, :);
+
+t = t_wt;
+
 figure(1)
+volt_idx = 1;
+hold_pt = t(hold_idx_wt(volt_idx));
+end_pt = t(end);
+
+time_space = cell(1,3);
+time_space{1} = t;
+time_space{2} = t(1:hold_idx_wt(volt_idx));
+time_space{3} = t(hold_idx_wt(volt_idx)+1:end) - t(hold_idx_wt(volt_idx)+1);
+
 y1 = ikto(par_kto, -70, volts(1), time_space, Ek);
 y2 = ikslow(par_kslow, -70, volts(1), time_space, Ek);
-y3 = zeros(length(sim_t), 1);
-y3((hold_len + 1):end_len) = amp(3,1);
+y3 = zeros(length(t), 1);
+y3(hold_idx_wt(volt_idx)+1:end) = amp_wt(3,1);
 
-plot(t, yksum(:, 1))
+plot(t, yksum_wt(:, 1))
 hold on
-    plot(sim_t, y1+y2+y3)
+    plot(t, y1+y2+y3)
 hold off
 legend('Experiemntal', 'Simulated')
 
@@ -128,18 +199,43 @@ hold off
 legend('Experiemntal', 'Simulated')
 
 figure(6)
-y1 = ikto(par_kto, -70, volts(6), time_space, Ek);
-y2 = ikslow(par_kslow, -70, volts(6), time_space, Ek);
-y3 = zeros(length(sim_t), 1);
-y3((hold_len + 1):end_len) = amp(3,6);
+volt_idx = 6;
+hold_pt = t(hold_idx_wt(volt_idx));
+end_pt = t(end);
 
-plot(t, yksum(:, 6))
+time_space = cell(1,3);
+time_space{1} = t;
+time_space{2} = t(1:hold_idx_wt(volt_idx));
+time_space{3} = t(hold_idx_wt(volt_idx)+1:end) - t(hold_idx_wt(volt_idx)+1);
+
+y1 = ikto(par_kto, -70, volts(volt_idx), time_space, Ek);
+y2 = ikslow(par_kslow, -70, volts(volt_idx), time_space, Ek);
+y3 = zeros(length(t), 1);
+y3(hold_idx_wt(volt_idx)+1:end) = amp_wt(3,volt_idx);
+
+plot(t, yksum_wt(:, volt_idx))
 hold on
-    plot(sim_t, y1+y2+y3)
+    plot(t, y1+y2+y3)
 hold off
 legend('Experiemntal', 'Simulated')
 
 %% compare with exponential function
+% protocol
+end_len = 4.5*1000;
+hold_len = 0.125*1000;
+
+hold_t = 0:hold_len;
+pulse_t = (hold_len + 1):end_len;
+pulse_t_adj = pulse_t - pulse_t(1);
+sim_t = [hold_t, pulse_t];
+
+time_space = cell(1,3);
+time_space{1} = sim_t;
+time_space{2} = hold_t;
+time_space{3} = pulse_t_adj;
+
+Ek = -91.1;
+
 % true amplitudes and taus
 amps_wt = [24.93, 20.49];
 taus_wt = [110.36, 1441.59];
