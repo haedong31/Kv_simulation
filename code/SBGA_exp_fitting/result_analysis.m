@@ -6,7 +6,6 @@ num_iters = 30;
 
 % load model fitting results and select best one
 load('calib_result_wt.mat')
-
 load('calib_result_ko.mat')
 
 % ikto wt
