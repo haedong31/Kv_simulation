@@ -246,13 +246,15 @@ Thus, we investigated the impact of reduced hybrid/complex N-glycosylation throu
 
 \begin{figure}[!ht]
     \centering
-    \caption{Simulation results of the (a) action potential and (b) relevant ionic currents (i.e., I\textsubscript{Kto}, I\textsubscript{Kslow}, I\textsubscript{Kss}, I\textsubscript{Na}, and I\textsubscript{CaL}) of mouse ventricular myocytes. Potassium currents have positive currents, while sodium and calcium currents are negative.}
+    \caption{{\bf Simulation model of mouse myocytes.} 
+    Simulation results of the (a) action potential and (b) relevant ionic currents (i.e., I\textsubscript{Kto}, I\textsubscript{Kslow}, I\textsubscript{Kss}, I\textsubscript{Na}, and I\textsubscript{CaL}) of mouse ventricular myocytes. Potassium currents have positive currents, while sodium and calcium currents are negative.}
     \label{fig1}
 \end{figure}
 
 \begin{figure}[!ht]
     \centering
-    \caption{Predominant ion channels in human ventricular myocytes and their functional role in shaping an AP.}
+    \caption{{\bf Human ventricular action potential.} 
+    Predominant ion channels in human ventricular myocytes and their functional role in shaping an AP.}
     \label{fig2}
 \end{figure}
 
@@ -265,6 +267,13 @@ Therefore, this paper presents simulation modeling of dominant K\textsuperscript
     \item Calibrated models facilitate the prediction of K\textsubscript{v} characteristics at different voltages that are not observed in the in-vitro experiments. In the Mgat1KO group, both I\textsubscript{Kto} and I\textsubscript{Kslow} densities are shown to be significantly reduced and the rate of I\textsubscript{Kslow} inactivation is much slower.
     \item Simulation modeling of cardiac myocytes is conducive to gain a better understanding of detailed K\textsubscript{v} kinetics, as well as how reduced glycosylation through ablation of Mgat1 gene impacts K\textsubscript{v} kinetics.
 \end{itemize}
+
+\begin{figure}[!ht]
+    \centering
+    \caption{{\bf Dominant K\textsuperscript{+} cureents.} 
+    Example of K\textsuperscript{+} current decomposition into three component currents. Each component K\textsuperscript{+} current has different characteristics in terms of their peak and decaying phase.}
+    \label{fig3}
+\end{figure}
 
 \section*{Background}
 % === II. RESEARCH BACKGROUND ===========================================
@@ -279,12 +288,6 @@ In the literature, optimization procedures have been proposed to fit cardiomyocy
 
 \subsection*{K\textsubscript{v} Isoforms}
 The orchestrated activity of different K\textsubscript{v} isoforms produces multiple component currents, as illustrated in Fig~\ref{fig1}-(b) and Fig~\ref{fig3} However, it is difficult to rigorously delineate the multiple component K\textsuperscript{+} currents through voltage-clamp experiments alone because only the sum of K\textsuperscript{+} currents is measured and recorded. Thus, I\textsubscript{Ksum} is usually decomposed mathematically by fitting the peak and decaying portion of each component current trace with an exponential function \cite{brunet2004heterogeneous}. As given in Eq~\ref{eq1}, a standard exponential function has three parameters: amplitude ($\mathrm{A}$), time constant ($\tau$), and constant offset value ($\mathrm{C}$). $t$ is time in millisecond. Amplitude refers to the value of the peak and $\tau$ to the time constant when current reduces by $e^{-1}$ (~63\%) of the peak. 
-
-\begin{figure}[!ht]
-    \centering
-    \caption{Example of K\textsuperscript{+} current decomposition into three component currents. Each component K\textsuperscript{+} current has different characteristics in terms of their peak and decaying phase.}
-    \label{fig3}
-\end{figure}
 
 \begin{equation}
     \mathrm{I} = \mathrm{A}e^{-t/\tau} + \mathrm{C}
@@ -317,7 +320,8 @@ As mentioned earlier, I\textsubscript{Ksum} was measured using whole-cell voltag
 
 \begin{figure}[!ht]
     \centering
-    \caption{In-vitro experimental results, adopted from \cite{ednie2019reduced}, of averages and error bars of (a) the peaks and constant current, and (b) inactivation time constant. As reported in \cite{ednie2019reduced}, significant differences between WT and Mgat1KO at $p \leq 0.05$ are indicated by an *. ($n=35$ for WT and $n=38$ for Mgat1KO).}
+    \caption{{\bf In-vitro experimental results.} 
+    In-vitro experimental results, adopted from \cite{ednie2019reduced}, of averages and error bars of (a) the peaks and constant current, and (b) inactivation time constant. As reported in \cite{ednie2019reduced}, significant differences between WT and Mgat1KO at $p \leq 0.05$ are indicated by an *. ($n=35$ for WT and $n=38$ for Mgat1KO).}
     \label{fig4}
 \end{figure}
 
@@ -410,7 +414,8 @@ In the standard GA, a new population is constructed from superior solutions of t
 
 \begin{figure}[!ht]
     \centering
-    \caption{An illustration of proposed self-breeding genetic algorithm and comparison with standard genetic algorithm.}
+    \caption{{\bf Method illustration.} 
+    An illustration of proposed self-breeding genetic algorithm and comparison with standard genetic algorithm.}
     \label{fig5}
 \end{figure}
 
@@ -469,7 +474,8 @@ Fig~\ref{fig6} shows the current traces generated by the calibrated simulation m
 
 \begin{figure}[!ht]
     \centering
-    \caption{The comparison of current traces between calibrated simulations models (gray line) and benchmark exponential fitting (blue lines: WT; red lines: Mgat1KO). Each plot includes 30 replications of simulations results.}
+    \caption{{\bf Comparison of simulation modeling and exponential fitting.} 
+    The comparison of current traces between calibrated simulations models (gray line) and benchmark exponential fitting (blue lines: WT; red lines: Mgat1KO). Each plot includes 30 replications of simulations results.}
     \label{fig6}
 \end{figure}
 
@@ -478,7 +484,8 @@ To further investigate additional differences between the Mgat1KO and WT groups,
 
 \begin{figure}[!ht]
     \centering
-    \caption{Predicted current traces of I\textsubscript{Kto} and I\textsubscript{Kslow} for each group. (a) Current traces of WT and (b) for Mgat1KO. Clamp voltages of 4.5 seconds were applied to from -60 mV to +50 mV by 10-mV increments from the holding potential -70 mV.}
+    \caption{{\bf Prediction of current traces.} 
+    Predicted current traces of I\textsubscript{Kto} and I\textsubscript{Kslow} for each group. (a) Current traces of WT and (b) for Mgat1KO. Clamp voltages of 4.5 seconds were applied to from -60 mV to +50 mV by 10-mV increments from the holding potential -70 mV.}
     \label{fig7}
 \end{figure}
 
@@ -486,7 +493,8 @@ Fig~\ref{fig8} further demonstrates the differences in predicted current density
 
 \begin{figure}[!ht]
     \centering
-    \caption{Predicted current density to voltage relationship for I\textsubscript{Kto} and I\textsubscript{Kslow} under Mgat1KO (red solid line with circle markers) and WT conditions (blue dotted line with square markers). Amplitudes were recorded for voltage steps ranging from -60 mV to 50 mV by 10-mV increments.} 
+    \caption{{\bf Prediction of density to voltage relationship.} 
+    Predicted current density to voltage relationship for I\textsubscript{Kto} and I\textsubscript{Kslow} under Mgat1KO (red solid line with circle markers) and WT conditions (blue dotted line with square markers). Amplitudes were recorded for voltage steps ranging from -60 mV to 50 mV by 10-mV increments.} 
     \label{fig8}
 \end{figure}
 
@@ -494,13 +502,14 @@ K\textsubscript{v} has unique inactivation kinetics that makes it difficult to d
 
 \begin{figure}[!ht]
     \centering
-    \caption{The prediction of inactivation time constants for I\textsubscript{Kto} and I\textsubscript{Kslow} with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
+    \caption{{\bf Prediction of inactivation time constant.} 
+    The prediction of inactivation time constants for I\textsubscript{Kto} and I\textsubscript{Kslow} with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
     \label{fig9}
 \end{figure}
 
 \begin{figure}[!ht]
     \centering
-    \caption{The prediction of SSI for I\textsubscript{Kto} and I\textsubscript{Kslow} with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
+    \caption{{\bf Prediction of SSI.} The prediction of SSI for I\textsubscript{Kto} and I\textsubscript{Kslow} with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
     \label{fig10}
 \end{figure}
 
