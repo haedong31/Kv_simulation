@@ -242,11 +242,23 @@ Dilated cardiomyopathy (DCM) is the third most common cause of heart failure and
 % =======================================================================
 Heart disease is the leading cause of death globally, accounting for 23\% of deaths in the U.S. in 2017 \cite{cdc2019deaths}. Dilated cardiomyopathy (DCM) is the third most common cause of heart failure and the most frequent reason for heart transplantation \cite{weintraub2017dilated}. DCM is characterized by enlarged and weakened ventricular chambers, and it is associated with systolic and contractile dysfunction that has a high risk to heart failure, with approximately 70\% of DCM cases regarded as idiopathic \cite{weintraub2017dilated, lakdawala2013dilated, hershberger2011update}. There has been consistent and increasing evidence of a link between aberrant glycosylation and heart failure \cite{gehrmann2003cardiomyopathy, footitt2009cardiomyopathy, marques2017cardiac}. Recently, we showed that reduction of hybrid/complex N-glycosylation in mouse cardiomyocytes, through ablation of the Mgat1\footnote{Mannosyl ($\alpha$-1,3-)-Glycoprotein $\beta$-1,2-N-acetylglucosaminyltransferase} gene that encodes a critical glycosyltransferase (GlcNAcT1\footnote{UDP-GlcNAc:$\alpha$-3-D-mannoside-$\beta$1,2-N-acetylglucosaminyltransferase}) (Mgat1KO model), is sufficient to cause DCM \cite{ednie2019reduced, ednie2019reduced2}. Mgat1KO mice develop DCM, heart failure, and 100\% die early, likely from ventricular arrhythmias resulting in sudden cardiac death. Further, Mgat1KO ventricular myocytes demonstrated altered electromechanical functions, including excitation-contraction (EC) coupling, are consistent with observed changes in electrical signaling caused by acute and downstream (disease-related) effects on voltage-gated ion channel (VGIC) gating and activity \cite{ednie2019reduced}. 
 
-Thus, we investigated the impact of reduced hybrid/complex N-glycosylation through the lens of electrophysiology. Electrophysiology refers to studies of electrical properties in scales from ion channels in cells to organ systems \cite{scanziani2009electrophysiology}. Electrical signaling in the heart has vital functions related to intra and extracellular communication, rhythmicity of heartbeats, and provides a driving force for contraction. The action potential (AP) is the net transmembrane potential varying over time which results from the composite activities of different ion channels \cite{grant2009cardiac}. Fig~\ref{fig1}-(a) shows the simulated AP of a mouse ventricular apex myocyte using models adopted from \cite{bondarenko2004computer}. The AP is the result of orchestrated activities of various ionic currents described in Fig 1-(b). Even small changes in VGIC function can contribute to aberrant AP waveform and/or conduction, leading to arrhythmias. As illustrated in Fig~\ref{fig2}, $\text{Na}^{+}$ channels ($\text{Na}_{v}$) are responsible for AP initiation, or the depolarization phase, $\text{Ca}^{2+}$ channels ($\text{Ca}_{v}$) drive the prolonged depolarization phase particularly in larger species (“plateau”), while several $\text{K}^{+}$ channel ($\text{K}_{v}$) isoforms are collectively responsible for AP deactivation, i.e., repolarization. Like most transmembrane proteins, VGICs are heavily glycosylated membrane proteins \cite{ednie2011modulation}. Studies have proven that glycosylation can affect VGIC function predominantly. For example, we reported that a saturating, electrostatic effect of negatively charged sialic acids, which are typically attached to the terminal of glycan branches, significantly altered cardiac electrical signaling \cite{ednie2013expression, ednie2015reduced}. Our recent studies observed aberrant electrical signaling, e.g., prolonged APs and abnormal early re-activations, in Mgat1KO ventricular apex myocytes \cite{ednie2019reduced, ednie2019reduced2}. These observations strongly support direct and disease-related effects of reduced N-glycosylation on VGIC gating and activity.
+Thus, we investigated the impact of reduced hybrid/complex N-glycosylation through the lens of electrophysiology. Electrophysiology refers to studies of electrical properties in scales from ion channels in cells to organ systems \cite{scanziani2009electrophysiology}. Electrical signaling in the heart has vital functions related to intra and extracellular communication, rhythmicity of heartbeats, and provides a driving force for contraction. The action potential (AP) is the net transmembrane potential varying over time which results from the composite activities of different ion channels \cite{grant2009cardiac}. Fig~\ref{fig1}-(a) shows the simulated AP of a mouse ventricular apex myocyte using models adopted from \cite{bondarenko2004computer}. The AP is the result of orchestrated activities of various ionic currents described in Fig-(b). Even small changes in VGIC function can contribute to aberrant AP waveform and/or conduction, leading to arrhythmias. As illustrated in Fig~\ref{fig2}, $\text{Na}^{+}$ channels ($\text{Na}_{v}$) are responsible for AP initiation, or the depolarization phase, $\text{Ca}^{2+}$ channels ($\text{Ca}_{v}$) drive the prolonged depolarization phase particularly in larger species (“plateau”), while several $\text{K}^{+}$ channel ($\text{K}_{v}$) isoforms are collectively responsible for AP deactivation, i.e., repolarization. Like most transmembrane proteins, VGICs are heavily glycosylated membrane proteins \cite{ednie2011modulation}. Studies have proven that glycosylation can affect VGIC function predominantly. For example, we reported that a saturating, electrostatic effect of negatively charged sialic acids, which are typically attached to the terminal of glycan branches, significantly altered cardiac electrical signaling \cite{ednie2013expression, ednie2015reduced}. Our recent studies observed aberrant electrical signaling, e.g., prolonged APs and abnormal early re-activations, in Mgat1KO ventricular apex myocytes \cite{ednie2019reduced, ednie2019reduced2}. These observations strongly support direct and disease-related effects of reduced N-glycosylation on VGIC gating and activity.
+
+\begin{figure}[!ht]
+    \centering
+    \caption{Simulation results of the (a) action potential and (b) relevant ionic currents (i.e., $\text{I}_{Kto}$, $\text{I}_{Kslow}$, $\text{I}_{Kss}$, $\text{I}_{Na}$, and $\text{I}_{CaL}$) of mouse ventricular myocytes. Potassium currents have positive currents, while sodium and calcium currents are negative.}
+    \label{fig1}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \caption{Predominant ion channels in human ventricular myocytes and their functional role in shaping an AP.}
+    \label{fig2}
+\end{figure}
 
 Although these in-vitro experiments showed changes in activities of ion channels, there are certain limitations that include: 1) \textit{Detailed ion channel kinetics are difficult to determine rigorously using in-vitro experiments alone}. From the electrophysiological experiment, pathological electrical signaling can be observed through measurements of APs at the whole-cell level and currents at the ion-channel level. However, it is difficult to relate, rigorously, the impacts of VGIC gating changes to the altered AP waveform/conduction and vice versa. 2) \textit{Segregating different $\text{K}^{+}$ currents ($\text{I}_{K}$) is difficult using whole-cell recording experimental techniques only}. $\text{I}_{Ksum}$ is the result of joint activity of multiple isoforms with each isoform producing a different, but slightly overlapping (in activation and inactivation voltages) component of the total $\text{K}^{+}$ current ($\text{I}_{Ksum}$) \cite{du2017} that contributes to various portions of AP repolarization. However, in-vitro experiments can only measure the sum of these component currents ($\text{I}_{Ksum}$) using whole-cell voltage-clamp protocols. Even pharmacologic separation of $\text{K}_{v}$ current types is difficult, as the specificity of drugs for a single current type is not ideal. Hence, component $\text{K}^{+}$ currents are usually estimated through multiple exponential fits of the decaying portion (due to channel inactivation) of the total $\text{K}^{+}$ current \cite{brunet2004heterogeneous}. Although the exponential function illustrates the shape of a component-current trace well, it cannot adequately describe kinetic dynamics of the current, nor fully and rigorously distinguish among currents produced by different $\text{K}_{v}$ isoforms because of their slightly overlapping voltage-dependence of gating. As $\text{K}_{v}$ have a critical function in repolarizing the cell, it is imperative to model and examine $\text{K}_{v}$ isoforms thoroughly.
 
-Therefore, this paper presents simulation modeling of dominant $\text{K}^{+}$ currents in mouse ventricular myocytes and further calibrate their parameters using the in-vitro data under normal and reduced glycosylation conditions through ablation of the Mgat1 gene. Specifically, we propose an optimization procedure to calibrate simulation models of potassium channel isoform activity, $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, in mouse cardiomyocytes.  Fig 3 shows  major component $\text{K}^{+}$ currents, including $\text{I}_{Ksum}$, $\text{I}_{Kto}$, $\text{I}_{Kslow}$ and $\text{I}_{Kss}$. Key statistics of component currents, amplitudes, and inactivation rates ($\tau$'s) are measured from in-vitro experimental data with a 4.5 s voltage-clamp protocol (see details in Section III). The major contributions of this paper are summarized as follows.
+Therefore, this paper presents simulation modeling of dominant $\text{K}^{+}$ currents in mouse ventricular myocytes and further calibrate their parameters using the in-vitro data under normal and reduced glycosylation conditions through ablation of the Mgat1 gene. Specifically, we propose an optimization procedure to calibrate simulation models of potassium channel isoform activity, $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, in mouse cardiomyocytes.  Fig~\ref{fig3} shows  major component $\text{K}^{+}$ currents, including $\text{I}_{Ksum}$, $\text{I}_{Kto}$, $\text{I}_{Kslow}$ and $\text{I}_{Kss}$. Key statistics of component currents, amplitudes, and inactivation rates ($\tau$'s) are measured from in-vitro experimental data with a 4.5 s voltage-clamp protocol (see details in Section III). The major contributions of this paper are summarized as follows.
 \begin{itemize}
     \item Simulation models are integrated with in-vitro experiments to investigate the effects of reduced N-glycosylation on $\text{K}_{v}$ activity of mouse myocytes. Computer simulation helps demonstrate the voltage-gating mechanism and conductance kinetics that cannot be readily available through traditional exponential fitting. 
     \item A self-breeding Genetic Algorithm procedure is developed to calibrate simulation models of voltage-gated $\text{K}^{+}$ channel of mouse ventricular apex myocytes based on key characterisitcs and raw data obtained from in-vitro experiments.
@@ -266,42 +278,69 @@ Electrophysiology was pioneered by Hodgkin and Huxley with a series of well-know
 In the literature, optimization procedures have been proposed to fit cardiomyocyte simulation models to electrophysiological experimental data. For example, $\text{Na}_{v}$ activity was coupled with in-vitro data of mouse cardiomyocyte using fractional factorial design and a Gaussian process model \cite{du2015statistical}. Fractional factorial designs were used to find significant control variables from the entire set of tuning parameters to reduce dimensionality. The Gaussian process model, which is computationally cheaper than the original $\text{Na}_{v}$ model, has served as a surrogate model to find optimal parameters. Characteristic curves such as steady-state activation (SSA), steady-state inactivation (SSI), and time constant of inactivation at different voltage were used to calculate goodness-of-fit as an objective function of optimization to minimize discrepancies with in-vitro experiment data. However, they are derived from current traces recorded during in-vitro experiments and may not always be available. For example, in our Mgat1KO data, currents were too small at early-activating voltages to reliably calculate the characteristic curves.  
 
 \subsection*{$\text{K}_{v}$ Isoforms}
-The orchestrated activity of different $\text{K}_{v}$ isoforms produces multiple component currents, as illustrated in Fig 1-(b) and Fig 3. However, it is difficult to rigorously delineate the multiple component $\text{K}^{+}$ currents through voltage-clamp experiments alone because only the sum of $\text{K}^{+}$ currents is measured and recorded. Thus, $\text{I}_{Ksum}$ is usually decomposed mathematically by fitting the peak and decaying portion of each component current trace with an exponential function \cite{brunet2004heterogeneous}. As given in Eq (1), a standard exponential function has three parameters: amplitude ($\text{A}$), time constant ($\tau$), and constant offset value $\text{C}$. $t$ is time in millisecond. Amplitude refers to the value of the peak and $\tau$ to the time constant when current reduces by $e^{-1}$ (~63\%) of the peak. 
+The orchestrated activity of different $\text{K}_{v}$ isoforms produces multiple component currents, as illustrated in Fig~\ref{fig1}-(b) and Fig~\ref{fig3} However, it is difficult to rigorously delineate the multiple component $\text{K}^{+}$ currents through voltage-clamp experiments alone because only the sum of $\text{K}^{+}$ currents is measured and recorded. Thus, $\text{I}_{Ksum}$ is usually decomposed mathematically by fitting the peak and decaying portion of each component current trace with an exponential function \cite{brunet2004heterogeneous}. As given in Eq~\ref{eq1}, a standard exponential function has three parameters: amplitude ($\text{A}$), time constant ($\tau$), and constant offset value $\text{C}$. $t$ is time in millisecond. Amplitude refers to the value of the peak and $\tau$ to the time constant when current reduces by $e^{-1}$ (~63\%) of the peak. 
 
-In mouse ventricular myocytes, $\text{I}_{Ksum}$ has often been decomposed into three dominant currents, with one current having a high peak and decaying rapidly ($\text{I}_{Kto}$), a second current having a smaller peak and decaying slowly ($\text{I}_{Kslow}$), and the third current type being constant ($\text{I}_{Kss}$), so that a bi-exponential function with a constant component, as in Eq (2), was used to separate different current components for 4.5-second protocols \cite{ednie2015reduced}. Fig 3 shows an example of the decomposition of $\text{I}_{Ksum}$ into three component currents. $\text{I}_{Kto}$ is a rapidly inactivating transient outward current that has a high peak at the very beginning of activation and rapid inactivation. $\text{I}_{Kslow}$, a delayed rectifier-type current, has a low peak and longer inactivation phase. $\text{I}_{Kss}$, a non-inactivating steady-state current, remains constant during the course of depolarization. In Eq (2), $\text{A}_{Kto}$ and $\text{A}_{Kslow}$ are the amplitudes; $\tau_{Kto}$ and $\tau_{Kslow}$ are time constants of $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, respectively. $\text{A}_{Kss}$ is the constant current $\text{I}_{Kss}$. Although bi-exponential fitting captures essential characteristics of three major component $\text{K}^{+}$ currents and describes the $\text{I}_{Ksum}$ waveform, it cannot provide detailed kinetic dynamics of $\text{K}_{v}$ isoforms \cite{plumlee2016calibrating}. 
+\begin{figure}[!ht]
+    \centering
+    \caption{Example of $\text{K}^{+}$ current decomposition into three component currents. Each component $\text{K}^{+}$ current has different characteristics in terms of their peak and decaying phase.}
+    \label{fig3}
+\end{figure}
+
 \begin{equation}
-\label{standaed exponential}
     \text{I} = \text{A}e^{-t/\tau} + \text{C}
+    \label{eq1}
 \end{equation}
+
+In mouse ventricular myocytes, $\text{I}_{Ksum}$ has often been decomposed into three dominant currents, with one current having a high peak and decaying rapidly ($\text{I}_{Kto}$), a second current having a smaller peak and decaying slowly ($\text{I}_{Kslow}$), and the third current type being constant ($\text{I}_{Kss}$), so that a bi-exponential function with a constant component, as in Eq~\ref{eq2}, was used to separate different current components for 4.5-second protocols \cite{ednie2015reduced}. Fig~\ref{fig3} shows an example of the decomposition of $\text{I}_{Ksum}$ into three component currents. $\text{I}_{Kto}$ is a rapidly inactivating transient outward current that has a high peak at the very beginning of activation and rapid inactivation. $\text{I}_{Kslow}$, a delayed rectifier-type current, has a low peak and longer inactivation phase. $\text{I}_{Kss}$, a non-inactivating steady-state current, remains constant during the course of depolarization. In Eq~\ref{eq2}, $\text{A}_{Kto}$ and $\text{A}_{Kslow}$ are the amplitudes; $\tau_{Kto}$ and $\tau_{Kslow}$ are time constants of $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, respectively. $\text{A}_{Kss}$ is the constant current $\text{I}_{Kss}$. Although bi-exponential fitting captures essential characteristics of three major component $\text{K}^{+}$ currents and describes the $\text{I}_{Ksum}$ waveform, it cannot provide detailed kinetic dynamics of $\text{K}_{v}$ isoforms \cite{plumlee2016calibrating}. 
+
 \begin{equation}
-\label{bi-exponential}
     \text{I}_{Ksum} = \text{A}_{Kto} e^{-t/\tau_{Kto}} + \text{A}_{Kslow} e^{-t/\tau_{Kslow}} + \text{A}_{Kss}
+    \label{eq2}
 \end{equation}
 
 \section*{Methods}
 % === III. METHODS ======================================================
 % =======================================================================
+In this study, we propose an optimization procedure to calibrate simulation models of potassium channel isoform activity in mouse cardiomyocytes. Coupling in-vitro data of $\text{K}_{v}$ with in-silico models has advantages that bi-exponential fitting cannot provide. For example, ionic currents, action potentials, and conductance can be determined more rigorously; and models allow for the simulation and prediction of glycosylation conditions that are not observed in the in-vitro experiment. 
+
+Specifically, this paper presents a new method that fits the simulation models directly to amplitudes and $\tau$'s, which are the most critical characteristics to describe component $\text{K}^{+}$ current traces. Eq~\ref{eq3} shows the objective function of the suggested optimization procedure, where $\hat{A_i}$ and $\hat{\tau_i}$ are estimations of amplitude and time constant from the simulation model. Potassium channels from mouse ventricular myocytes are modeled and parameterized based on partial differential equations. Then, full factorial designs are used to discover sensitive variables from the potential set of parameters. Further, a genetic algorithm-based heuristic optimization method is developed to calibrate the models to the data.
+
+\begin{equation}
+    \min (|\text{A}_i - \hat{\text{A}_i}| + |\tau_i - \hat{\tau_i}|), \ i \in \{Kto,\ Kslow\}
+    \label{eq3}
+\end{equation}
+
 \subsection*{In-vitro Experimental Data}
 Recently, we reported electrophysiological experiment data to investigate the impact of reduced hybrid/complex N-glycosylation on left ventricular cardiomyocyte activity, through deletion of the Mgat1 gene, which encodes a critical glycosyltransferase (GlcNAcT1) \cite{ednie2019reduced, ednie2019reduced2}. The detailed process of creation of Mgat1KO (Mgat1 Knock Out) strain, features of the cardiomyocyte-specific Mgat1KO strain, breeding, genotyping, and selection of wild type (WT) animals were previously described in \cite{ednie2019reduced2}. In our previous study of $\text{K}_{v}$ activities in the Mgat1KO \cite{ednie2019reduced}, cells of 12 to 20-week-old mice were used and numbers of observation for WT and Mgat1KO are 35 and 38 respectively.
 
 As mentioned earlier, $\text{I}_{Ksum}$ was measured using whole-cell voltage clamp protocols. Cells were held at -70 mV and then depolarized by 10 mV voltage steps from -50 mV to 50 mV for 4.5 seconds. Note that this paper does not include the 25s depolarization, which often helps distinguish $\text{I}_{Kslow1}$ ($\text{K}_{v}1.5$ activity) and $\text{I}_{Kslow2}$ ($\text{K}_{v}2.1$ activity). Our ongoing experiments focus on voltage-clamp experiments on 25-second periods. The resulted data will be further studied and calibrated with simulation models in the future work.
 
-Fig 4 shows our in-vitro experimental data about key statistics on $\text{I}_{Kto}$ and $\text{I}_{Kslow}$. Peaks of both currents are reduced in the Mgat1KO group. Steady-state current $\text{I}_{Kss}$, remaining constant during the depolarization, is also reduced in the Mgat1KO group. To be specific, $\text{A}_{Kslow}$ is most reduced compared to WT, by ~77\%. In addition, $\tau_{Kslow}$ of the Mgat1KO group is ~30\% larger than the WT group, which means $\text{I}_{Kslow}$ is prolonged with reduced N-glycosylation. However, $\tau_{Kto}$ does not show significant difference.
+\begin{figure}[!ht]
+    \centering
+    \caption{In-vitro experimental results, adopted from \cite{ednie2019reduced}, of averages and error bars of (a) the peaks and constant current, and (b) inactivation time constant. As reported in \cite{ednie2019reduced}, significant differences between WT and Mgat1KO at $p \leq 0.05$ are indicated by an *. ($n=35$ for WT and $n=38$ for Mgat1KO.}
+    \label{fig4}
+\end{figure}
+
+Fig~\ref{fig4} shows our in-vitro experimental data about key statistics on $\text{I}_{Kto}$ and $\text{I}_{Kslow}$. Peaks of both currents are reduced in the Mgat1KO group. Steady-state current $\text{I}_{Kss}$, remaining constant during the depolarization, is also reduced in the Mgat1KO group. To be specific, $\text{A}_{Kslow}$ is most reduced compared to WT, by ~77\%. In addition, $\tau_{Kslow}$ of the Mgat1KO group is ~30\% larger than the WT group, which means $\text{I}_{Kslow}$ is prolonged with reduced N-glycosylation. However, $\tau_{Kto}$ does not show significant difference.
 
 \subsection*{Simulation Models of $\text{I}_{Kto}$, and $\text{I}_{Kslow}$}
-In this paper, cell AP is modeled as an orchestrated activity of various ion channels and electrogenic transport proteins, as given in Equation (4). In this equation, $C_m$ is the membrane capacitance, and there are several ionic currents: L-type calcium current ($\text{I}_{CaL}$), calcium pump current ($\text{I}_{p(Ca)}$), $\text{Na}^{+}/\text{Ca}^{2+}$ exchange current ($\text{I}_{NaCa}$), calcium background current ($\text{I}_{Cab}$), fast $\text{Na}^{+}$ current ($\text{I}_{Na}$), background $\text{Na}^{+}$ current ($\text{I}_{Nab}$), $\text{Na}^{+}/\text{K}^{+}$ pump current ($\text{I}_{NaK}$), fast transient outward $\text{K}^{+}$ current ($\text{I}_{Kto,f}$), slower transient outward $\text{K}^{+}$ current ($\text{I}_{Kto,s}$, which is essentially missing in apex myocytes), time independent $\text{K}^{+}$ current ($\text{I}_{K1}$), slow delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Ks}$), ultrarapidly activating delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Kur}$), non-inactivating steady-state $\text{K}^{+}$ current ($\text{I}_{Kss}$), rapidly delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Kr}$), $\text{Ca}^{2+}$-activated $\text{Cl}^{-}$ current ($\text{I}_{Cl,Ca}$), and stimulus current ($\text{I}_{stim}$). Although there are seven currents pertinent to $\text{K}_{v}$ dynamics in this model, as mentioned earlier, three current types, $\text{I}_{Kto}$, $\text{I}_{Kslow}$, and $\text{I}_{Kss}$, are dominant $\text{K}^{+}$ currents in a ventricular apex myocyte \cite{nerbonne2005molecular} (also see Fig 4). In this study, we modeled and calibrated $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ as in Equations (5) and (6) with statistical data from our in-vitro experiments on ventricular myocytes,
+In this paper, cell AP is modeled as an orchestrated activity of various ion channels and electrogenic transport proteins, as given in Eq~\ref{eq4}. In this equation, $C_m$ is the membrane capacitance, and there are several ionic currents: L-type calcium current ($\text{I}_{CaL}$), calcium pump current ($\text{I}_{p(Ca)}$), $\text{Na}^{+}/\text{Ca}^{2+}$ exchange current ($\text{I}_{NaCa}$), calcium background current ($\text{I}_{Cab}$), fast $\text{Na}^{+}$ current ($\text{I}_{Na}$), background $\text{Na}^{+}$ current ($\text{I}_{Nab}$), $\text{Na}^{+}/\text{K}^{+}$ pump current ($\text{I}_{NaK}$), fast transient outward $\text{K}^{+}$ current ($\text{I}_{Kto,f}$), slower transient outward $\text{K}^{+}$ current ($\text{I}_{Kto,s}$, which is essentially missing in apex myocytes), time independent $\text{K}^{+}$ current ($\text{I}_{K1}$), slow delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Ks}$), ultrarapidly activating delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Kur}$), non-inactivating steady-state $\text{K}^{+}$ current ($\text{I}_{Kss}$), rapidly delayed rectifier $\text{K}^{+}$ current ($\text{I}_{Kr}$), $\text{Ca}^{2+}$-activated $\text{Cl}^{-}$ current ($\text{I}_{Cl,Ca}$), and stimulus current ($\text{I}_{stim}$). Although there are seven currents pertinent to $\text{K}_{v}$ dynamics in this model, as mentioned earlier, three current types, $\text{I}_{Kto}$, $\text{I}_{Kslow}$, and $\text{I}_{Kss}$, are dominant $\text{K}^{+}$ currents in a ventricular apex myocyte \cite{nerbonne2005molecular} (also see Fig~\ref{fig4}). In this study, we modeled and calibrated $\text{I}_{Kto}$ and $\text{I}_{Kslow}$.
+
 \begin{equation}
-\begin{split}
+    \begin{split}
     -C_{m}\frac{dV}{dt} &= \text{I}_{CaL}+\text{I}_{p(Ca)}+\text{I}_{NaCa}+\text{I}_{Cab}\\
     &+\text{I}_{Na}+\text{I}_{Nab}+\text{I}_{NaK}+\text{I}_{Kto,f}\\
     &+\text{I}_{Kto,s}+\text{I}_{K1}+\text{I}_{Ks}+\text{I}_{Kur}\\
     &+\text{I}_{Kss}+\text{I}_{Kr}+\text{I}_{Cl,Ca}+\text{I}_{stim}
-\end{split}
+    \end{split}
+    \label{eq4}
 \end{equation}
 
-There are two major modeling schemes for VGICs, Markov models and Hodgkin-Huxley models. Hodgkin-Huxley modeling is commonly used to formulate $\text{K}^{+}$ currents for various species, for example, not only for mouse ventricular myocytes but also for rabbit and human ventricular myocytes. HH models have two state variables for describing activation and inactivation. For example, in Equation (5), $a_{Kto}$ and $i_{Kto}$ are two state variables of activation and inactivation, respectively. $G_{Kto}$ is the maximum conductance of $\text{K}_{v}4.2$, and $(V-E_k)$ is the difference of voltage $V$ and the $\text{K}^{+}$ Nernst potential $E_k$. Similarly, the $\text{I}_{Kslow}$ model is given as Equation (6), which also include two state variables for activation and inactivation gates. Relevant parametric equations of transition rates and time constants for the gating mechanisms are given below. Maximum conductance variables $G_{Kto}$ and $G_{Kslow}$ are parameterized as variables to be calibrated during the optimization; thereby, conductance values for different cells are estimated.
+There are two major modeling schemes for VGICs, Markov models and Hodgkin-Huxley models. Hodgkin-Huxley modeling is commonly used to formulate $\text{K}^{+}$ currents for various species, for example, not only for mouse ventricular myocytes but also for rabbit and human ventricular myocytes. In this study, $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ are designed using Hodgkin-Huxley modeling as given in Eq~\ref{eq5} and Eq~\ref{eq6} respectively. Hodgkin-Huxley models have two state variables for describing activation and inactivation. For example, in Equation (5), $a_{Kto}$ and $i_{Kto}$ are two state variables of activation and inactivation, respectively. $G_{Kto}$ is the maximum conductance of $\text{K}_{v}4.2$, and $(V-E_k)$ is the difference of voltage $V$ and the $\text{K}^{+}$ Nernst potential $E_k$. Similarly, the $\text{I}_{Kslow}$ model is given as Equation (6), which also include two state variables for activation and inactivation gates. Relevant parametric equations of transition rates and time constants for the gating mechanisms are given below. Maximum conductance variables $G_{Kto}$ and $G_{Kslow}$ are parameterized as variables to be calibrated during the optimization; thereby, conductance values for different cells are estimated.
+
 \begin{equation}
     I_{Kto} = G_{Kto}a_{Kto}^{3}i_{Kto}(V-E_K)
+    \label{eq5}
 \end{equation}
 \begin{align*}
     &\frac{da_{Kto}}{dt} = \alpha_{a}(1-a_{Kto}) - \beta_{a}a_{Kto} \\
@@ -311,8 +350,10 @@ There are two major modeling schemes for VGICs, Markov models and Hodgkin-Huxley
     &\alpha_i = \frac{0.000152 e^{-(V+x_3)/x_4}}{0.067083 e^{-(V + x_5)/x_4} + 1} \\
     &\beta_i = \frac{0.00095 e^{(V+x_6)/x_7}}{0.051335 e^{(V+x_6)/x_7} + 1} \\
 \end{align*}
+
 \begin{equation}
     I_{Kslow} = G_{Kslow}a_{Kslow}i_{Kslow}(V-E_k)
+    \label{eq6}
 \end{equation}
 \begin{align*}
     &\frac{a_{Kslow}}{dt} = \frac{a_{ss}-a_{Kslow}}{\tau_{a}} \\
@@ -324,13 +365,12 @@ There are two major modeling schemes for VGICs, Markov models and Hodgkin-Huxley
 \end{align*}
 
 \subsection*{Variable Screening}
-In in-silico experiments, it is critical to identify a sparse subset of sensitive variables (or model parameters to be calibrated) to reduce computational burden and improve modeling accuracy. The curse of dimensionality causes the dramatic surge of required computing resources when the number of variables increases and counter-intuitive geometric properties, making the learning procedure difficult. While a sparse subset of variables restricts the model flexibility to fit data, the opposite also has a detrimental effect on modeling accuracy. We used two-level factorial designs to perform sensitivity analysis and screen the variables that impact the model outputs of our interest. Variables were adjusted at two different levels to assess their effects on model outputs and $\text{K}_{v}$ characteristics. Table 1 shows the final subset of sensitive variables.
+In in-silico experiments, it is critical to identify a sparse subset of sensitive variables (or model parameters to be calibrated) to reduce computational burden and improve modeling accuracy. The curse of dimensionality causes the dramatic surge of required computing resources when the number of variables increases and counter-intuitive geometric properties, making the learning procedure difficult. While a sparse subset of variables restricts the model flexibility to fit data, the opposite also has a detrimental effect on modeling accuracy. We used two-level factorial designs to perform sensitivity analysis and screen the variables that impact the model outputs of our interest. Variables were adjusted at two different levels to assess their effects on model outputs and $\text{K}_{v}$ characteristics. Table~\ref{table1} shows the final subset of sensitive variables.
 
 % Place tables after the first paragraph in which they are cited.
 \begin{table}
     \centering
     \caption{\bf{Sensitive variables identified by 2-level factorial designs.}}
-    \label{table1}
     \begin{tabular}{ll}
         \hline
         Model & Selected Variables  \\ 
@@ -339,11 +379,12 @@ In in-silico experiments, it is critical to identify a sparse subset of sensitiv
         $\text{I}_{Kslow}$ & $x_1, x_2, x_3, x_4, x_6, G_{Kslow}$ \\
         \hline
     \end{tabular}
+    \label{table1}
 \end{table}
 
 \subsection*{Optimization Process}
-Furthermore, we proposed a novel metaheuristics optimization method based on the genetic algorithm (GA). Metaheuristics optimization is a higher-level procedure, which means that it is not problem-specific, but to find sufficiently satisfactory solutions for complex optimization problems efficiently. Most metaheuristics methods have common characteristics: they are inspired by nature and often involve local-search heuristic methods without gradient or Hessian matrix. GA mimics the evolution of genes based on natural selection, and its procedure is described in Algorithm 1.
-\begin{algorithm}
+Furthermore, we proposed a novel metaheuristics optimization method based on the genetic algorithm (GA). Metaheuristics optimization is a higher-level procedure, which means that it is not problem-specific, but to find sufficiently satisfactory solutions for complex optimization problems efficiently. Most metaheuristics methods have common characteristics: they are inspired by nature and often involve local-search heuristic methods without gradient or Hessian matrix. GA mimics the evolution of genes based on natural selection, and its procedure is described in Algorithm~\ref{alg1}.
+\begin{algorithm}[!ht]
     \caption{Standard Genetic Algorithm}
     \begin{algorithmic}[1]
         \renewcommand{\algorithmicrequire}{\textbf{Input:}}
@@ -361,11 +402,19 @@ Furthermore, we proposed a novel metaheuristics optimization method based on the
         \STATE Update current population with solutions generated through Step 4 and Step 6
         \ENDWHILE
         \RETURN $\mathbf{x^{*}}$ 
-    \end{algorithmic} 
+    \end{algorithmic}
+    \label{alg1}
 \end{algorithm}
 
-In the standard GA, a new population is constructed from superior solutions of the current population and new solutions are reproduced in Breeding step by so-called crossover. As illustrated in Fig. 5, the crossover is a process of mixing up elements of superior solutions in the current population so that this process is also called reproduction. This procedure is expected to discover better candidates for combinatorial optimization problems by searching combinations of elite solutions. Although crossover is an intuitive searching method for combinatorial or discrete optimization problems, exploring combinations is not appropriate for continuous variables. Hence, in this paper, we presented a new method named \textit{self-breeding genetic algorithm} that reproduces new generations without crossover but directly breeds them from each superior solution. The procedure is described in Algorithm 2, and Fig. 5 illustrates the difference between standard GA and proposed \textit{self-breeding GA}.
-\begin{algorithm}
+In the standard GA, a new population is constructed from superior solutions of the current population and new solutions are reproduced in Breeding step by so-called crossover. As illustrated in Fig~\ref{fig5}, the crossover is a process of mixing up elements of superior solutions in the current population so that this process is also called reproduction. This procedure is expected to discover better candidates for combinatorial optimization problems by searching combinations of elite solutions. Although crossover is an intuitive searching method for combinatorial or discrete optimization problems, exploring combinations is not appropriate for continuous variables. Hence, in this paper, we presented a new method named \textit{self-breeding genetic algorithm} that reproduces new generations without crossover but directly breeds them from each superior solution. The procedure is described in Algorithm~\ref{alg2}, and Fig~\ref{fig5} illustrates the difference between standard GA and proposed \textit{self-breeding GA}.
+
+\begin{figure}[!ht]
+    \centering
+    \caption{An illustration of proposed self-breeding genetic algorithm and comparison with standard genetic algorithm.}
+    \label{fig5}
+\end{figure}
+
+\begin{algorithm}[!ht]
     \caption{Self-breeding Genetic Algorithm}
     \begin{algorithmic}[1-=0+-*]
         \renewcommand{\algorithmicrequire}{\textbf{Input:}}
@@ -386,19 +435,19 @@ In the standard GA, a new population is constructed from superior solutions of t
         \STATE Update current population with top $k$ solutions generated in Step 4 and $ks$ solutions generated through Step 6 and Step 8
         \ENDWHILE
         \RETURN $(\delta_{A}, \delta_{\tau})$ and $\mathbf{x}^*$
-    \end{algorithmic} 
+    \end{algorithmic}
+    \label{alg2}
 \end{algorithm}
 
 % Results and Discussion can be combined.
 \section*{Results}
 % === IV. RESULTS =======================================================
 % =======================================================================
-The self-breeding GA was applied to a pair of mean values of $\text{A}_i$ and $\tau_i$ in Fig. 4, $i \in \{to,\ Kslow\}$, for each group, WT and Mgat1KO. This calibration process was repeated 30 times. The algorithm stopped when discrepancies of amplitude and time constant were less than tolerances. Tolerances for amplitude and time constant were (0.1, 1.0) for $\text{I}_{Kto}$ and (0.1, 5.0) for $\text{I}_{Kslow}$, which are smaller than the standard error of mean values. Table 2 shows means and standard errors of calibrated parameters found by the suggested optimization process. The simulation models and optimization process were implemented in MATLAB 2020a, and the codes are available at \url{https://github.com/haedong31/20_Kv_simulation}.
+The self-breeding GA was applied to a pair of mean values of $\text{A}_i$ and $\tau_i$ in Fig~\ref{fig4}, $i \in \{to,\ Kslow\}$, for each group, WT and Mgat1KO. This calibration process was repeated 30 times. The algorithm stopped when discrepancies of amplitude and time constant were less than tolerances. Tolerances for amplitude and time constant were (0.1, 1.0) for $\text{I}_{Kto}$ and (0.1, 5.0) for $\text{I}_{Kslow}$, which are smaller than the standard error of mean values. Table~\ref{table2} shows means and standard errors of calibrated parameters found by the suggested optimization process. The simulation models and optimization process were implemented in MATLAB 2020a, and the codes are available at \url{https://github.com/haedong31/20_Kv_simulation}.
 
 \begin{table}
     \centering
     \caption{\bf{Calibrated model parameters}}
-    \label{table2}
     \begin{tabular}{lrrlrr}
         \hline
         \multicolumn{3}{l}{$\text{I}_{Kto}$} & \multicolumn{3}{l}{$\text{I}_{Kslow}$} \\ 
@@ -413,16 +462,47 @@ The self-breeding GA was applied to a pair of mean values of $\text{A}_i$ and $\
         $\text{G}_{Kto}$ & $0.193 \pm 0.002$ & $0.142 \pm 0.001$ & $\text{G}_{Kslow}$ & $0.153 \pm 0.001$ & $0.075 \pm 0.015$ \\
         \hline
     \end{tabular}
+    \label{table2}
 \end{table}
 
-Fig. 6 shows the current traces generated by the calibrated simulation models and exponential fitting with the mean amplitudes and time constants from in-vitro experiment data. Simulation models are shown to be compatible with results of exponential fitting in the electrophysiological data. The solid gray lines represent simulated current traces with 30 repetitions. Except for $\text{I}_{Kslow}$ of the Mgat1KO, it is difficult to distinguish the two traces through a visual inspection. For this one, there was a slight dissimilarity during the early decay phase. Also, before applying the clamp voltage, it showed instability that currents had small positive values under the holding potential. Due to the small peak but large time constant, the trace of the Mgat1KO is flattened compared to a standard exponential function, which sharply decreases after the peak. This change is expected to show modeling differences between WT and Mgat1KO.
+Fig~\ref{fig6} shows the current traces generated by the calibrated simulation models and exponential fitting with the mean amplitudes and time constants from in-vitro experiment data. Simulation models are shown to be compatible with results of exponential fitting in the electrophysiological data. The solid gray lines represent simulated current traces with 30 repetitions. Except for $\text{I}_{Kslow}$ of the Mgat1KO, it is difficult to distinguish the two traces through a visual inspection. For this one, there was a slight dissimilarity during the early decay phase. Also, before applying the clamp voltage, it showed instability that currents had small positive values under the holding potential. Due to the small peak but large time constant, the trace of the Mgat1KO is flattened compared to a standard exponential function, which sharply decreases after the peak. This change is expected to show modeling differences between WT and Mgat1KO.
+
+\begin{figure}[!ht]
+    \centering
+    \caption{The comparison of current traces between calibrated simulations models (gray line) and benchmark exponential fitting (blue lines: WT; red lines: Mgat1KO). Each plot includes 30 replications of simulations results.}
+    \label{fig6}
+\end{figure}
 
 \subsection*{Simulation Comparison between WT and Mgat1KO}
-To further investigate additional differences between the Mgat1KO and WT groups, current traces were simulated at voltages between -60 mV and 50 mV in 10-mV increments as shown in Fig. 7. Simulated current traces show different patterns as voltage changes between two groups. For $\text{I}_{Kslow}$ in Fig. 7, as voltage decreases, the amplitude declines rapidly, for Mgat1KO, while reducing evenly in WT. Because of the rapid reduction, $\text{I}_{Kslow}$ traces for Mgat1KO below 0 mV depolarizations are negligible. In addition, from the perspective of decay phase, the current decreases slowly for $\text{I}_{Kslow}$ in the Mgat1KO group. It is predicted that there are differences in conductance values between WT and Mgat1KO.
+To further investigate additional differences between the Mgat1KO and WT groups, current traces were simulated at voltages between -60 mV and 50 mV in 10-mV increments as shown in Fig~\ref{fig7}. Simulated current traces show different patterns as voltage changes between two groups. For $\text{I}_{Kslow}$ in Fig~\ref{fig7}, as voltage decreases, the amplitude declines rapidly, for Mgat1KO, while reducing evenly in WT. Because of the rapid reduction, $\text{I}_{Kslow}$ traces for Mgat1KO below 0 mV depolarizations are negligible. In addition, from the perspective of decay phase, the current decreases slowly for $\text{I}_{Kslow}$ in the Mgat1KO group. It is predicted that there are differences in conductance values between WT and Mgat1KO.
 
-Fig. 8 further demonstrates the differences in predicted current density to voltage relationship between WT and Mgat1KO. For both $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, channels in Mgat1KO are less active at a given depolarized activation voltage compared to WT. The difference in the current peaks between the two groups is more prominent at depolarizations greater than -10 mV. This gap is more significant in $\text{I}_{Kslow}$ than $\text{I}_{Kto}$. At all voltages, the Mgat1KO $\text{I}_{Kslow}$ is smaller than the WT $\text{I}_{Kslow}$. This is consistent with in-vitro experimental results in which the average amplitude of $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ were significantly reduced with N-glycosylation perturbation (in the Mgat1KO), and the reduction in Mgat1KO $\text{I}_{Kslow}$ was bigger than for Mgat1KO $\text{I}_{Kto}$. 
+\begin{figure}[!ht]
+    \centering
+    \caption{Predicted current traces of $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ for each group. (a) Current traces of WT and (b) for Mgat1KO. Clamp voltages of 4.5 seconds were applied to from -60 mV to +50 mV by 10-mV increments from the holding potential -70 mV.}
+    \label{fig7}
+\end{figure}
 
-$\text{K}_{v}$ has unique inactivation kinetics that makes it difficult to dinstinguish component $\text{K}^{+}$ currents. To investigate its inactivation gating kinetics, inactivation time constants at various voltages were simulated as shown in Fig. 9. $\tau_{Kto}$ does not show a significant difference between Mgat1KO and WT when the depolarization is greater than -20 mV. There are gaps in the case where voltages are less than -20 mV, but the uncertainty represented by the error bars are too wide to make reliable predictions. $\tau_{Kslow}$ shows consistent differences, with the Mgat1KO inactivating significantly more slowly than WT at all voltages. Fig. 10 provides further information of the steady-state inactivation (SSI) rate. The SSI relationships are not significantly different between Mgat1KO and WT for either current type. These data, the longer transition times from open to inactivated state and the lack of a shift in the voltage dependence of $\text{K}_{v}$ distribution between open and inactivated states (SSI) for less glycosylated $\text{K}_{v}$ (Mgat1KO), are consistent with our previous studies \cite{schwetz2010n, ednie2015reduced, du2017}
+Fig~\ref{fig8} further demonstrates the differences in predicted current density to voltage relationship between WT and Mgat1KO. For both $\text{I}_{Kto}$ and $\text{I}_{Kslow}$, channels in Mgat1KO are less active at a given depolarized activation voltage compared to WT. The difference in the current peaks between the two groups is more prominent at depolarizations greater than -10 mV. This gap is more significant in $\text{I}_{Kslow}$ than $\text{I}_{Kto}$. At all voltages, the Mgat1KO $\text{I}_{Kslow}$ is smaller than the WT $\text{I}_{Kslow}$. This is consistent with in-vitro experimental results in which the average amplitude of $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ were significantly reduced with N-glycosylation perturbation (in the Mgat1KO), and the reduction in Mgat1KO $\text{I}_{Kslow}$ was bigger than for Mgat1KO $\text{I}_{Kto}$. 
+
+\begin{figure}[!ht]
+    \centering
+    \caption{Predicted current density to voltage relationship for $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ under Mgat1KO (red solid line with circle markers) and WT conditions (blue dotted line with square markers). Amplitudes were recorded for voltage steps ranging from -60 mV to 50 mV by 10-mV increments.} 
+    \label{fig8}
+\end{figure}
+
+$\text{K}_{v}$ has unique inactivation kinetics that makes it difficult to dinstinguish component $\text{K}^{+}$ currents. To investigate its inactivation gating kinetics, inactivation time constants at various voltages were simulated as shown in Fig~\ref{fig9}. $\tau_{Kto}$ does not show a significant difference between Mgat1KO and WT when the depolarization is greater than -20 mV. There are gaps in the case where voltages are less than -20 mV, but the uncertainty represented by the error bars are too wide to make reliable predictions. $\tau_{Kslow}$ shows consistent differences, with the Mgat1KO inactivating significantly more slowly than WT at all voltages. Fig~\ref{fig10} provides further information of the steady-state inactivation (SSI) rate. The SSI relationships are not significantly different between Mgat1KO and WT for either current type. These data, the longer transition times from open to inactivated state and the lack of a shift in the voltage dependence of $\text{K}_{v}$ distribution between open and inactivated states (SSI) for less glycosylated $\text{K}_{v}$ (Mgat1KO), are consistent with our previous studies \cite{schwetz2010n, ednie2015reduced, du2017}
+
+\begin{figure}[!ht]
+    \centering
+    \caption{The prediction of inactivation time constants for $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
+    \label{fig9}
+\end{figure}
+
+\begin{figure}[!ht]
+    \centering
+    \caption{The prediction of SSI for $\text{I}_{Kto}$ and $\text{I}_{Kslow}$ with voltage steps from -60 mV to 50 mV by 10 mV steps.} 
+    \label{fig10}
+\end{figure}
 
 \section*{Conclusion}
 This paper has developed a self-breeding GA method to calibrate simulation models of $\text{K}^{+}$ channel of mouse ventricular apex myocytes based on key statistics and raw data obtained from in-vitro voltage-clamp experiments \cite{ednie2019reduced}. In-silico simulation models allow for the investigation of underlying dynamics of observed current and to make inferences about different experimental conditions that were not yet or cannot be conducted.
