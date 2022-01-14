@@ -1,0 +1,19 @@
+holding_p = -70; %mV
+holding_t = 450; %ms
+P1 = 50; %mV
+P1_t = 25*1000; % ms
+Ek = -91.1;
+param = [170.97       4.6577       10.045       17.955       1048.8      0.022296];
+
+[t, ~, A] = IKslow(param, holding_p, holding_t, P1, P1_t, Ek);
+trc = A(:,5);
+[peak, peak_idx] = max(trc);
+    
+amp_del = abs(peak - y(1));
+
+trc_rd = trc(peak_idx:end);
+tt_rd = t(peak_idx:end);
+tt_rd = tt_rd - tt_rd(1);
+
+[~, tau_idx] = min(abs(peak*exp(-1) - trc_rd));
+tau_dels = abs(tt_rd(tau_idx)-y(2));

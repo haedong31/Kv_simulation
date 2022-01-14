@@ -1,11 +1,10 @@
 # folders
-/code_reference/
 /literature/
 /writing/
-/code/data/
-/code/debug/
-/code/model_investigation/
-/code/results_saved/
+/data/
+/debug/
+/model_investigation/
+/results_saved/
 
 # files
 *.csv
@@ -14,14 +13,14 @@
 **.DS_Store
 
 # History files
-/code/.Rhistory
-/code/.Rapp.history
+/.Rhistory
+/.Rapp.history
 
 # Session Data files
-/code/.RData
+/.RData
 
 # User-specific files
-/code/.Ruserdata
+/.Ruserdata
 
 # Example code in package build process
 *-Ex.R
@@ -30,10 +29,10 @@
 /*.tar.gz
 
 # Output files from R CMD check
-/code/*.Rcheck/
+/*.Rcheck/
 
 # RStudio files
-/code/.Rproj.user/
+/.Rproj.user/
 
 # produced vignettes
 vignettes/*.html
@@ -52,3 +51,4 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
+.Rproj.user
