@@ -91,61 +91,69 @@ IKslow_wt_exp = [holding_exp, IKslow_wt_exp];
 IKslow_ko_exp = exp_fn(t_P1, amps_ko(2), taus_ko(2));
 IKslow_ko_exp = [holding_exp, IKslow_ko_exp];
 
-figure(1)
+fig = figure('Color','w', 'Position',[681  578  687  288]);
+orient(fig,'landscape')
 subplot(1, 2, 1)
 plot(t_exp, Ito_wt_exp, '--', 'LineWidth',2, 'Color','blue')
 hold on
     for i = 1:num_iters
         [t_sim, ~, A1] = Ito(to_param_wt(i, :), holding_p, holding_t, 50, P1_t, Ek);
-        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1])
+        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.5])
     end
 hold off
 axis tight
-legend('Exponential fitting', 'Simulation Models')
-ylabel('I_{to} (pA/pF)')
+legend('Exponential Function', 'Simulation Models')
+ylabel('I_{Kto} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
+kto_ylim = get(gca,'YLim');
 
 subplot(1, 2, 2)
-plot(t_exp, IKslow_ko_exp, '--', 'LineWidth',2, 'Color','blue')
+plot(t_exp, IKslow_wt_exp, '--', 'LineWidth',2, 'Color','blue')
 hold on
     for i = 1:num_iters
-        [t_sim, ~, A1] = IKslow(kslow_param_ko(i, :), holding_p, holding_t, 50, P1_t, Ek);
-        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.1])
+        [t_sim, ~, A1] = IKslow(kslow_param_wt(i, :), holding_p, holding_t, 50, P1_t, Ek);
+        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.5])
     end
 hold off
 axis tight
-ylabel('I_{to} (pA/pF)')
+ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
+kslow_ylim = get(gca,'YLim');
 
-figure(2)
+fig = figure('Color','w', 'Position',[681  578  687  288]);
+orient(fig,'landscape')
 subplot(1, 2, 1)
 plot(t_exp, Ito_ko_exp, '--', 'LineWidth',2, 'Color','red')
 hold on
     for i = 1:num_iters
         [t_sim, ~, A1] = Ito(to_param_ko(i, :), holding_p, holding_t, 50, P1_t, Ek);
-        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.1])
+        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.5])
     end
 hold off
-axis tight
+ylim(kto_ylim);
 legend('Exponential Function', 'Simulation Models')
-ylabel('I_{to} (pA/pF)')
+ylabel('I_{Kto} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'XLimSpec','tight')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 subplot(1, 2, 2)
 plot(t_exp, IKslow_ko_exp, '--', 'LineWidth',2, 'Color','red')
 hold on
     for i = 1:num_iters
         [t_sim, ~, A1] = IKslow(kslow_param_ko(i, :), holding_p, holding_t, 50, P1_t, Ek);
-        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.1])
+        plot(t_sim, A1(:, 5), 'LineWidth',1, 'Color',[0.1, 0.1, 0.1, 0.5])
     end
 hold off
-axis tight
-ylabel('I_{to} (pA/pF)')
+ylim(kslow_ylim);
+ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'XLimSpec','tight')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 %% prediction; generate traces with different voltage with the best
-close all
-
 % text string for legend
 vtext = cell(1,numv);
 for i=1:numv
@@ -154,7 +162,8 @@ end
 vtext = string(vtext);
 
 % WT
-figure('Color','w', 'Position',[100,100,480,200])
+fig = figure('Color','w', 'Position',[681  578  687  288]);
+orient(fig,'landscape')
 subplot(1, 2, 1)
 hold on
 for i=1:numv
@@ -163,10 +172,11 @@ for i=1:numv
 end
 hold off
 axis tight
-ylabel('I_{to} (pA/pF)')
+ylabel('I_{Kto} (pA/pF)')
 xlabel('Time (ms)')
 legend(vtext)
 set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
+kto_ylim = get(gca,'YLim');
 
 subplot(1, 2, 2)
 hold on
@@ -179,9 +189,11 @@ axis tight
 ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
 set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
+kslow_ylim = get(gca,'YLim');
 
 % Mgat1KO
-figure('Color','w', 'Position',[600,100,480,200])
+fig = figure('Color','w', 'Position',[681  578  687  288]);
+orient(fig,'landscape')
 subplot(1, 2, 1)
 hold on
 for i = 1:numv
@@ -189,10 +201,11 @@ for i = 1:numv
     plot(t_to, A_to(:, 5));
 end
 hold off
-axis tight
-ylabel('I_{to} (pA/pF)')
+ylim(kto_ylim)
+ylabel('I_{Kto} (pA/pF)')
 xlabel('Time (ms)')
 legend(vtext)
+set(gca,'XLimSpec','tight')
 set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 subplot(1, 2, 2)
@@ -202,9 +215,10 @@ for i = 1:numv
     plot(t_Kslow, A_Kslow(:, 5));
 end
 hold off
-axis tight
+ylim(kslow_ylim)
 ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'XLimSpec','tight')
 set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 %% prediction; SSA, SSI, densities, and time constants
@@ -219,7 +233,7 @@ kslow_tau_wt = zeros(num_iters, numv);
 kslow_ssa_wt = zeros(num_iters, numv);
 kslow_ssi_wt = zeros(num_iters, numv);
 
-% KO
+% Mgat1KO
 to_peak_ko = zeros(num_iters, numv);
 to_tau_ko = zeros(num_iters, numv);
 to_ssa_ko = zeros(num_iters, numv);
