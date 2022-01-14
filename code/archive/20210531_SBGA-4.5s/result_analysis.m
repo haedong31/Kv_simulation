@@ -144,51 +144,68 @@ ylabel('I_{to} (pA/pF)')
 xlabel('Time (ms)')
 
 %% prediction; generate traces with different voltage with the best
-figure(3) % WT
+close all
+
+% text string for legend
+vtext = cell(1,numv);
+for i=1:numv
+    vtext{i} = strcat(num2str(V(numv-i+1)),' mV');
+end
+vtext = string(vtext);
+
+% WT
+figure('Color','w', 'Position',[100,100,480,200])
 subplot(1, 2, 1)
 hold on
-    for i = 1:numv
-        [t_to, ~, A_to] = Ito(to_param_wt(best_toWt_idx, :), holding_p, holding_t, V(i), P1_t, Ek);
-        plot(t_to, A_to(:, 5));
-    end
+for i=1:numv
+    [t_to, ~, A_to] = Ito(to_param_wt(best_toWt_idx, :), holding_p, holding_t, V(numv-i+1), P1_t, Ek);
+    plot(t_to, A_to(:, 5));
+end
 hold off
 axis tight
 ylabel('I_{to} (pA/pF)')
 xlabel('Time (ms)')
+legend(vtext)
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 subplot(1, 2, 2)
 hold on
-    for i = 1:numv
-        [t_Kslow, ~, A_Kslow] = IKslow(kslow_param_wt(best_KslowWt_idx, :), holding_p, holding_t, V(i), P1_t, Ek );
-        plot(t_Kslow, A_Kslow(:, 5));
-    end
+for i = 1:numv
+    [t_Kslow, ~, A_Kslow] = IKslow(kslow_param_wt(best_KslowWt_idx, :), holding_p, holding_t, V(numv-i+1), P1_t, Ek );
+    plot(t_Kslow, A_Kslow(:, 5));
+end
 hold off
 axis tight
 ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
-figure(4) % KO
+% Mgat1KO
+figure('Color','w', 'Position',[600,100,480,200])
 subplot(1, 2, 1)
 hold on
-    for i = 1:numv
-        [t_to, ~, A_to] = Ito(to_param_ko(best_toKo_idx, :), holding_p, holding_t, V(i), P1_t, Ek);
-        plot(t_to, A_to(:, 5));
-    end
+for i = 1:numv
+    [t_to, ~, A_to] = Ito(to_param_ko(best_toKo_idx, :), holding_p, holding_t, V(numv-i+1), P1_t, Ek);
+    plot(t_to, A_to(:, 5));
+end
 hold off
 axis tight
 ylabel('I_{to} (pA/pF)')
 xlabel('Time (ms)')
+legend(vtext)
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 subplot(1, 2, 2)
 hold on
-    for i = 1:numv
-        [t_Kslow, ~, A_Kslow] = IKslow(kslow_param_ko(best_KslowKo_idx, :), holding_p, holding_t, V(i), P1_t, Ek );
-        plot(t_Kslow, A_Kslow(:, 5));
-    end
+for i = 1:numv
+    [t_Kslow, ~, A_Kslow] = IKslow(kslow_param_ko(best_KslowKo_idx, :), holding_p, holding_t, V(numv-i+1), P1_t, Ek );
+    plot(t_Kslow, A_Kslow(:, 5));
+end
 hold off
 axis tight
 ylabel('I_{Kslow} (pA/pF)')
 xlabel('Time (ms)')
+set(gca,'FontName','Arial','FontSize',11,'FontWeight','bold')
 
 %% prediction; SSA, SSI, densities, and time constants
 % WT
