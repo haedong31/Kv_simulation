@@ -1,55 +1,101 @@
-function [current_trc] = ikslow(x, hold_volt, volt, time_space, Ek)
-    % default parameters
-    p = [22.5, 7.7, 45.2, 5.7, 0.493, 0.0629, 2.058, 1200, 170, 0.16];
-    
-    % input x for selected variables
-    p(1) = x(1);
-    p(2) = x(2);
-    p(3) = x(3);
-    p(4) = x(4);
-    p(8) = x(5);
-    p(10) = x(6);
 
-    % initial values of state variables
-    act0 = 0.417069e-3;  % aur; Gating variable for 
-    inact0 = 0.998543;  % iur; Gating variable for ultrarapidly 
-    
-    % max conductance
-    gmax = p(10); % 0.16
-
-    % time space information
-    t = time_space{1};
-    hold_t = time_space{2};
-    pulse_t = time_space{3};
-    hold_idx = length(hold_t);
-
-    current_trc = zeros(length(t), 1);
-
-    % at holding potential
-    gv_hold = gating_variables(p, hold_volt);
-    act_hold = hh_model(hold_t, act0, gv_hold(1), gv_hold(2));
-    inact_hold = hh_model(hold_t, inact0, gv_hold(3), gv_hold(4));
-    current_trc(1:hold_idx) = gmax.*(act_hold.^3).*(inact_hold).*(hold_volt - Ek);
-
-    % at pulse voltage
-    gv_pulse = gating_variables(p, volt);
-    act_pulse = hh_model(pulse_t, act0, gv_pulse(1), gv_pulse(2));
-    inact_pulse = hh_model(pulse_t, inact0, gv_pulse(3), gv_pulse(4));
-    current_trc((hold_idx + 1):end) = gmax.*(act_pulse.^3).*(inact_pulse).*(volt - Ek);
+function [t, STATES, ALGEBRAIC] = IKslow(X, holding_p, holding_t, P1, P1_t, Ek)
+    % This is the "main function".  In Matlab, things work best if you rename this function to match the filename.
+   [t, STATES, ALGEBRAIC] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek);
 end
 
-function [gv] = gating_variables(p, V)
-    gv = zeros(4, 1);
+function [t, STATES, ALGEBRAIC] = solveModel(X, holding_p, holding_t, P1, P1_t, Ek)
+    % Create ALGEBRAIC of correct size
+    global algebraicVariableCount;  algebraicVariableCount = getAlgebraicVariableCount();
+    
+    % Initialise constants and state variables
+    INIT_STATES = initConsts();
 
-    % activation
-    gv(1) = 1 ./ (1 + exp(-(V+p(1))./p(2)));
-    gv(2) = p(5).*exp(-p(6).*V) + p(7);
+    % Set timespan to solve over 
+    tspan = [0, P1_t];
 
-    % inactivation
-    gv(3) = 1 ./ (1 + exp((V+p(3))./p(4)));
-    gv(4) = p(8) - (p(9))./(1 + exp((V+p(3))./p(4)));
+    % Set numerical accuracy options for ODE solver
+    options = odeset('RelTol', 1e-06, 'AbsTol', 1e-06, 'MaxStep', 1);
+
+    % Solve model with ODE solver
+    [t, STATES] = ode15s(@(t, STATES)computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek), tspan, INIT_STATES, options);
+    
+    % Compute algebraic variables
+    [RATES, ALGEBRAIC] = computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek);
+    ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, STATES, t, holding_p, holding_t, P1, P1_t, Ek);
 end
 
-function [y] = hh_model(t, ss0, ss, tau)
-    y = ss - (ss - ss0).*exp(-t./tau);
+function [RATES, ALGEBRAIC] = computeRates(X, t, STATES, holding_p, holding_t, P1, P1_t, Ek)
+    global algebraicVariableCount;
+    statesSize = size(STATES);
+    statesColumnCount = statesSize(2);
+    if ( statesColumnCount == 1)
+        STATES = STATES';
+        ALGEBRAIC = zeros(1, algebraicVariableCount);
+    else
+        statesRowCount = statesSize(1);
+        ALGEBRAIC = zeros(statesRowCount, algebraicVariableCount);
+        RATES = zeros(statesRowCount, statesColumnCount);
+    end
+    
+    % externally applied voltage (voltage clamp)
+    ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
+    
+    % IKslow
+    % A78; a_ss
+    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+X(1))./X(2)));
+    % A79; i_ss
+    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(3))./X(4)));
+    % A90; tau_aur
+    ALGEBRAIC(:,3) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,6)) + 2.058;
+    % A91; tau_iur
+    ALGEBRAIC(:,4) = X(5) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+45.2)./5.7));
+    % A88; aur
+    RATES(:,1) = (ALGEBRAIC(:,1) - STATES(:,1))./ALGEBRAIC(:,3);
+    % A89; iur
+    RATES(:,2) = (ALGEBRAIC(:,2) - STATES(:,2))./ALGEBRAIC(:,4);
+    % A87; I_kUR
+    ALGEBRAIC(:,5) =  X(6).*STATES(:,1).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
+    
+    RATES = RATES';
+end
+
+function ALGEBRAIC = computeAlgebraic(X, ALGEBRAIC, STATES, t, holding_p, holding_t, P1, P1_t, Ek)
+    ALGEBRAIC(:,6) = arrayfun(@(t) volt_clamp(t, holding_p, holding_t, P1, P1_t), t);
+
+    % A78; a_ss
+    ALGEBRAIC(:,1) = 1.00000./(1.00000+exp( - (ALGEBRAIC(:,6)+X(1))./X(2)));
+    % A79; i_ss
+    ALGEBRAIC(:,2) = 1.00000./(1.00000+exp((ALGEBRAIC(:,6)+X(3))./X(4)));
+    % A90; tau_aur
+    ALGEBRAIC(:,3) =  0.493000.*exp(  - 0.0629000.*ALGEBRAIC(:,6)) + 2.058;
+    % A91; tau_iur
+    ALGEBRAIC(:,4) = X(5) - 170.000./(1.00000+exp((ALGEBRAIC(:,6)+45.2)./5.7));
+    % A87; I_kUR
+    ALGEBRAIC(:,5) =  X(6).*STATES(:,1).*STATES(:,2).*(ALGEBRAIC(:,6) - Ek);
+end
+
+function VC = volt_clamp(t, holding_p, holding_t, P1, P1_t)
+    if t < holding_t
+        VC = holding_p;
+    elseif (t >= holding_t) && (t <= P1_t) 
+        VC = P1;
+    end
+end
+
+function [algebraicVariableCount] = getAlgebraicVariableCount() 
+    % Used later when setting a global variable with the number of algebraic variables.
+    % There are a total of 41 entries in each of the rate and state variable arrays.
+    % There are a total of 73 entries in the constant variable array.
+    algebraicVariableCount =6;
+end
+
+function [STATES] = initConsts()
+    STATES = [];
+
+    STATES(:,1) = 0.417069e-3;  % aur; Gating variable for ultrarapidly activating delayed-rectifier K+ current
+    STATES(:,2) = 0.998543;  % iur; Gating variable for ultrarapidly activating delayed-rectifier K+ current0
+    % CONSTANTS(:,1) = 0.16;  % GKur; Maximum ultrarapidly delayed-rectifier K+ current conductance(apex):mS/uF
+
+    if (isempty(STATES)), warning('Initial values for states not set'); end
 end
