@@ -137,18 +137,6 @@ CK2=0.641229e-3; %mERG channel closed state
 OK=0.175298e-3; %mERG channel open state
 IK=0.319129e-4; %mERG channel inactivated state
 
-%% IKtof parameters
-pktof = zeros(6,1);
-pktof(1) = 30;
-pktof(2) = 30;
-pktof(3) = 13.5;
-pktof(4) = 33.5;
-pktof(5) = 7.0;
-pktof(6) = 0.4067;
-GKtof = pktof(6);
-
-%% IKslow (IKur) parameters
-
 %% stimulation current
 SimT=2000;                    % simulation time: ms
 
@@ -157,3 +145,89 @@ time=0:0.01:SimT;           % sampling time set to 1 ms
 I_ext=zeros(size(time));
 I_ext=[time', I_ext'];
 I_ext(10:11,2)=-80;    % external current: uA
+
+%% import calibrated parameters
+load('Ito_WT.mat')
+to_param_wt = best_chroms;
+
+[~, best_amps_idx] = min(best_amps);
+[~, best_tau_idx] = min(best_taus);
+if best_amps_idx == best_tau_idx
+    best_toWt_idx = best_amps_idx;
+else
+    [~, best_toWt_idx] = min(best_amps+best_taus);
+end
+
+% load model fitting results - Ito KO
+load('Ito_KO.mat')
+to_param_ko = best_chroms;
+
+[~, best_amps_idx] = min(best_amps);
+[~, best_tau_idx] = min(best_taus);
+if best_amps_idx == best_tau_idx
+    best_toKo_idx = best_amps_idx;
+else
+    [~, best_toKo_idx] = min(best_amps+best_taus);
+end
+
+% load model fitting results - IKslow WT
+load('IKslow_WT.mat')
+kslow_param_wt = best_chroms;
+
+[~, best_amps_idx] = min(best_amps);
+[~, best_tau_idx] = min(best_taus);
+if best_amps_idx == best_tau_idx
+    best_KslowWt_idx = best_amps_idx;
+else
+    [~, best_KslowWt_idx] = min(best_amps+best_taus);
+end
+
+% load model fitting results - IKslow KO
+load('IKslow_KO.mat')
+kslow_param_ko = best_chroms;
+
+[~, best_amps_idx] = min(best_amps);
+[~, best_tau_idx] = min(best_taus);
+if best_amps_idx == best_tau_idx
+    best_KslowKo_idx = best_amps_idx;
+else
+    [~, best_KslowKo_idx] = min(best_amps+best_taus);
+end
+
+
+%% WT
+pktof = to_param_wt(best_toWt_idx, :);
+GKtof = pktof(6);
+pkslow = kslow_param_wt(best_KslowWt_idx, :);
+GKur = pkslow(6);
+
+%% Mgat1KO
+pktof = to_param_ko(best_toKo_idx, :);
+GKtof = pktof(6);
+pkslow_fit = kslow_param_ko(18, :);
+
+pkslow(1) = pkslow_fit(1);
+pkslow(2) = pkslow_fit(2);
+pkslow(3) = pkslow_fit(3);
+pkslow(4) = pkslow_fit(4);
+pkslow(5) = pkslow_fit(5);
+Gkur = pkslow_fit(6);
+
+% 
+% pktof = zeros(6,1);
+% pktof(1) = 30;
+% pktof(2) = 30;
+% pktof(3) = 13.5;
+% pktof(4) = 33.5;
+% pktof(5) = 7.0;
+% pktof(6) = 0.4067;
+% GKtof = pktof(6);
+% 
+% pkslow = zeros(6,1);
+% pkslow(1) = -60;
+% pkslow(2) = 7.7;
+% pkslow(3) = 45.2;
+% pkslow(4) = 5.7;
+% pkslow(5) = 1200;
+% pkslow(6) = 0.160;
+% GKur = pkslow(6);
