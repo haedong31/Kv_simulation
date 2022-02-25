@@ -1,10 +1,8 @@
 # folders
 /literature/
 /writing/
-/data/
 /debug/
 /model_investigation/
-/results_saved/
 
 # files
 *.csv
